@@ -1,9 +1,10 @@
 {
   "Author": "Meisterlala",
   "Name": "Neko Fans",
-  "Description": "Shows you an image of a random anime character, who accompanies you on your journey through eorzea",
-  "InternalName": "NekoFans",
-  "AssemblyVersion": "1.0.0",
+  "Punchline": "Frustrated in a dungeon? Look at a cute cat girl.",
+  "Description": "Shows you an image of a random neko character. Click on the image to view the next one.",
+  "InternalName": "Neko",
+  "AssemblyVersion": "1.0.2",
   "RepoUrl": "https://github.com/Meisterlala/NekoLife",
   "ApplicableVersion": "any",
   "Tags": [
@@ -12,6 +13,9 @@
     "waifu",
     "miqote",
     "image"
+  ],
+  "CategoryTags": [
+    "UI"
   ],
   "DalamudApiLevel": 6,
   "IconUrl": "https://github.com/Meisterlala/NekoLife/raw/icon.png"

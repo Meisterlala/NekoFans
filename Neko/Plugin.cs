@@ -5,6 +5,7 @@ using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Plugin;
+using Dalamud.Logging;
 using System;
 
 namespace Neko
@@ -17,23 +18,27 @@ namespace Neko
 
         public string Name => "Neko Plugin";
 
-        public static Configuration? Configuration;
+        private const string CommandMain = "/neko";
+        private const string CommandConfig = "/nekocfg";
+
+        public static Configuration Configuration;
         private readonly NekoWindow ui;
 
         public Plugin()
         {
             Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
             ui = new();
-
-            CommandManager.AddHandler("neko", new CommandInfo(OnCommand)
+            /*
+                        CommandManager.AddHandler(CommandConfig, new CommandInfo(OnCommand)
+                        {
+                            HelpMessage = "TODO: Config Window"
+                        });
+            */
+            CommandManager.AddHandler(CommandMain, new CommandInfo(OnCommand)
             {
                 HelpMessage = "Display the main window, containing the image."
             });
 
-            CommandManager.AddHandler("nekocfg", new CommandInfo(OnCommand)
-            {
-                HelpMessage = "TODO"
-            });
 
             PluginInterface.UiBuilder.OpenConfigUi += OpenConfig;
             PluginInterface.UiBuilder.Draw += DrawUI;
@@ -41,7 +46,8 @@ namespace Neko
 
         public void Dispose()
         {
-            CommandManager.RemoveHandler("neko");
+            CommandManager.RemoveHandler(CommandConfig);
+            CommandManager.RemoveHandler(CommandMain);
         }
 
         private void OnCommand(string command, string args)

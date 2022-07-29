@@ -20,6 +20,13 @@ namespace Neko
             set => visible = value;
         }
 
+        private float alpha = 0.0f;
+        public float Alpha
+        {
+            get => alpha;
+            set => alpha = value;
+        }
+
         private bool imageGrayed = false;
         private TextureWrap? currentNeko;
         private Task<TextureWrap>? nekoTask;
@@ -28,11 +35,11 @@ namespace Neko
         {
             try
             {
-                // Load neko asnync
-                asnyncNextNeko();
-
                 // Load config
                 var configs = Plugin.Configuration;
+
+                // Load neko asnync
+                asnyncNextNeko();
             }
             catch (Exception ex)
             {
@@ -55,12 +62,26 @@ namespace Neko
         {
             if (nekoTask == null || nekoTask.IsCompleted)
             {
+                // Load New Neko
                 nekoTask = GetNeko.nextNeko();
+
+                // if Task success
                 nekoTask.ContinueWith((task) =>
                 {
-                    currentNeko = task.Result;
                     imageGrayed = false;
-                });
+                    currentNeko = task.Result;
+                }, TaskContinuationOptions.OnlyOnRanToCompletion);
+
+                // if Task failed
+                nekoTask.ContinueWith((task) =>
+                {
+                    imageGrayed = false;
+                    currentNeko = GetNeko.defaultNeko();
+
+                    // useless code, but the task sceduler will throw an expection if every exception
+                    // is not used. task.Exception is not null
+                    var whyisthisneeded = task.Exception.Flatten();
+                }, TaskContinuationOptions.OnlyOnFaulted);
             }
         }
 
@@ -75,10 +96,10 @@ namespace Neko
             ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowSizeConstraints(size, size * 20);
             ImGui.PushStyleColor(ImGuiCol.ResizeGrip, 0);
+            ImGui.SetNextWindowBgAlpha(alpha);
 
-            if (ImGui.Begin("Neko",
-             ref visible,
-             ImGuiWindowFlags.NoBackground))
+
+            if (ImGui.Begin("Neko", ref visible))
             {
                 if (currentNeko != null)
                 {
@@ -101,6 +122,11 @@ namespace Neko
                     imageStart += (windowSize - imageSize) / 2;
                     ImGui.SetCursorScreenPos(imageStart);
 
+                    // Transparancy
+                    ImGui.PushStyleColor(ImGuiCol.Button, Vector4.Zero);
+                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, Vector4.Zero);
+                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Vector4.Zero);
+
                     if (ImGui.ImageButton(currentNeko.ImGuiHandle,
                         imageSize,
                         Vector2.Zero,
@@ -114,8 +140,10 @@ namespace Neko
                         asnyncNextNeko();
                     }
 
+                    ImGui.PopStyleColor(3);
                 }
             }
+
             ImGui.PopStyleColor();
             ImGui.End();
         }

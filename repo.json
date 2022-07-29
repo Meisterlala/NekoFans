@@ -4,7 +4,7 @@
     "Name": "Neko Fans",
     "Description": "Shows you an image of a random anime character, who accompanies you on your journey through eorzea",
     "InternalName": "NekoFans",
-    "AssemblyVersion": "1.0.0",
+    "AssemblyVersion": "1.0.1",
     "RepoUrl": "https://github.com/Meisterlala/NekoLife",
     "ApplicableVersion": "any",
     "Tags": [
