@@ -1,4 +1,4 @@
-# Neko Life Plugin
+# Neko Life Plugin <img src="icon.png" align="right" width="220">
 
 - Displays a random Neko cat girl.
 
