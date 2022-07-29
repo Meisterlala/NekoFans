@@ -5,7 +5,7 @@
     "Punchline": "Frustrated in a dungeon? Look at a cute cat girl.",
     "Description": "Shows you an image of a random neko character. Click on the image to view the next one.",
     "InternalName": "Neko",
-    "AssemblyVersion": "1.0.3",
+    "AssemblyVersion": "1.0.4",
     "RepoUrl": "https://github.com/Meisterlala/NekoLife",
     "ApplicableVersion": "any",
     "Tags": [
@@ -22,10 +22,10 @@
     "IconUrl": "https://raw.githubusercontent.com/Meisterlala/NekoLife/master/icon.png",
     "IsHide": "False",
     "IsTestingExclusive": "False",
-    "LastUpdated": 1659132807,
+    "LastUpdated": 1659133535,
     "DownloadCount": 0,
-    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.3/NekoPlugin.zip",
-    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.3/NekoPlugin.zip",
-    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.3/NekoPlugin.zip"
+    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.4/NekoPlugin.zip",
+    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.4/NekoPlugin.zip",
+    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.4/NekoPlugin.zip"
   }
 ]
