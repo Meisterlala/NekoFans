@@ -1,0 +1,33 @@
+name: Generate Repo
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
+  repository_dispatch:
+    types: [new-release]
+
+jobs:
+  generate:
+    name: Generate Repo
+    runs-on: windows-2019
+    steps:
+      - name: Extract branch
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+      - uses: actions/checkout@v1
+      - name: Run Powershell Script
+        run: .\generate-repo.ps1
+      - name: Commit files
+        continue-on-error: true
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -m "Regenerate Repo" -a
+      - name: Push changes
+        continue-on-error: true
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.PAT }}
+          branch: ${{ steps.extracted_branch.outputs.branch }}
