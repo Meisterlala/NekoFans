@@ -81,5 +81,5 @@ jobs:
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.PAT }}
-          repository: LeonBlade/DalamudPlugins
+          repository: Meisterlala/NekoLife
           event-type: new-release
