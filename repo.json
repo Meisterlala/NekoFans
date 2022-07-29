@@ -2,9 +2,10 @@
   {
     "Author": "Meisterlala",
     "Name": "Neko Fans",
-    "Description": "Shows you an image of a random anime character, who accompanies you on your journey through eorzea",
-    "InternalName": "NekoFans",
-    "AssemblyVersion": "1.0.1",
+    "Punchline": "Frustrated in a dungeon? Look at a cute cat girl.",
+    "Description": "Shows you an image of a random neko character. Click on the image to view the next one.",
+    "InternalName": "Neko",
+    "AssemblyVersion": "1.0.2",
     "RepoUrl": "https://github.com/Meisterlala/NekoLife",
     "ApplicableVersion": "any",
     "Tags": [
@@ -14,14 +15,17 @@
       "miqote",
       "image"
     ],
+    "CategoryTags": [
+      "UI"
+    ],
     "DalamudApiLevel": 6,
     "IconUrl": "https://github.com/Meisterlala/NekoLife/raw/icon.png",
     "IsHide": "False",
     "IsTestingExclusive": "False",
-    "LastUpdated": 1659112124,
-    "DownloadCount": 2,
-    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.1/NekoPlugin.zip",
-    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.1/NekoPlugin.zip",
-    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.1/NekoPlugin.zip"
+    "LastUpdated": 1659130768,
+    "DownloadCount": 0,
+    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.2/NekoPlugin.zip",
+    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.2/NekoPlugin.zip",
+    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.2/NekoPlugin.zip"
   }
 ]
