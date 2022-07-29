@@ -10,7 +10,7 @@ on:
     branches: [main]
 
 env:
-  PROJECT_NAME: HeelsPlugin
+  PROJECT_NAME: Neko
 
 jobs:
   build:
@@ -39,13 +39,13 @@ jobs:
 
       - name: Create artifact
         run: |
-          Compress-Archive -Path "bin/*" -DestinationPath HeelsPlugin.zip
+          Compress-Archive -Path "bin/*" -DestinationPath NekoPlugin.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2.2.1
         with:
           name: PluginZip
-          path: HeelsPlugin.zip
+          path: NekoPlugin.zip
           if-no-files-found: error
 
   release:
@@ -75,7 +75,7 @@ jobs:
           name: ${{ env.PROJECT_NAME }} ${{ steps.tag.outputs.tag }}
           tag_name: ${{ steps.tag.outputs.tag }}
           body: ${{ github.events.commits[0].message }}
-          files: ${{ steps.download.outputs.download-path }}/HeelsPlugin.zip
+          files: ${{ steps.download.outputs.download-path }}/NekoPlugin.zip
 
       - name: Trigger plugin repo update
         uses: peter-evans/repository-dispatch@v1
