@@ -1,0 +1,18 @@
+{
+  "Author": "Meisterlala",
+  "Name": "Neko Fans",
+  "Description": "Shows you an image of a random anime character, who accompanies you on your journey through eorzea",
+  "InternalName": "NekoFans",
+  "AssemblyVersion": "1.0.0",
+  "RepoUrl": "https://github.com/LeonBlade/HeelsPlugin",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "anime",
+    "neko",
+    "waifu",
+    "miqote",
+    "image"
+  ],
+  "DalamudApiLevel": 6,
+  "IconUrl": "https://github.com/LeonBlade/HeelsPlugin/raw/main/icon.png"
+}
