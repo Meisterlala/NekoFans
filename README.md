@@ -1,4 +1,4 @@
-# Neko Life Plugin <img src="icon.png" align="right" width="220">
+# Neko Life Plugin for FFXIV <img src="icon.png" align="right" width="220">
 [![Build](https://github.com/Meisterlala/NekoLife/actions/workflows/build.yml/badge.svg)](https://github.com/Meisterlala/NekoLife/actions/workflows/build.yml)
 
 **Displays a random Neko cat girl.**
