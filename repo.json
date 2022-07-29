@@ -5,7 +5,7 @@
     "Description": "Shows you an image of a random anime character, who accompanies you on your journey through eorzea",
     "InternalName": "NekoFans",
     "AssemblyVersion": "1.0.0",
-    "RepoUrl": "https://github.com/LeonBlade/HeelsPlugin",
+    "RepoUrl": "https://github.com/Meisterlala/NekoLife",
     "ApplicableVersion": "any",
     "Tags": [
       "anime",
@@ -15,13 +15,13 @@
       "image"
     ],
     "DalamudApiLevel": 6,
-    "IconUrl": "https://github.com/LeonBlade/HeelsPlugin/raw/main/icon.png",
+    "IconUrl": "https://github.com/Meisterlala/NekoLife/raw/icon.png",
     "IsHide": "False",
     "IsTestingExclusive": "False",
-    "LastUpdated": 1659109999,
+    "LastUpdated": 1659112124,
     "DownloadCount": 0,
-    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.0/NekoPlugin.zip",
-    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.0/NekoPlugin.zip",
-    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.0/NekoPlugin.zip"
+    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.1/NekoPlugin.zip",
+    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.1/NekoPlugin.zip",
+    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.1/NekoPlugin.zip"
   }
 ]
