@@ -16,7 +16,7 @@ namespace Neko
         [PluginService] public static CommandManager CommandManager { get; private set; } = null!;
         [PluginService] public static DalamudPluginInterface PluginInterface { get; private set; } = null!;
 
-        public string Name => "Neko Plugin";
+        public string Name => "Neko Life";
 
         private const string CommandMain = "/neko";
         private const string CommandConfig = "/nekocfg";
