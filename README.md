@@ -1,6 +1,7 @@
 # Neko Life Plugin <img src="icon.png" align="right" width="220">
+[![Build](https://github.com/Meisterlala/NekoLife/actions/workflows/build.yml/badge.svg)](https://github.com/Meisterlala/NekoLife/actions/workflows/build.yml)
 
-- Displays a random Neko cat girl.
+**Displays a random Neko cat girl.**
 
 
 This is a plugin to be used with the [FFXIVQuickLauncher](https://github.com/goatcorp/FFXIVQuickLauncher).
