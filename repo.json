@@ -19,11 +19,11 @@
       "UI"
     ],
     "DalamudApiLevel": 6,
-    "IconUrl": "https://github.com/Meisterlala/NekoLife/raw/icon.png",
+    "IconUrl": "https://raw.githubusercontent.com/Meisterlala/NekoLife/master/icon.png",
     "IsHide": "False",
     "IsTestingExclusive": "False",
     "LastUpdated": 1659130768,
-    "DownloadCount": 0,
+    "DownloadCount": 1,
     "DownloadLinkInstall": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.2/NekoPlugin.zip",
     "DownloadLinkTesting": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.2/NekoPlugin.zip",
     "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.2/NekoPlugin.zip"
