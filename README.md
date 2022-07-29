@@ -8,9 +8,12 @@ This is a plugin to be used with the [FFXIVQuickLauncher](https://github.com/goa
 Inspired by [Nya](https://github.com/Sirspam/Nya) for Beat Saber.
 
 ## Installing
+Add this as a custom plugin repository in the experimental settings:
+```
+https://raw.githubusercontent.com/Meisterlala/NekoLife/master/repo.json
+```
 
-Please visit [this](https://github.com/LeonBlade/DalamudPlugins) for instructions on how to install the plugin.
-
+Please visit [this](https://github.com/LeonBlade/DalamudPlugins) for more instructions on how to install plugins.
 ## Usage
 
 To use the plugin, you must have launched the game via FFXIVQuickLauncher.
