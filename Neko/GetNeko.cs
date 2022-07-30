@@ -53,7 +53,7 @@ namespace Neko
             }
 
             // download actual image
-            byte[] bytes;
+            byte[]? bytes;
             try
             {
                 client.DefaultRequestHeaders.Accept.Clear();
@@ -72,7 +72,19 @@ namespace Neko
 
             PluginLog.Log("Downloaded " + bytes.Length / 1000 + " kb from " + response.url);
 
-            return Plugin.PluginInterface.UiBuilder.LoadImage(bytes);
+            TextureWrap? image;
+            try
+            {
+                image = await Plugin.PluginInterface.UiBuilder.LoadImageAsync(bytes);
+            }
+            catch (System.Exception e)
+            {
+                PluginLog.LogError("Could not decode image");
+                PluginLog.LogError(e.ToString());
+                throw;
+            }
+
+            return image;
         }
 
 

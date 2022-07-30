@@ -1,10 +1,7 @@
 ﻿using Dalamud.Interface.Components;
 using Dalamud.Logging;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using ImGuiScene;
 using System.Threading.Tasks;
