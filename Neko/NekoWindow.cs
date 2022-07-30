@@ -36,14 +36,14 @@ namespace Neko
             try
             {
                 // Load config
-                var configs = Plugin.Configuration;
+                // var configs = Plugin.Configuration;
 
                 // Load neko asnync
                 asnyncNextNeko();
             }
             catch (Exception ex)
             {
-                PluginLog.Error(ex, "Failed to create NekoWindow");
+                PluginLog.Error(ex, "Failed to create Neko Life window");
             }
         }
 
@@ -78,7 +78,7 @@ namespace Neko
                     imageGrayed = false;
                     currentNeko = GetNeko.defaultNeko();
 
-                    // useless code, but the task sceduler will throw an expection if every exception
+                    // useless code, but the task scheduler will throw an exception if every exception
                     // is not used. task.Exception is not null
                     var whyisthisneeded = task.Exception.Flatten();
                 }, TaskContinuationOptions.OnlyOnFaulted);

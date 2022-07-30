@@ -19,14 +19,14 @@ namespace Neko
         public string Name => "Neko Life";
 
         private const string CommandMain = "/neko";
-        private const string CommandConfig = "/nekocfg";
+        // private const string CommandConfig = "/nekocfg";
 
-        public static Configuration Configuration;
+        // public static Configuration Configuration;
         private readonly NekoWindow ui;
 
         public Plugin()
         {
-            Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+            // Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
             ui = new();
             /*
                         CommandManager.AddHandler(CommandConfig, new CommandInfo(OnCommand)
@@ -46,7 +46,7 @@ namespace Neko
 
         public void Dispose()
         {
-            CommandManager.RemoveHandler(CommandConfig);
+            // CommandManager.RemoveHandler(CommandConfig);
             CommandManager.RemoveHandler(CommandMain);
         }
 
