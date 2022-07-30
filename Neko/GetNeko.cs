@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Reflection;
 
 namespace Neko
 {
@@ -90,19 +91,29 @@ namespace Neko
 
         static public TextureWrap defaultNeko()
         {
+            // Load icon synchronous as a fallback from embedded
             PluginLog.LogWarning("Loading default Neko image");
 
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("image/jpeg"));
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = "Neko.resources.error.jpg";
 
-            client.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("image/png"));
+            TextureWrap? image;
+            try
+            {
+                using (Stream? stream = assembly.GetManifestResourceStream(resourceName))
+                using (var memoryStream = new MemoryStream())
+                {
+                    stream?.CopyTo(memoryStream);
+                    image = Plugin.PluginInterface.UiBuilder.LoadImage(memoryStream.ToArray());
+                }
+            }
+            catch (System.Exception)
+            {
+                PluginLog.LogError("Could not load default image");
+                throw;
+            }
 
-            // Load icon synchronous as a fallback
-            var task = client.GetByteArrayAsync("https://raw.githubusercontent.com/Meisterlala/NekoFans/master/icon.png");
-            task.Wait();
-            return Plugin.PluginInterface.UiBuilder.LoadImage(task.Result);
+            return image;
         }
     }
 }

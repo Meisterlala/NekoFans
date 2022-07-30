@@ -77,7 +77,7 @@ namespace Neko
 
                     // useless code, but the task scheduler will throw an exception if every exception
                     // is not used. task.Exception is not null
-                    var whyisthisneeded = task.Exception.Flatten();
+                    var whyisthisneeded = task?.Exception?.Flatten();
                 }, TaskContinuationOptions.OnlyOnFaulted);
             }
         }
