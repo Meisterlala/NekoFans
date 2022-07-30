@@ -6,7 +6,7 @@
     "Description": "Shows you an image of a random neko character. Click on the image to view the next one. \nWarning: You might see naughty images",
     "InternalName": "Neko",
     "AssemblyVersion": "1.0.5",
-    "RepoUrl": "https://github.com/Meisterlala/NekoLife",
+    "RepoUrl": "https://github.com/Meisterlala/NekoFans",
     "ApplicableVersion": "any",
     "Tags": [
       "anime",
@@ -19,13 +19,13 @@
       "UI"
     ],
     "DalamudApiLevel": 6,
-    "IconUrl": "https://raw.githubusercontent.com/Meisterlala/NekoLife/master/icon.png",
+    "IconUrl": "https://raw.githubusercontent.com/Meisterlala/NekoFans/master/icon.png",
     "IsHide": "False",
     "IsTestingExclusive": "False",
-    "LastUpdated": 1659141579,
-    "DownloadCount": 4,
-    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.5/NekoPlugin.zip",
-    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.5/NekoPlugin.zip",
-    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoLife/releases/download/1.0.5/NekoPlugin.zip"
+    "LastUpdated": 1659133535,
+    "DownloadCount": 2,
+    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.5/NekoPlugin.zip",
+    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.5/NekoPlugin.zip",
+    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.5/NekoPlugin.zip"
   }
 ]

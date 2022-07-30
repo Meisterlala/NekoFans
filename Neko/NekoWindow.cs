@@ -43,7 +43,7 @@ namespace Neko
             }
             catch (Exception ex)
             {
-                PluginLog.Error(ex, "Failed to create Neko Life window");
+                PluginLog.Error(ex, "Failed to create Neko Fans window");
             }
         }
 
@@ -107,7 +107,7 @@ namespace Neko
                     var imageStart = ImGui.GetCursorScreenPos();
                     var windowSize = ImGui.GetWindowSize() - new Vector2(15f, 40f);
 
-                    // Fix aspect ration
+                    // Fix aspect ratio
                     Vector2 imageSize;
                     if (windowSize.Y / windowSize.X > imageRatio)
                     {

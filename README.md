@@ -1,5 +1,5 @@
-# Neko Life Plugin for FFXIV <img src="icon.png" align="right" width="220">
-[![Build](https://github.com/Meisterlala/NekoLife/actions/workflows/build.yml/badge.svg)](https://github.com/Meisterlala/NekoLife/actions/workflows/build.yml)
+# Neko Fans Plugin for FFXIV <img src="icon.png" align="right" width="220">
+[![Build](https://github.com/Meisterlala/NekoFans/actions/workflows/build.yml/badge.svg)](https://github.com/Meisterlala/NekoFans/actions/workflows/build.yml)
 
 **Displays a random Neko cat girl.**
 
@@ -11,7 +11,7 @@ Inspired by [Nya](https://github.com/Sirspam/Nya) for Beat Saber.
 ## Installing
 Add this as a custom plugin repository in the experimental settings:
 ```
-https://raw.githubusercontent.com/Meisterlala/NekoLife/master/repo.json
+https://raw.githubusercontent.com/Meisterlala/NekoFans/master/repo.json
 ```
 
 Please visit [this](https://github.com/LeonBlade/DalamudPlugins) for more instructions on how to install plugins.

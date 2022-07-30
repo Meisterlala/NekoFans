@@ -87,8 +87,8 @@ namespace Neko
             client.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("image/png"));
 
-            // Load icon syncron as a fallback
-            var task = client.GetByteArrayAsync("https://raw.githubusercontent.com/Meisterlala/NekoLife/master/icon.png");
+            // Load icon synchronous as a fallback
+            var task = client.GetByteArrayAsync("https://raw.githubusercontent.com/Meisterlala/NekoFans/master/icon.png");
             task.Wait();
             return Plugin.PluginInterface.UiBuilder.LoadImage(task.Result);
         }
