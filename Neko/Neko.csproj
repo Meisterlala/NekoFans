@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>1.0.0</Version>
+    <Version>1.0.7</Version>
     <TargetFramework>net5.0-windows</TargetFramework>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -15,14 +15,31 @@
     <OutputPath>$(AppData)\XIVLauncher\devPlugins\Neko</OutputPath>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <runtime>
-      <legacyCorruptedStateExceptionsPolicy enabled="false"/> 
-    </runtime>
-  </PropertyGroup>
+  <ProjectExtensions>
+    <DalamudPlugin>
+      <ApiLevel>6</ApiLevel>
+      <Author>Meisterlala</Author>
+      <Name>Neko Fans</Name>
+      <Punchline>Frustrated in a dungeon? Look at a cute cat girl!</Punchline>
+      <Description>Shows you an image of a random neko character. Click on the image to view the next one. \nWarning: You might see naughty images</Description>
+      <IconUrl>https://raw.githubusercontent.com/Meisterlala/NekoFans/master/icon.png</IconUrl>
+      <Tags>
+        <Tag>anime</Tag>
+        <Tag>neko</Tag>
+        <Tag>waifu</Tag>
+        <Tag>miqote</Tag>
+        <Tag>image</Tag>
+      </Tags>
+      <CategoryTags>
+        <Tag>UI</Tag>
+      </CategoryTags>
+      <Hidden>False</Hidden>
+    </DalamudPlugin>
+  </ProjectExtensions>
 
   <PropertyGroup>
     <DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -39,10 +56,23 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
+  <!--  
+  <ItemGroup>
+    <PackageReference Include="DalamudPackager" Version="2.1.7"/>
+  </ItemGroup>
 
+  <Target Name="PackagePlugin" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <DalamudPackager
+      ProjectDir="$(ProjectDir)"
+      OutputPath="$(OutputPath)"
+      AssemblyName="$(AssemblyName)"
+      VersionComponents="3"
+    />
+  </Target>  
+  -->
   <ItemGroup>
     <None Include="Neko.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
