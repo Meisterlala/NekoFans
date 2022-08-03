@@ -9,7 +9,8 @@ This is a plugin to be used with the [FFXIVQuickLauncher](https://github.com/goa
 Inspired by [Nya](https://github.com/Sirspam/Nya) for Beat Saber.
 
 ## Installing
-Add this as a custom plugin repository in the experimental settings:
+Enable "Get plugin testing builds" in the experimental settings of Dalamud, or
+add this as a custom plugin repository in the experimental settings:
 ```
 https://raw.githubusercontent.com/Meisterlala/NekoFans/master/repo.json
 ```
