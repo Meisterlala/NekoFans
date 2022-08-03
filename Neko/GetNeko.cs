@@ -1,30 +1,36 @@
-using System.IO;
-using ImGuiScene;
-using Dalamud.Logging;
-using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Collections.Generic;
 using System.Text.Json;
-using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using System;
+using Dalamud.Logging;
+
+#if DEBUG
+using System.IO;
+#endif
+
 
 namespace Neko
 {
 
+
+#pragma warning disable 
     class NekosLifeJson
     {
         public string? url { get; set; }
     }
+#pragma warning restore
 
     public class GetNeko
     {
-        private static readonly HttpClient client = new HttpClient();
+        private static readonly HttpClient client = new();
 
-        async static public Task<TextureWrap> nextNeko()
+        public async static Task<NekoImage> NextNeko()
         {
             var url = "https://nekos.life/api/v2/img/neko";
 
-            // get a random image URL
+            // Get a random image URL
             NekosLifeJson? response;
             try
             {
@@ -35,25 +41,24 @@ namespace Neko
                 var streamTask = client.GetStreamAsync(url);
                 response = await JsonSerializer.DeserializeAsync<NekosLifeJson>(await streamTask);
             }
-            catch (System.Net.Http.HttpRequestException e)
+            catch (HttpRequestException ex)
             {
-                PluginLog.LogError("Could not get a random neko image.");
-                PluginLog.LogError(e.Message);
-                throw;
+                throw new Exception("Could not get a random neko image.", ex);
             }
-            catch (JsonException e)
+            catch (JsonException ex)
             {
-                PluginLog.LogError("Could not parse the json, which contains the url to a random image.");
-                PluginLog.LogError(e.Message);
-                throw;
+                throw new Exception("Could not parse the json, which contains the url to a random image.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Could not connect to Server.", ex);
             }
             if (response == null || response.url == null)
             {
-                PluginLog.LogError("No response from Server");
-                throw new System.Exception("No response from Server.");
+                throw new Exception($"No response from Server: {url}");
             }
 
-            // download actual image
+            // Download actual image
             byte[]? bytes;
             try
             {
@@ -64,56 +69,55 @@ namespace Neko
                     new MediaTypeWithQualityHeaderValue("image/png"));
                 bytes = await client.GetByteArrayAsync(response.url);
             }
-            catch (System.Net.Http.HttpRequestException e)
+            catch (HttpRequestException ex)
             {
-                PluginLog.LogError("Could not download " + response.url);
-                PluginLog.LogError(e.Message);
-                throw;
+                throw new Exception("Could not download " + response.url, ex);
             }
 
-            PluginLog.Log("Downloaded " + bytes.Length / 1000 + " kb from " + response.url);
+            PluginLog.Log("Downloaded {0} from {1}", Helper.SizeSuffix(bytes.LongLength, 1), response.url);
+#if DEBUG
+            // Write last image to disk
+            Directory.CreateDirectory("C:\\Temp\\neko");
+            File.WriteAllBytes("C:\\Temp\\neko\\last.jpg", bytes);
+#endif
 
-            TextureWrap? image;
+            // Load image to GPU
+            NekoImage? image;
             try
             {
-                image = await Plugin.PluginInterface.UiBuilder.LoadImageAsync(bytes);
+                image = new(bytes);
+                await image.LoadImage();
             }
-            catch (System.Exception e)
+            catch (Exception ex)
             {
-                PluginLog.LogError("Could not decode image");
-                PluginLog.LogError(e.ToString());
-                throw;
+                throw new Exception("Could not load image onto GPU", ex);
             }
 
             return image;
         }
 
 
-        static public TextureWrap defaultNeko()
+#if DEBUG
+        public async static void LoadLoop(NekoWindow ui)
         {
-            // Load icon synchronous as a fallback from embedded
-            PluginLog.LogWarning("Loading default Neko image");
-
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "Neko.resources.error.jpg";
-
-            TextureWrap? image;
-            try
+            // 16MB   9600x5400
+            byte[] data = System.IO.File.ReadAllBytes("C:\\Temp\\neko\\big_image.png");
+            NekoImage? testImage;
+            while (ui.Visible)
             {
-                using (Stream? stream = assembly.GetManifestResourceStream(resourceName))
-                using (var memoryStream = new MemoryStream())
+                try
                 {
-                    stream?.CopyTo(memoryStream);
-                    image = Plugin.PluginInterface.UiBuilder.LoadImage(memoryStream.ToArray());
+                    testImage = new(data);
+                    var img = await testImage.LoadImage();
+                    PluginLog.LogInformation("Loaded {0} to GPU", Helper.SizeSuffix(img.Width * img.Height * 4));
+                    testImage.Dispose();
+                }
+                catch (System.Exception ex)
+                {
+                    PluginLog.LogError(ex, "System.AccessViolationException catched");
                 }
             }
-            catch (System.Exception)
-            {
-                PluginLog.LogError("Could not load default image");
-                throw;
-            }
-
-            return image;
         }
+#endif
     }
 }

@@ -1,12 +1,10 @@
-using Dalamud.Data;
-using Dalamud.Game;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Objects;
+using System;
+using System.Threading;
 using Dalamud.Game.Command;
 using Dalamud.IoC;
-using Dalamud.Plugin;
 using Dalamud.Logging;
-using System;
+using Dalamud.Plugin;
+using ImGuiScene;
 
 namespace Neko
 {
@@ -21,40 +19,44 @@ namespace Neko
         private const string CommandMain = "/neko";
         // private const string CommandConfig = "/nekocfg";
 
-        // public static Configuration Configuration;
         private readonly NekoWindow ui;
 
         public Plugin()
         {
             // Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-            ui = new();
+
             /*
-                        CommandManager.AddHandler(CommandConfig, new CommandInfo(OnCommand)
-                        {
-                            HelpMessage = "TODO: Config Window"
-                        });
+            CommandManager.AddHandler(CommandConfig, new CommandInfo(OnCommand)
+            {
+                HelpMessage = "TODO: Config Window"
+            });
             */
             CommandManager.AddHandler(CommandMain, new CommandInfo(OnCommand)
             {
                 HelpMessage = "Display the main window, containing the image."
             });
 
+            ui = new();  // Create UI
+            _ = NekoImage.DefaultNeko(); // Load Default image to memory
+                                         //  ui.AsnyncNextNeko(); // Load first Neko
 
             PluginInterface.UiBuilder.OpenConfigUi += OpenConfig;
             PluginInterface.UiBuilder.Draw += DrawUI;
         }
 
+#pragma warning disable CA1816
         public void Dispose()
         {
+            ui.Visible = false;
             // CommandManager.RemoveHandler(CommandConfig);
             CommandManager.RemoveHandler(CommandMain);
         }
+#pragma warning restore
 
         private void OnCommand(string command, string args)
         {
             ui.Visible = !ui.Visible;
         }
-
         private void OpenConfig()
         {
             ui.Visible = !ui.Visible;
