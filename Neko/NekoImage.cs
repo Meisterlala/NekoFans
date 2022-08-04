@@ -191,7 +191,7 @@ namespace Neko
 #if !DEBUG
             // we can delete the original image data to clear up ram, 
             // since the uncompressed image is now stored in vram
-            _data = null;
+            _data = Array.Empty<Byte>();
 #endif
 
             ImageStatus = ImageStatus.Successfull;

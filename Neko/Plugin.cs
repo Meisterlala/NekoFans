@@ -60,7 +60,6 @@ namespace Neko
         private void OpenConfig()
         {
             ui.Visible = !ui.Visible;
-            ui.LogQueue();
         }
 
         private void DrawUI()

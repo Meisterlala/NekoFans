@@ -56,11 +56,11 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-  <!--  
+   
   <ItemGroup>
     <PackageReference Include="DalamudPackager" Version="2.1.7"/>
   </ItemGroup>
-
+  <!-- 
   <Target Name="PackagePlugin" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
     <DalamudPackager
       ProjectDir="$(ProjectDir)"
