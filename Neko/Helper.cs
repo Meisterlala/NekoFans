@@ -6,7 +6,7 @@ namespace Neko
     {
         static readonly string[] SizeSuffixes =
                        { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
-        public static string SizeSuffix(long value, int decimalPlaces = 0)
+        public static string SizeSuffix(long value, int decimalPlaces = 1)
         {
             if (decimalPlaces < 0) { throw new ArgumentOutOfRangeException(nameof(decimalPlaces)); }
             if (value < 0) { return "-" + SizeSuffix(-value, decimalPlaces); }

@@ -27,21 +27,14 @@ namespace Neko
 
         private Task<NekoImage>? nekoTaskCurrent;
         private Task<NekoImage>? nekoTaskNext;
+        private readonly NekoQueue queue;
 
         public NekoWindow()
         {
-            try
-            {
-                // Load config
-                // var configs = Plugin.Configuration;
-
-                // Load neko asnync
-                nekoTaskCurrent = GetNeko.NextNeko();
-            }
-            catch (Exception ex)
-            {
-                PluginLog.Error(ex, "Failed to create Neko Fans window");
-            }
+            // Load config
+            // var configs = Plugin.Configuration;
+            queue = new(); // Start loading images
+            AsnyncNextNeko();
         }
 
         public void Draw()
@@ -50,26 +43,28 @@ namespace Neko
             catch { }
         }
 
-        public void AsnyncNextNeko()
+        private void AsnyncNextNeko()
         {
             if (nekoTaskNext != null && nekoTaskNext.Status == TaskStatus.Running) return;
+            if (nekoTaskNext != null) nekoTaskNext.Dispose();
 
-            if (nekoTaskNext != null)
-                nekoTaskNext.Dispose();
+            // Get next image from Queue
+            nekoTaskNext = queue.Pop();
 
-            nekoTaskNext = GetNeko.NextNeko();
-
-            nekoTaskNext.ContinueWith((task) =>
+            var processResult = (Task<NekoImage> task) =>
             {
-                foreach (var ex in task.Exception?.Flatten().InnerExceptions ?? new(Array.Empty<Exception>()))
-                {
-                    PluginLog.LogError(ex, "Task exited with error");
-                }
+                var _ = task.Exception?.Flatten();  // This is done to prevent System.AggregateException
                 if (nekoTaskCurrent != null)
                     nekoTaskCurrent.Dispose();
                 nekoTaskCurrent = task;
                 imageGrayed = false;
-            });
+            };
+
+            // Update nekoTaskCurrent now
+            if (nekoTaskNext.IsCompleted)
+                processResult(nekoTaskNext);
+            else // Update later
+                nekoTaskNext.ContinueWith(processResult);
         }
 
         public void DrawNeko()
@@ -88,7 +83,9 @@ namespace Neko
             if (ImGui.Begin("Neko", ref visible))
             {
                 TextureWrap? currentNeko;
-                if (nekoTaskCurrent != null && nekoTaskCurrent.Status == TaskStatus.RanToCompletion)
+                if (nekoTaskCurrent != null
+                    && nekoTaskCurrent.IsCompleted
+                    && nekoTaskCurrent.Result.ImageStatus == ImageStatus.Successfull)
                     currentNeko = nekoTaskCurrent.Result.Texture;
                 else
                     currentNeko = NekoImage.DefaultNekoTexture;
@@ -135,5 +132,13 @@ namespace Neko
             ImGui.PopStyleColor();
             ImGui.End();
         }
+
+#if DEBUG
+        public void LogQueue()
+        {
+            PluginLog.Log(queue.ToString());
+        }
+#endif
+
     }
 }

@@ -22,11 +22,14 @@ namespace Neko
     }
 #pragma warning restore
 
-    public class GetNeko
+    public static class GetNeko
     {
         private static readonly HttpClient client = new();
 
-        public async static Task<NekoImage> NextNeko()
+        /// <summary>
+        /// Load the next image form the web to ram, not to vram yet
+        /// </summary>
+        public async static Task<NekoImage> NextNeko(CancellationToken ct = default)
         {
             var url = "https://nekos.life/api/v2/img/neko";
 
@@ -38,8 +41,8 @@ namespace Neko
                 client.DefaultRequestHeaders.Accept.Add(
                     new MediaTypeWithQualityHeaderValue("application/json"));
 
-                var streamTask = client.GetStreamAsync(url);
-                response = await JsonSerializer.DeserializeAsync<NekosLifeJson>(await streamTask);
+                var streamTask = client.GetStreamAsync(url, ct);
+                response = await JsonSerializer.DeserializeAsync<NekosLifeJson>(utf8Json: await streamTask, cancellationToken: ct);
             }
             catch (HttpRequestException ex)
             {
@@ -58,6 +61,8 @@ namespace Neko
                 throw new Exception($"No response from Server: {url}");
             }
 
+            ct.ThrowIfCancellationRequested();
+
             // Download actual image
             byte[]? bytes;
             try
@@ -67,7 +72,7 @@ namespace Neko
                     new MediaTypeWithQualityHeaderValue("image/jpeg"));
                 client.DefaultRequestHeaders.Accept.Add(
                     new MediaTypeWithQualityHeaderValue("image/png"));
-                bytes = await client.GetByteArrayAsync(response.url);
+                bytes = await client.GetByteArrayAsync(response.url, ct);
             }
             catch (HttpRequestException ex)
             {
@@ -81,18 +86,10 @@ namespace Neko
             File.WriteAllBytes("C:\\Temp\\neko\\last.jpg", bytes);
 #endif
 
-            // Load image to GPU
-            NekoImage? image;
-            try
-            {
-                image = new(bytes);
-                await image.LoadImage();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Could not load image onto GPU", ex);
-            }
+            ct.ThrowIfCancellationRequested();
 
+            // Create Image, dont load it to GPU yet
+            NekoImage? image = new(bytes);
             return image;
         }
 

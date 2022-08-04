@@ -8,10 +8,14 @@ using ImGuiScene;
 
 namespace Neko
 {
+    public enum ImageStatus
+    {
+        Successfull, Faulty, HasData, Unknown
+    }
+
     public class NekoImage
     {
-        // Support for multi CPU computers
-        private enum Architecture
+        private enum Architecture // Support for multi CPU computers
         {
             Workstation32Bit, Workstation64Bit, Server32Bit, Server64Bit
         }
@@ -53,8 +57,11 @@ namespace Neko
             }
         }
 
-        private byte[]? _data;
+        private byte[] _data;
         private TextureWrap? _texture;
+        private static int inNoGCRegion = 0;   // 1 = in NoGCRegon
+
+        public ImageStatus ImageStatus { get; set; }
 
         public TextureWrap Texture
         {
@@ -65,12 +72,16 @@ namespace Neko
             }
         }
 
-
         public NekoImage(byte[] data)
         {
             _data = data;
-            // This somehow doesnt work, so its done with NoGCRegion
-            // GC.KeepAlive(_data);
+            ImageStatus = ImageStatus.HasData;
+        }
+
+        public NekoImage()
+        {
+            _data = Array.Empty<Byte>();
+            ImageStatus = ImageStatus.Faulty;
         }
 
         ~NekoImage()
@@ -80,18 +91,36 @@ namespace Neko
 
         public void Dispose()
         {
+#if DEBUG
+            PluginLog.LogDebug("Disposing Image  " + this.ToString());
+#endif
             _texture?.Dispose();
             _texture = null;
-#if DEBUG
-            PluginLog.LogDebug("Disposed {0} image", Helper.SizeSuffix(_data?.Length ?? 0));
-#endif
-            _data = null;
+
+            _data = Array.Empty<Byte>();
         }
 
+        public override string ToString()
+        {
+            if (_texture == null && _data != null)
+                return $"Data: {Helper.SizeSuffix(_data.Length)} Texture: not loaded";
+            else if (_texture != null && _data != null)
+                return $"Data: {Helper.SizeSuffix(_data.Length)} Texture: {Helper.SizeSuffix(_texture.Height * _texture.Width * 4)}";
+            else
+                return "Invalid Image";
+        }
+
+        /// <summary>
+        /// Load image from RAM to GPU VRAM
+        /// </summar>
         public async Task<TextureWrap> LoadImage()
         {
-            if (_data == null || _data.Length == 0)
+            if (_texture != null) // If already loaded
+                return _texture;
+
+            if (_data == Array.Empty<Byte>() || _data.Length == 0)
             {
+                ImageStatus = ImageStatus.Faulty;
                 throw new Exception("No Image data provided");
             }
 
@@ -99,19 +128,23 @@ namespace Neko
             try
             {
                 // try correct size
-                System.GC.TryStartNoGCRegion(EphemeralMemorySize, true);
+                if (0 == Interlocked.Exchange(ref inNoGCRegion, 1))
+                {
+                    System.GC.TryStartNoGCRegion(EphemeralMemorySize, true);
+                }
             }
             catch (ArgumentOutOfRangeException)
             {
                 // This will catch, if:
                 // - EphemeralMemorySize is to big: Fallback to 32bit GC size
                 // - Already in NoGCRegion
-                PluginLog.Log("Fallback to smaller GC bufffer " + Helper.SizeSuffix(EphemeralMemorySize, 3));
+                PluginLog.Log("Fallback to smaller GC bufffer " + Helper.SizeSuffix(EphemeralMemorySizeTable(Architecture.Workstation32Bit), 3));
                 System.GC.TryStartNoGCRegion(EphemeralMemorySizeTable(Architecture.Workstation32Bit), true);
             }
             catch (InvalidOperationException)
             {
                 // This will catch, if already in NoGCRegion
+                PluginLog.Debug("Already in NoGCRegion");
             }
 
             try
@@ -130,18 +163,30 @@ namespace Neko
                 // - there is not enough ram avalible
                 // - there is not enough vram avalible
                 // - the NoGCRegion totalSize was too small and a GC collection happend
-                // - the image data is corupt
+                // - the image data is corrupt
+                ImageStatus = ImageStatus.Faulty;
                 throw new Exception("Could not load image", ex);
             }
 
             // Restart GC
-            try { System.GC.EndNoGCRegion(); }
-            catch (System.Exception)
+            try
+            {
+                if (1 == Interlocked.Exchange(ref inNoGCRegion, 0))
+                {
+                    System.GC.EndNoGCRegion();
+                }
+            }
+            catch (System.Exception ex)
             {
                 // This will catch, if:
                 // - NoGCRegion totalSize was too small
-                PluginLog.LogDebug("Could not end NoGCRegion");
+                // - NoGCRegion was never started
+                PluginLog.LogDebug(ex, "Ephemeral memory to small to load image");
             }
+
+            PluginLog.Debug("Decompressed {0} to {1} and loaded into GPU VRAM",
+                            _data != null ? Helper.SizeSuffix(_data.Length) : "???",
+                            Helper.SizeSuffix(_texture.Width * _texture.Height * 4));
 
 #if !DEBUG
             // we can delete the original image data to clear up ram, 
@@ -149,6 +194,7 @@ namespace Neko
             _data = null;
 #endif
 
+            ImageStatus = ImageStatus.Successfull;
             return _texture;
         }
 
@@ -169,7 +215,7 @@ namespace Neko
             // Only load texture if it was never loaded. 
             if (defaultNekoImage != null) return defaultNekoImage;
 
-            // Load embedded error icon as a fallback
+            // Load embedded error icon
             if (DefaultNekoReady)
                 PluginLog.LogWarning("Reloading default Neko image");
             var assembly = Assembly.GetExecutingAssembly();

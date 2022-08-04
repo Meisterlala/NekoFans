@@ -38,7 +38,7 @@ namespace Neko
 
             ui = new();  // Create UI
             _ = NekoImage.DefaultNeko(); // Load Default image to memory
-                                         //  ui.AsnyncNextNeko(); // Load first Neko
+
 
             PluginInterface.UiBuilder.OpenConfigUi += OpenConfig;
             PluginInterface.UiBuilder.Draw += DrawUI;
@@ -60,6 +60,7 @@ namespace Neko
         private void OpenConfig()
         {
             ui.Visible = !ui.Visible;
+            ui.LogQueue();
         }
 
         private void DrawUI()

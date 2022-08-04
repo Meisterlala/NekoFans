@@ -72,7 +72,7 @@
   -->
   <ItemGroup>
     <None Include="Neko.json">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
