@@ -24,13 +24,14 @@ namespace Neko
 
     public static class GetNeko
     {
-
+        private static readonly HttpClient client = new();
 
         /// <summary>
         /// Load the next image form the web to ram, not to vram yet
         /// </summary>
         public async static Task<NekoImage> NextNeko(CancellationToken ct = default)
         {
+            HttpClient client = new();
             var url = "https://nekos.life/api/v2/img/neko";
             HttpClient client = new();
             
@@ -93,29 +94,5 @@ namespace Neko
             NekoImage? image = new(bytes);
             return image;
         }
-
-
-#if DEBUG
-        public async static void LoadLoop(NekoWindow ui)
-        {
-            // 16MB   9600x5400
-            byte[] data = System.IO.File.ReadAllBytes("C:\\Temp\\neko\\big_image.png");
-            NekoImage? testImage;
-            while (ui.Visible)
-            {
-                try
-                {
-                    testImage = new(data);
-                    var img = await testImage.LoadImage();
-                    PluginLog.LogInformation("Loaded {0} to GPU", Helper.SizeSuffix(img.Width * img.Height * 4));
-                    testImage.Dispose();
-                }
-                catch (System.Exception ex)
-                {
-                    PluginLog.LogError(ex, "System.AccessViolationException catched");
-                }
-            }
-        }
-#endif
     }
 }

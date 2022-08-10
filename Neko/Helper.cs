@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 
 namespace Neko
 {
@@ -31,7 +32,5 @@ namespace Neko
                 adjustedSize,
                 SizeSuffixes[mag]);
         }
-
-    }
-
+    };
 }

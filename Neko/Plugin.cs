@@ -1,10 +1,8 @@
-using System;
-using System.Threading;
 using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Logging;
 using Dalamud.Plugin;
-using ImGuiScene;
+using Neko.Gui;
 
 namespace Neko
 {
@@ -16,55 +14,85 @@ namespace Neko
 
         public string Name => "Neko Fans";
 
-        private const string CommandMain = "/neko";
-        // private const string CommandConfig = "/nekocfg";
+        public static Configuration Config { get; private set; } = null!;
+        public static NekoWindow GuiMain { get; private set; } = null!;
+        public static ConfigWindow GuiConfig { get; private set; } = null!;
 
-        private readonly NekoWindow ui;
+
+        private const string CommandMain = "/neko";
+        private const string CommandConfig = "/nekocfg";
+
 
         public Plugin()
         {
-            // Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-
-            /*
+            // Setup commands
             CommandManager.AddHandler(CommandConfig, new CommandInfo(OnCommand)
             {
-                HelpMessage = "TODO: Config Window"
+                HelpMessage = "Configuration window"
             });
-            */
+
             CommandManager.AddHandler(CommandMain, new CommandInfo(OnCommand)
             {
                 HelpMessage = "Display the main window, containing the image."
             });
 
-            ui = new();  // Create UI
+            Config = Configuration.Load(); // Load Configuration
             _ = NekoImage.DefaultNeko(); // Load Default image to memory
 
-
-            PluginInterface.UiBuilder.OpenConfigUi += OpenConfig;
+            PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigGui;
             PluginInterface.UiBuilder.Draw += DrawUI;
+#if DEBUG
+            // Open all windows in Debug
+            ToggleMainGui();
+            ToggleConfigGui();
+            GuiMain.Visible = true;
+            GuiConfig.Visible = true;
+#endif
         }
 
 #pragma warning disable CA1816
         public void Dispose()
         {
-            ui.Visible = false;
-            // CommandManager.RemoveHandler(CommandConfig);
+            if (GuiMain != null)
+                GuiMain.Visible = false;
+            if (GuiConfig != null)
+                GuiConfig.Visible = false;
+
+            CommandManager.RemoveHandler(CommandConfig);
             CommandManager.RemoveHandler(CommandMain);
         }
 #pragma warning restore
 
         private void OnCommand(string command, string args)
         {
-            ui.Visible = !ui.Visible;
-        }
-        private void OpenConfig()
-        {
-            ui.Visible = !ui.Visible;
+            var input = command + args;
+            if (input.Contains("cfg") || input.Contains("config"))
+                ToggleConfigGui();
+            else
+                ToggleMainGui();
         }
 
         private void DrawUI()
         {
-            ui.Draw();
+            if (GuiMain != null)
+                GuiMain.Draw();
+
+            if (GuiConfig != null)
+                GuiConfig.Draw();
+        }
+
+        private static void ToggleMainGui()
+        {
+            if (GuiMain == null)
+                GuiMain = new();
+            GuiMain.Visible = !GuiMain.Visible;
+        }
+
+        private static void ToggleConfigGui()
+        {
+            if (GuiConfig == null)
+                GuiConfig = new();
+            GuiConfig.Visible = !GuiConfig.Visible;
         }
     }
 }

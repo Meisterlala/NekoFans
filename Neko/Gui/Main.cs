@@ -5,7 +5,7 @@ using Dalamud.Logging;
 using ImGuiNET;
 using ImGuiScene;
 
-namespace Neko
+namespace Neko.Gui
 {
     public class NekoWindow
     {
@@ -16,18 +16,11 @@ namespace Neko
             set => visible = value;
         }
 
-        private float alpha = 0.0f;
-        public float Alpha
-        {
-            get => alpha;
-            set => alpha = value;
-        }
-
         private bool imageGrayed = false;
 
         private Task<NekoImage>? nekoTaskCurrent;
         private Task<NekoImage>? nekoTaskNext;
-        private readonly NekoQueue queue;
+        public readonly NekoQueue queue;
 
         public NekoWindow()
         {
@@ -39,14 +32,76 @@ namespace Neko
 
         public void Draw()
         {
-            try { DrawNeko(); }
-            catch { }
+            if (!visible) return;
+            try
+            {
+                DrawNeko();
+            }
+            finally
+            {
+                ImGui.End();
+            }
         }
+
+
+        public void DrawNeko()
+        {
+            if (!NekoImage.DefaultNekoReady) return;
+
+            var fontScale = ImGui.GetIO().FontGlobalScale;
+            var size = new Vector2(100 * fontScale, 100 * fontScale);
+
+            ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowSizeConstraints(size, size * 20);
+            ImGui.SetNextWindowBgAlpha(Plugin.Config.GuiMainOpacity);
+            var flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse;
+            if (!Plugin.Config.GuiMainShowResize)
+                ImGui.PushStyleColor(ImGuiCol.ResizeGrip, 0);
+
+            if (ImGui.Begin("Neko", ref visible, flags))
+            {
+                TextureWrap? currentNeko;
+                if (nekoTaskCurrent != null
+                    && nekoTaskCurrent.IsCompleted
+                    && nekoTaskCurrent.Result.ImageStatus == ImageStatus.Successfull)
+                    currentNeko = nekoTaskCurrent.Result.Texture;
+                else
+                    currentNeko = NekoImage.DefaultNekoTexture;
+
+                // Align Image
+                var windowSize = ImGui.GetWindowSize() - new Vector2(10f, 27f);
+                var (startPos, endPos) = Common.AlignImage(new Vector2(currentNeko.Height, currentNeko.Width), windowSize, Plugin.Config.Alignment);
+                ImGui.SetCursorPos(startPos + new Vector2(5f, 23f));
+
+                // Transparancy
+                ImGui.PushStyleColor(ImGuiCol.Button, Vector4.Zero);
+                ImGui.PushStyleColor(ImGuiCol.ButtonActive, Vector4.Zero);
+                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Vector4.Zero);
+
+                if (ImGui.ImageButton(currentNeko.ImGuiHandle,
+                    endPos - startPos,
+                    Vector2.Zero,
+                    Vector2.One,
+                    0,
+                    Vector4.Zero,
+                    imageGrayed ? new Vector4(.5f, .5f, .5f, 1f) : Vector4.One))
+                {
+                    imageGrayed = true;
+                    // Load next Neko if Image is pressed
+                    AsnyncNextNeko();
+                }
+
+                ImGui.PopStyleColor(3);
+            }
+            if (!Plugin.Config.GuiMainShowResize)
+                ImGui.PopStyleColor();
+        }
+
 
         private void AsnyncNextNeko()
         {
-            if (nekoTaskNext != null && nekoTaskNext.Status == TaskStatus.Running) return;
-            if (nekoTaskNext != null) nekoTaskNext.Dispose();
+            if (nekoTaskNext != null && !nekoTaskNext.IsCompleted) return;
+            if (nekoTaskNext != null && nekoTaskNext.IsCompleted) nekoTaskNext.Dispose();
 
             // Get next image from Queue
             nekoTaskNext = queue.Pop();
@@ -66,79 +121,6 @@ namespace Neko
             else // Update later
                 nekoTaskNext.ContinueWith(processResult);
         }
-
-        public void DrawNeko()
-        {
-            if (!visible) return;
-            if (!NekoImage.DefaultNekoReady) return;
-
-            var fontScale = ImGui.GetIO().FontGlobalScale;
-            var size = new Vector2(100 * fontScale, 100 * fontScale);
-
-            ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
-            ImGui.SetNextWindowSizeConstraints(size, size * 20);
-            ImGui.PushStyleColor(ImGuiCol.ResizeGrip, 0);
-            ImGui.SetNextWindowBgAlpha(alpha);
-
-            if (ImGui.Begin("Neko", ref visible))
-            {
-                TextureWrap? currentNeko;
-                if (nekoTaskCurrent != null
-                    && nekoTaskCurrent.IsCompleted
-                    && nekoTaskCurrent.Result.ImageStatus == ImageStatus.Successfull)
-                    currentNeko = nekoTaskCurrent.Result.Texture;
-                else
-                    currentNeko = NekoImage.DefaultNekoTexture;
-
-                var imageRatio = (float)currentNeko.Height / currentNeko.Width;
-                var imageStart = ImGui.GetCursorScreenPos();
-                var windowSize = ImGui.GetWindowSize() - new Vector2(15f, 40f);
-
-                // Fix aspect ratio
-                Vector2 imageSize;
-                if (windowSize.Y / windowSize.X > imageRatio)
-                {
-                    imageSize = new Vector2(windowSize.X, windowSize.X * imageRatio);
-                }
-                else
-                {
-                    imageSize = new Vector2(windowSize.Y / imageRatio, windowSize.Y);
-                }
-
-                // Center
-                imageStart += (windowSize - imageSize) / 2;
-                ImGui.SetCursorScreenPos(imageStart);
-
-                // Transparancy
-                ImGui.PushStyleColor(ImGuiCol.Button, Vector4.Zero);
-                ImGui.PushStyleColor(ImGuiCol.ButtonActive, Vector4.Zero);
-                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Vector4.Zero);
-
-                if (ImGui.ImageButton(currentNeko.ImGuiHandle,
-                    imageSize,
-                    Vector2.Zero,
-                    Vector2.One,
-                    0,
-                    Vector4.Zero,
-                    imageGrayed ? new Vector4(.5f, .5f, .5f, 1f) : Vector4.One))
-                {
-                    imageGrayed = true;
-                    // Load next Neko if Image is pressed
-                    AsnyncNextNeko();
-                }
-
-                ImGui.PopStyleColor(3);
-            }
-            ImGui.PopStyleColor();
-            ImGui.End();
-        }
-
-#if DEBUG
-        public void LogQueue()
-        {
-            PluginLog.Log(queue.ToString());
-        }
-#endif
 
     }
 }
