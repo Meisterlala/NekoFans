@@ -24,7 +24,7 @@ namespace Neko
 
     public static class GetNeko
     {
-        private static readonly HttpClient client = new();
+
 
         /// <summary>
         /// Load the next image form the web to ram, not to vram yet
@@ -32,7 +32,8 @@ namespace Neko
         public async static Task<NekoImage> NextNeko(CancellationToken ct = default)
         {
             var url = "https://nekos.life/api/v2/img/neko";
-
+            HttpClient client = new();
+            
             // Get a random image URL
             NekosLifeJson? response;
             try
