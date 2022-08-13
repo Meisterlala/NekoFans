@@ -1,35 +1,31 @@
+using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using System;
 using Dalamud.Logging;
 
-#if DEBUG
-using System.IO;
-#endif
-
-
-namespace Neko
+namespace Neko.Sources
 {
 
-
-#pragma warning disable 
+#pragma warning disable
     class NekosLifeJson
     {
         public string? url { get; set; }
     }
 #pragma warning restore
 
-    public static class GetNeko
+    enum Category
+    {
+        Neko,
+    }
+
+    public class NekoLife : ImageSource
     {
         private static readonly HttpClient client = new();
 
-        /// <summary>
-        /// Load the next image form the web to ram, not to vram yet
-        /// </summary>
-        public async static Task<NekoImage> NextNeko(CancellationToken ct = default)
+        public async Task<NekoImage> Next(CancellationToken ct = default)
         {
             HttpClient client = new();
             var url = "https://nekos.life/api/v2/img/neko";
@@ -81,18 +77,13 @@ namespace Neko
                 throw new Exception("Could not download " + response.url, ex);
             }
 
-            PluginLog.Log("Downloaded {0} from {1}", Helper.SizeSuffix(bytes.LongLength, 1), response.url);
-#if DEBUG
-            // Write last image to disk
-            Directory.CreateDirectory("C:\\Temp\\neko");
-            File.WriteAllBytes("C:\\Temp\\neko\\last.jpg", bytes);
-#endif
+            Helper.LogDownload(bytes.LongLength, response.url);
 
             ct.ThrowIfCancellationRequested();
 
-            // Create Image, dont load it to GPU yet
             NekoImage? image = new(bytes);
             return image;
         }
     }
+
 }

@@ -15,12 +15,14 @@ namespace Neko.Gui
             get => visible;
             set => visible = value;
         }
+        private int QueueDonwloadCount;
+        private int QueuePreloadCount;
 
         public ConfigWindow()
         {
-
+            QueueDonwloadCount = Plugin.Config.QueueDonwloadCount;
+            QueuePreloadCount = Plugin.Config.QueuePreloadCount;
         }
-
 
         public void Draw()
         {
@@ -33,7 +35,7 @@ namespace Neko.Gui
                 ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
                 ImGui.SetNextWindowSizeConstraints(size, size * 20);
 
-                if (!ImGui.Begin("Neko Fans config", ref visible)) return;
+                if (!ImGui.Begin("Neko Fans Configuration", ref visible)) return;
 
                 if (ImGui.BeginTabBar("##tabBar"))
                 {
@@ -44,6 +46,11 @@ namespace Neko.Gui
                     }
                     if (ImGui.BeginTabItem("Image sources"))
                     {
+                        ImGui.EndTabItem();
+                    }
+                    if (ImGui.BeginTabItem("Advanced"))
+                    {
+                        DrawAdvanced();
                         ImGui.EndTabItem();
                     }
 #if DEBUG
@@ -63,24 +70,72 @@ namespace Neko.Gui
         }
 
 
+
         private void DrawLook()
         {
             ImGui.PushItemWidth(-200);
-            ImGui.Text("TestText");
 
             // Background opacity slider
             if (ImGui.SliderFloat("Background opacity", ref Plugin.Config.GuiMainOpacity, 0, 1))
                 Plugin.Config.Save();
             ImGui.SameLine(); Common.HelpMarker("CTRL+click to input value.");
 
-            // Show resize
-            if (ImGui.Checkbox("Show resize handle", ref Plugin.Config.GuiMainShowResize))
+            // Allow resizing
+            if (ImGui.Checkbox("Allow resizing", ref Plugin.Config.GuiMainAllowResize))
                 Plugin.Config.Save();
-            ImGui.SameLine(); Common.HelpMarker("Show or hide the grey triangle in the bottom right corner of the window");
+            ImGui.SameLine(); Common.HelpMarker("Show arrows near the edges of the window to resize it.");
+
+            if (Plugin.Config.GuiMainAllowResize)
+            {
+                // Show resize
+                if (ImGui.Checkbox("Show resize handle", ref Plugin.Config.GuiMainShowResize))
+                    Plugin.Config.Save();
+                ImGui.SameLine(); Common.HelpMarker("Show or hide the grey triangle in the bottom right corner of the window.");
+
+            }
+
+            // Show Title Bar
+            if (ImGui.Checkbox("Show window title bar", ref Plugin.Config.GuiMainShowTitleBar))
+                Plugin.Config.Save();
+            ImGui.SameLine(); Common.HelpMarker("Show or hide the bar on top of the image.\nHold down the right mouse button to move the window when no title bar is displayed.");
 
             // Image Alignment Submenu
             if (ImGui.CollapsingHeader("Image alignment"))
                 DrawAlign();
+
+            ImGui.PopItemWidth();
+        }
+
+        private void DrawAdvanced()
+        {
+            ImGui.PushItemWidth(-200);
+
+            // Image Queue System
+            ImGui.Text("Image preloading system");
+            ImGui.SameLine(); Common.HelpMarker("Images are loaded in the background, to make displaying the next image faster.");
+
+            // Int Downloaded
+            if (ImGui.InputInt("Downloaded", ref QueueDonwloadCount, 1))
+            {
+                if (QueueDonwloadCount < 1 || QueueDonwloadCount > 50 || QueuePreloadCount > QueueDonwloadCount)
+                    QueueDonwloadCount = Plugin.Config.QueueDonwloadCount;
+                Plugin.Config.QueueDonwloadCount = QueueDonwloadCount;
+                Plugin.Config.Save();
+                Plugin.GuiMain.queue.UpdateQueueLength();
+            }
+            ImGui.SameLine(); Common.HelpMarker("The amount of images which are downloaded from the internet.\nIncreasing this will result in higher RAM usage. Recomended: 5");
+
+            // Int in VRAM
+            if (ImGui.InputInt("in VRAM", ref QueuePreloadCount, 1))
+            {
+                if (QueuePreloadCount < 1 || QueuePreloadCount > 25 || QueuePreloadCount > QueueDonwloadCount)
+                    QueuePreloadCount = Plugin.Config.QueuePreloadCount;
+                Plugin.Config.QueuePreloadCount = QueuePreloadCount;
+                Plugin.Config.Save();
+                Plugin.GuiMain.queue.UpdateQueueLength();
+            }
+            ImGui.SameLine(); Common.HelpMarker("The amount of images which are decoded and loaded into the GPU.\nIncreasing this will result in higher VRAM usage. Recomended: 2");
+            ImGui.PopItemWidth();
         }
 
         private void DrawAlign()

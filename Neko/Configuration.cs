@@ -14,6 +14,13 @@ namespace Neko
 
         public float GuiMainOpacity = 0f;
         public bool GuiMainShowResize = false;
+        public bool GuiMainShowTitleBar = true;
+        public bool GuiMainAllowResize = true;
+
+        public int QueueDonwloadCount = 5;
+        public int QueuePreloadCount = 2;
+
+        public Sources.ImageSource ImageSource = new Sources.NekoLife();
 
         public ImageAlignment Alignment = ImageAlignment.Center;
 

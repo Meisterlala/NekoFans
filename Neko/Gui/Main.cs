@@ -22,6 +22,7 @@ namespace Neko.Gui
         private Task<NekoImage>? nekoTaskNext;
         public readonly NekoQueue queue;
 
+
         public NekoWindow()
         {
             // Load config
@@ -55,11 +56,22 @@ namespace Neko.Gui
             ImGui.SetNextWindowSizeConstraints(size, size * 20);
             ImGui.SetNextWindowBgAlpha(Plugin.Config.GuiMainOpacity);
             var flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse;
+
+            // Remove resize triangle
             if (!Plugin.Config.GuiMainShowResize)
                 ImGui.PushStyleColor(ImGuiCol.ResizeGrip, 0);
 
+            // Remove Title Bar
+            if (!Plugin.Config.GuiMainShowTitleBar)
+                flags |= ImGuiWindowFlags.NoTitleBar;
+
+            // No Resize
+            if (!Plugin.Config.GuiMainAllowResize)
+                flags |= ImGuiWindowFlags.NoResize;
+
             if (ImGui.Begin("Neko", ref visible, flags))
             {
+                // Load Neko or fallback to default
                 TextureWrap? currentNeko;
                 if (nekoTaskCurrent != null
                     && nekoTaskCurrent.IsCompleted
@@ -68,10 +80,21 @@ namespace Neko.Gui
                 else
                     currentNeko = NekoImage.DefaultNekoTexture;
 
+                // Get Window Size
+                var windowSize = ImGui.GetWindowSize();
+                if (Plugin.Config.GuiMainShowTitleBar)
+                    windowSize -= new Vector2(10f, 27f);
+                else
+                    windowSize -= new Vector2(10f, 10f);
+
                 // Align Image
-                var windowSize = ImGui.GetWindowSize() - new Vector2(10f, 27f);
                 var (startPos, endPos) = Common.AlignImage(new Vector2(currentNeko.Height, currentNeko.Width), windowSize, Plugin.Config.Alignment);
-                ImGui.SetCursorPos(startPos + new Vector2(5f, 23f));
+
+                // Set image start position
+                if (Plugin.Config.GuiMainShowTitleBar)
+                    ImGui.SetCursorPos(startPos + new Vector2(5f, 23f));
+                else
+                    ImGui.SetCursorPos(startPos + new Vector2(5f, 5f));
 
                 // Transparancy
                 ImGui.PushStyleColor(ImGuiCol.Button, Vector4.Zero);
@@ -91,7 +114,13 @@ namespace Neko.Gui
                     AsnyncNextNeko();
                 }
 
+                // Allow move with right mouse button
+                if (ImGui.IsMouseDragging(ImGuiMouseButton.Right))
+                    ImGui.SetWindowPos(ImGui.GetIO().MouseDelta + ImGui.GetWindowPos());
+
                 ImGui.PopStyleColor(3);
+                ImGui.EndChild();
+                //  ImGui.PopStyleColor();
             }
             if (!Plugin.Config.GuiMainShowResize)
                 ImGui.PopStyleColor();

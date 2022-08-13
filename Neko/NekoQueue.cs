@@ -17,9 +17,6 @@ namespace Neko
             public bool imageShouldLoad = false;
         }
 
-        private const int QUEUE_COUNT = 5; // TODO: Make adjustable in config
-        private const int VRAM_COUNT = 2;
-
         private readonly List<QueueItem> queue;
         private readonly CancellationTokenSource tokenSource;
 
@@ -39,7 +36,7 @@ namespace Neko
 
         public override string ToString()
         {
-            string res = $"Queue length: {QUEUE_COUNT}   preloaded: {VRAM_COUNT}";
+            string res = $"Queue length: {Plugin.Config.QueueDonwloadCount}   preloaded: {Plugin.Config.QueuePreloadCount}";
             for (int i = 0; i < queue.Count; i++)
             {
                 var item = queue[i];
@@ -67,31 +64,27 @@ namespace Neko
 
         public async Task<NekoImage> Pop()
         {
-            // Check if there are falty images in the preloaded Queue
+            // Check if there are faulted images in the preloaded Queue
             // If there are: just use the first image.
             // If there are none:
             //      If there are images in VRAM use the latest
             //      else use the first
             int index = 0;
-            bool hasFaulty = true;
-            for (int i = 0; i < VRAM_COUNT; i++)
+            for (int i = 0; i < Plugin.Config.QueuePreloadCount; i++)
             {
                 var item = queue[i];
                 if ((item.downloadTask?.IsFaulted ?? true)
-                    && (item.imageTask?.IsFaulted ?? true))
+                    || (item.imageTask != null && item.imageTask.IsFaulted))
                 {
-                    hasFaulty = false;
                     break;
                 }
                 else if ((item.downloadTask?.IsCompletedSuccessfully ?? false)
                          && (item.imageTask?.IsCompletedSuccessfully ?? false))
                 {
                     index = i;
+                    break;
                 }
             }
-            if (hasFaulty)
-                index = 0;
-
 
             // Remove from queue
             var popped = queue[index];
@@ -132,13 +125,21 @@ namespace Neko
             return await popped.downloadTask;
         }
 
+        public void UpdateQueueLength()
+        {
+            // Currently the image queue will only grow and never shrink
+            FillQueue();
+            LoadImages();
+        }
+
         private void FillQueue()
         {
-            if (queue.Count >= QUEUE_COUNT) return; // Base case
+            if (queue.Count >= Plugin.Config.QueueDonwloadCount) return; // Base case
 
             var item = new QueueItem();
 
-            var download = GetNeko.NextNeko(tokenSource.Token);
+            var download = Plugin.Config.ImageSource.Next(tokenSource.Token);
+
             download.ContinueWith((task) =>
             {
                 if (task.IsFaulted)
@@ -165,7 +166,7 @@ namespace Neko
 
         private void LoadImages()
         {
-            for (int i = 0; i < VRAM_COUNT && i < queue.Count; i++)
+            for (int i = 0; i < Plugin.Config.QueuePreloadCount && i < queue.Count; i++)
             {
                 queue[i].imageShouldLoad = true;
                 LoadImage(queue[i]);
