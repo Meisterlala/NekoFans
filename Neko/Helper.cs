@@ -34,9 +34,6 @@ namespace Neko
                 SizeSuffixes[mag]);
         }
 
-        public static void LogDownload(long bytes, string url)
-        {
-            PluginLog.Log("Downloaded {0} from {1}", SizeSuffix(bytes, 1), url);
-        }
+
     }
 }

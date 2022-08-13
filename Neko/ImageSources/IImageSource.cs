@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Neko.Sources
 {
-    public interface ImageSource
+    public interface IImageSource
     {
         /// <summary>
         /// Load the next image form the web to ram, not to vram yet

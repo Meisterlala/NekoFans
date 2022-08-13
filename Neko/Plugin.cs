@@ -15,8 +15,8 @@ namespace Neko
         public string Name => "Neko Fans";
 
         public static Configuration Config { get; private set; } = null!;
-        public static NekoWindow GuiMain { get; private set; } = null!;
-        public static ConfigWindow GuiConfig { get; private set; } = null!;
+        public static NekoWindow? GuiMain { get; private set; } = null!;
+        public static ConfigWindow? GuiConfig { get; private set; } = null!;
 
 
         private const string CommandMain = "/neko";
@@ -41,12 +41,15 @@ namespace Neko
 
             PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigGui;
             PluginInterface.UiBuilder.Draw += DrawUI;
+
+            // Open Main Window
+            if (Config.GuiMainVisible)
+                ShowMainGui();
+
 #if DEBUG
-            // Open all windows in Debug
-            ToggleMainGui();
-            ToggleConfigGui();
-            GuiMain.Visible = true;
-            GuiConfig.Visible = true;
+            // always open all windows in Debug
+            ShowMainGui();
+            ShowConfigGui();
 #endif
         }
 
@@ -81,18 +84,31 @@ namespace Neko
                 GuiConfig.Draw();
         }
 
-        private static void ToggleMainGui()
+        public static void ToggleMainGui()
         {
             if (GuiMain == null)
                 GuiMain = new();
             GuiMain.Visible = !GuiMain.Visible;
         }
 
-        private static void ToggleConfigGui()
+        public static void ToggleConfigGui()
         {
             if (GuiConfig == null)
                 GuiConfig = new();
             GuiConfig.Visible = !GuiConfig.Visible;
+        }
+
+        public static void ShowMainGui()
+        {
+            if (GuiMain == null)
+                GuiMain = new();
+            GuiMain.Visible = true;
+        }
+        public static void ShowConfigGui()
+        {
+            if (GuiConfig == null)
+                GuiConfig = new();
+            GuiConfig.Visible = true;
         }
     }
 }

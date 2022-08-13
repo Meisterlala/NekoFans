@@ -10,10 +10,19 @@ namespace Neko.Gui
     public class NekoWindow
     {
         private bool visible = false;
+
         public bool Visible
         {
             get => visible;
-            set => visible = value;
+            set
+            {
+                if (Plugin.Config.GuiMainVisible != value)
+                {
+                    Plugin.Config.GuiMainVisible = value;
+                    Plugin.Config.Save();
+                }
+                visible = value;
+            }
         }
 
         private bool imageGrayed = false;
@@ -33,7 +42,7 @@ namespace Neko.Gui
 
         public void Draw()
         {
-            if (!visible) return;
+            if (!Visible) return;
             try
             {
                 DrawNeko();
@@ -55,6 +64,9 @@ namespace Neko.Gui
             ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowSizeConstraints(size, size * 20);
             ImGui.SetNextWindowBgAlpha(Plugin.Config.GuiMainOpacity);
+
+            ImGui.SetNextWindowPos(Vector2.One, ImGuiCond.Once);
+
             var flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse;
 
             // Remove resize triangle
@@ -117,6 +129,10 @@ namespace Neko.Gui
                 // Allow move with right mouse button
                 if (ImGui.IsMouseDragging(ImGuiMouseButton.Right))
                     ImGui.SetWindowPos(ImGui.GetIO().MouseDelta + ImGui.GetWindowPos());
+
+                // Allow close with middle mouse button
+                if (!Plugin.Config.GuiMainShowTitleBar && ImGui.IsMouseClicked(ImGuiMouseButton.Middle))
+                    Visible = false;
 
                 ImGui.PopStyleColor(3);
                 ImGui.EndChild();

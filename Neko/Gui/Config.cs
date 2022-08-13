@@ -9,24 +9,22 @@ namespace Neko.Gui
 {
     public class ConfigWindow
     {
-        private bool visible = false;
-        public bool Visible
-        {
-            get => visible;
-            set => visible = value;
-        }
+        public bool Visible = false;
+
         private int QueueDonwloadCount;
         private int QueuePreloadCount;
 
+        private readonly ImageSourcesGUI imageSourcesGUI = new();
+
         public ConfigWindow()
         {
-            QueueDonwloadCount = Plugin.Config.QueueDonwloadCount;
+            QueueDonwloadCount = Plugin.Config.QueueDownloadCount;
             QueuePreloadCount = Plugin.Config.QueuePreloadCount;
         }
 
         public void Draw()
         {
-            if (!visible) return;
+            if (!Visible) return;
             try
             {
                 var fontScale = ImGui.GetIO().FontGlobalScale;
@@ -35,7 +33,7 @@ namespace Neko.Gui
                 ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
                 ImGui.SetNextWindowSizeConstraints(size, size * 20);
 
-                if (!ImGui.Begin("Neko Fans Configuration", ref visible)) return;
+                if (!ImGui.Begin("Neko Fans Configuration", ref Visible)) return;
 
                 if (ImGui.BeginTabBar("##tabBar"))
                 {
@@ -46,6 +44,7 @@ namespace Neko.Gui
                     }
                     if (ImGui.BeginTabItem("Image sources"))
                     {
+                        imageSourcesGUI.Draw();
                         ImGui.EndTabItem();
                     }
                     if (ImGui.BeginTabItem("Advanced"))
@@ -60,6 +59,9 @@ namespace Neko.Gui
                         ImGui.EndTabItem();
                     }
 #endif
+                    if (ImGui.TabItemButton(Plugin.GuiMain?.Visible ?? false ? "Hide Neko window" : "Show Neko window"))
+                        Plugin.ToggleMainGui();
+                    Common.ToolTip("type /neko in the chat to view the main window");
                 }
                 ImGui.EndTabBar();
             }
@@ -68,7 +70,6 @@ namespace Neko.Gui
                 ImGui.End();
             }
         }
-
 
 
         private void DrawLook()
@@ -97,7 +98,9 @@ namespace Neko.Gui
             // Show Title Bar
             if (ImGui.Checkbox("Show window title bar", ref Plugin.Config.GuiMainShowTitleBar))
                 Plugin.Config.Save();
-            ImGui.SameLine(); Common.HelpMarker("Show or hide the bar on top of the image.\nHold down the right mouse button to move the window when no title bar is displayed.");
+            ImGui.SameLine(); Common.HelpMarker("Show or hide the bar on top of the image.\n" +
+                                                "Hold down the right mouse button to move the window.\n" +
+                                                "Press the middle mouse button to close the window when no title bar is displayed.");
 
             // Image Alignment Submenu
             if (ImGui.CollapsingHeader("Image alignment"))
@@ -105,6 +108,7 @@ namespace Neko.Gui
 
             ImGui.PopItemWidth();
         }
+
 
         private void DrawAdvanced()
         {
@@ -118,12 +122,14 @@ namespace Neko.Gui
             if (ImGui.InputInt("Downloaded", ref QueueDonwloadCount, 1))
             {
                 if (QueueDonwloadCount < 1 || QueueDonwloadCount > 50 || QueuePreloadCount > QueueDonwloadCount)
-                    QueueDonwloadCount = Plugin.Config.QueueDonwloadCount;
-                Plugin.Config.QueueDonwloadCount = QueueDonwloadCount;
+                    QueueDonwloadCount = Plugin.Config.QueueDownloadCount;
+                Plugin.Config.QueueDownloadCount = QueueDonwloadCount;
                 Plugin.Config.Save();
-                Plugin.GuiMain.queue.UpdateQueueLength();
+                if (Plugin.GuiMain != null)
+                    Plugin.GuiMain.queue.UpdateQueueLength();
             }
-            ImGui.SameLine(); Common.HelpMarker("The amount of images which are downloaded from the internet.\nIncreasing this will result in higher RAM usage. Recomended: 5");
+            ImGui.SameLine(); Common.HelpMarker("The amount of images which are downloaded from the internet.\n" +
+                                                "Increasing this will result in higher RAM usage. Recomended: 5");
 
             // Int in VRAM
             if (ImGui.InputInt("in VRAM", ref QueuePreloadCount, 1))
@@ -132,9 +138,19 @@ namespace Neko.Gui
                     QueuePreloadCount = Plugin.Config.QueuePreloadCount;
                 Plugin.Config.QueuePreloadCount = QueuePreloadCount;
                 Plugin.Config.Save();
-                Plugin.GuiMain.queue.UpdateQueueLength();
+                if (Plugin.GuiMain != null)
+                    Plugin.GuiMain.queue.UpdateQueueLength();
             }
-            ImGui.SameLine(); Common.HelpMarker("The amount of images which are decoded and loaded into the GPU.\nIncreasing this will result in higher VRAM usage. Recomended: 2");
+            ImGui.SameLine(); Common.HelpMarker("The amount of images which are decoded and loaded into the GPU.\n" +
+                                                "Increasing this will result in higher VRAM usage. Recomended: 2");
+
+            // Clear Image queue
+            if (ImGui.Button("Clear all downloaded images"))
+            {
+                if (Plugin.GuiMain != null)
+                    Plugin.GuiMain.queue.Refresh();
+            }
+            ImGui.SameLine(); Common.HelpMarker("This will force all images to be downloaded again.");
             ImGui.PopItemWidth();
         }
 
@@ -198,8 +214,9 @@ namespace Neko.Gui
         private void DrawDev()
         {
             if (ImGui.CollapsingHeader("Image Queue"))
-                ImGui.Text(Plugin.GuiMain.queue.ToString());
-
+                ImGui.Text(Plugin.GuiMain?.queue.ToString() ?? "GuiMain not loaded");
+            if (ImGui.CollapsingHeader("Image Sources"))
+                ImGui.Text(Plugin.Config.ImageSource.ToString());
         }
     }
 }

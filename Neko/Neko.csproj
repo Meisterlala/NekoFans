@@ -55,9 +55,13 @@
       <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
       <Private>False</Private>
     </Reference>
+        <Reference Include="Newtonsoft.Json">
+      <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
    
-  <ItemGroup>
+  <ItemGroup> 
     <PackageReference Include="DalamudPackager" Version="2.1.7"/>
   </ItemGroup>
   <!-- 

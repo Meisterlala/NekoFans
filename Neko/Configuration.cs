@@ -16,11 +16,12 @@ namespace Neko
         public bool GuiMainShowResize = false;
         public bool GuiMainShowTitleBar = true;
         public bool GuiMainAllowResize = true;
+        public bool GuiMainVisible = false;
 
-        public int QueueDonwloadCount = 5;
+        public int QueueDownloadCount = 5;
         public int QueuePreloadCount = 2;
 
-        public Sources.ImageSource ImageSource = new Sources.NekoLife();
+        public Sources.CombinedSource ImageSource = new(new Sources.NekosLife());
 
         public ImageAlignment Alignment = ImageAlignment.Center;
 

@@ -18,7 +18,8 @@ namespace Neko
         }
 
         private readonly List<QueueItem> queue;
-        private readonly CancellationTokenSource tokenSource;
+        private CancellationTokenSource tokenSource;
+        public bool StopQueue = false;
 
         public NekoQueue()
         {
@@ -29,6 +30,28 @@ namespace Neko
             LoadImages();
         }
 
+        private int TargetDownloadCount
+        {
+            get
+            {
+                if (StopQueue)
+                    return 0;
+                else
+                    return Plugin.Config.QueueDownloadCount;
+            }
+        }
+
+        private int TargetPreloadCount
+        {
+            get
+            {
+                if (StopQueue)
+                    return 0;
+                else
+                    return Plugin.Config.QueuePreloadCount;
+            }
+        }
+
         ~NekoQueue()
         {
             tokenSource.Cancel();
@@ -36,7 +59,7 @@ namespace Neko
 
         public override string ToString()
         {
-            string res = $"Queue length: {Plugin.Config.QueueDonwloadCount}   preloaded: {Plugin.Config.QueuePreloadCount}";
+            string res = $"Queue length: {TargetDownloadCount}   preloaded: {TargetPreloadCount}";
             for (int i = 0; i < queue.Count; i++)
             {
                 var item = queue[i];
@@ -64,13 +87,22 @@ namespace Neko
 
         public async Task<NekoImage> Pop()
         {
+            // If the Queue is empty load new images, unless the queue is stopped
+            if (queue.Count == 0)
+            {
+                if (StopQueue)
+                    return new NekoImage();
+                FillQueue();
+                LoadImages();
+            }
+
             // Check if there are faulted images in the preloaded Queue
             // If there are: just use the first image.
             // If there are none:
             //      If there are images in VRAM use the latest
             //      else use the first
             int index = 0;
-            for (int i = 0; i < Plugin.Config.QueuePreloadCount; i++)
+            for (int i = 0; i < TargetPreloadCount; i++)
             {
                 var item = queue[i];
                 if ((item.downloadTask?.IsFaulted ?? true)
@@ -134,7 +166,7 @@ namespace Neko
 
         private void FillQueue()
         {
-            if (queue.Count >= Plugin.Config.QueueDonwloadCount) return; // Base case
+            if (queue.Count >= TargetDownloadCount) return; // Base case
 
             var item = new QueueItem();
 
@@ -156,6 +188,15 @@ namespace Neko
             FillQueue(); // Recursivly fill
         }
 
+        public void Refresh()
+        {
+            tokenSource.Cancel();
+            tokenSource = new CancellationTokenSource();
+            queue.Clear();
+            FillQueue();
+            LoadImages();
+        }
+
         private static void HandleTaskExceptions<T>(Task<T> task)
         {
             foreach (var ex in task.Exception?.Flatten().InnerExceptions ?? new(Array.Empty<Exception>()))
@@ -166,7 +207,7 @@ namespace Neko
 
         private void LoadImages()
         {
-            for (int i = 0; i < Plugin.Config.QueuePreloadCount && i < queue.Count; i++)
+            for (int i = 0; i < TargetPreloadCount && i < queue.Count; i++)
             {
                 queue[i].imageShouldLoad = true;
                 LoadImage(queue[i]);
