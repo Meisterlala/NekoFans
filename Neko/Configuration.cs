@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Dalamud.Configuration;
 
 namespace Neko

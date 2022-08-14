@@ -1,6 +1,4 @@
 using System;
-using System.Numerics;
-using Dalamud.Logging;
 
 namespace Neko
 {

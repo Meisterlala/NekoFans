@@ -1,10 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.Numerics;
-using System.Threading.Tasks;
 using Dalamud.Logging;
 using ImGuiNET;
-using ImGuiScene;
 using Neko.Sources;
 
 namespace Neko.Gui

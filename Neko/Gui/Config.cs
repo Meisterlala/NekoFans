@@ -1,9 +1,6 @@
 using System;
 using System.Numerics;
-using System.Threading.Tasks;
-using Dalamud.Logging;
 using ImGuiNET;
-using ImGuiScene;
 
 namespace Neko.Gui
 {
