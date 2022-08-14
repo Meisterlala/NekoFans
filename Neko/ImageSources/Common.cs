@@ -11,70 +11,94 @@ using ImGuiNET;
 
 namespace Neko.Sources;
 
-    public static class Common
+public static class Common
+{
+    static readonly HttpClient client = new()
     {
-        static readonly JsonSerializerOptions jsonOptions = new()
-        {
-            PropertyNameCaseInsensitive = true,
-            AllowTrailingCommas = true,
-            ReadCommentHandling = JsonCommentHandling.Skip
-        };
-
-        static readonly ProductInfoHeaderValue userAgent =
-            new("NekoFans", Assembly.GetExecutingAssembly().GetName().Version?.ToString());
-
-        public async static Task<NekoImage> DownloadImage(string url, CancellationToken ct = default)
-        {
-            HttpClient client = new();
-            byte[]? bytes;
-            try
-            {
-                client.DefaultRequestHeaders.Accept.Add(
-                    new MediaTypeWithQualityHeaderValue("image/jpeg"));
-                client.DefaultRequestHeaders.Accept.Add(
-                    new MediaTypeWithQualityHeaderValue("image/png"));
-                client.DefaultRequestHeaders.UserAgent.Add(userAgent);
-                bytes = await client.GetByteArrayAsync(url, ct);
+        DefaultRequestHeaders = {
+            UserAgent =
+             {
+                new("NekoFans", Assembly.GetExecutingAssembly().GetName().Version?.ToString()),
+                new("(a Plugin for Final Fantasy XIV)")
             }
-            catch (Exception ex)
+        }
+    };
+
+    static readonly JsonSerializerOptions jsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        AllowTrailingCommas = true,
+        ReadCommentHandling = JsonCommentHandling.Skip
+    };
+
+    public async static Task<NekoImage> DownloadImage(string url, CancellationToken ct = default)
+    {
+        byte[]? bytes;
+        try
+        {
+            HttpRequestMessage request = new(HttpMethod.Get, url)
             {
-                throw new Exception("Could not download image from: " + url, ex);
-            }
+                Headers =
+                {
+                    Accept =
+                    {
+                        new("image/jpeg"),
+                        new("image/png"),
+                    }
+                }
+            };
 
-            PluginLog.Log($"Downloaded {Helper.SizeSuffix(bytes.LongLength, 1)} from {url}");
-
-            ct.ThrowIfCancellationRequested();
-
-            NekoImage? image = new(bytes);
-            return image;
+            var response = await client.SendAsync(request, ct).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+            bytes = await response.Content.ReadAsByteArrayAsync(ct).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Could not download image from: " + url, ex);
         }
 
-        public async static Task<T> ParseJson<T>(string url, CancellationToken ct = default)
-        {
-            HttpClient client = new();
-            T? result;
-            try
-            {
-                client.DefaultRequestHeaders.Accept.Add(
-                    new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.UserAgent.Add(userAgent);
-                var stream = await client.GetStreamAsync(url, ct);
-                result = await JsonSerializer.DeserializeAsync<T>(stream, jsonOptions, ct);
-            }
-            catch (HttpRequestException ex)
-            {
-                throw new Exception("Could not Download .json form: " + url, ex);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Could not Parse .json File from: " + url, ex);
-            }
+        PluginLog.Log($"Downloaded {Helper.SizeSuffix(bytes.LongLength, 1)} from {url}");
 
-            if (result == null)
-                throw new Exception("Could not Parse .json File from: " + url);
-
-            ct.ThrowIfCancellationRequested();
-            return result;
-        }
-
+        ct.ThrowIfCancellationRequested();
+        NekoImage? image = new(bytes);
+        return image;
     }
+
+    public async static Task<T> ParseJson<T>(string url, CancellationToken ct = default)
+    {
+        T? result;
+        try
+        {
+            HttpRequestMessage request = new(HttpMethod.Get, url)
+            {
+                Headers =
+                {
+                    Accept =
+                    {
+                        new("application/json"),
+                    }
+                }
+            };
+
+            var response = await client.SendAsync(request, ct).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+            var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
+            result = await JsonSerializer.DeserializeAsync<T>(stream, jsonOptions, ct).ConfigureAwait(false);
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new Exception("Could not Download .json form: " + url, ex);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Could not Parse .json File from: " + url, ex);
+        }
+
+        if (result == null)
+            throw new Exception("Could not Parse .json File from: " + url);
+
+        ct.ThrowIfCancellationRequested();
+        return result;
+    }
+
+}

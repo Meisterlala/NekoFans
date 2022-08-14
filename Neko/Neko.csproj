@@ -58,7 +58,8 @@
   </ItemGroup>
    
   <ItemGroup> 
-    <PackageReference Include="DalamudPackager" Version="2.1.7"/>
+    <PackageReference Include="DalamudPackager" Version="2.1.7" /> 
+    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
   </ItemGroup>
   <!-- 
   <Target Name="PackagePlugin" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">

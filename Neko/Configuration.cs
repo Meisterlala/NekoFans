@@ -18,6 +18,7 @@ public class Configuration : IPluginConfiguration
         public WaifuPics.Config WaifuPics = new();
         public PicRe.Config PicRe = new();
         public DogCEO.Config DogCEO = new();
+        public TheCatAPI.Config TheCatAPI = new();
     }
 
     public enum ImageAlignment
@@ -54,6 +55,7 @@ public class Configuration : IPluginConfiguration
         combined.AddSource(Sources.WaifuPics.LoadConfig());
         combined.AddSource(Sources.PicRe.LoadConfig());
         combined.AddSource(Sources.DogCEO.LoadConfig());
+        combined.AddSource(Sources.TheCatAPI.LoadConfig());
         return combined;
     }
 
