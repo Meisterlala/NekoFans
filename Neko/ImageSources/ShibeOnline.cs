@@ -10,6 +10,20 @@ namespace Neko.Sources
 {
     public class ShibeOnline : IImageSource
     {
+        public class Config : IImageConfig
+        {
+            public bool enabled = false;
+
+
+            public IImageSource? LoadConfig()
+            {
+                if (enabled)
+                    return new ShibeOnline();
+                return null;
+            }
+        }
+
+
         private bool isOffline = false;
         private const int URLCount = 100;
         private const int URLThreshold = 1;
@@ -74,5 +88,6 @@ namespace Neko.Sources
         {
             return "Shibe.online Remaining urls:" + shibeURLs.Count;
         }
+
     }
 }

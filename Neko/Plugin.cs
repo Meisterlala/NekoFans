@@ -15,9 +15,9 @@ namespace Neko
         public string Name => "Neko Fans";
 
         public static Configuration Config { get; private set; } = null!;
-        public static NekoWindow? GuiMain { get; private set; } = null!;
+        public static MainWindow? GuiMain { get; private set; } = null!;
         public static ConfigWindow? GuiConfig { get; private set; } = null!;
-
+        public static Sources.CombinedSource ImageSource { get; private set; } = null!;
 
         private const string CommandMain = "/neko";
         private const string CommandConfig = "/nekocfg";
@@ -37,6 +37,7 @@ namespace Neko
             });
 
             Config = Configuration.Load(); // Load Configuration
+            ImageSource = Config.LoadSources(); // Load ImageSources from config
             _ = NekoImage.DefaultNeko(); // Load Default image to memory
 
             PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigGui;

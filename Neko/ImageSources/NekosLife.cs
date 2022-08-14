@@ -5,6 +5,18 @@ namespace Neko.Sources
 {
     public class NekosLife : IImageSource
     {
+        public class Config : IImageConfig
+        {
+            public bool enabled = true;
+
+            public IImageSource? LoadConfig()
+            {;
+                if (enabled)
+                    return new NekosLife();
+                return null;
+            }
+        }
+
 #pragma warning disable
         class NekosLifeJson
         {
@@ -20,6 +32,7 @@ namespace Neko.Sources
             // Download  image
             return await Common.DownloadImage(response.url, ct); ;
         }
+
     }
 
 }

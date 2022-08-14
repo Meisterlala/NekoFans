@@ -32,7 +32,7 @@ namespace Neko.Sources
                     new MediaTypeWithQualityHeaderValue("image/png"));
                 bytes = await client.GetByteArrayAsync(url, ct);
             }
-            catch (HttpRequestException ex)
+            catch (Exception ex)
             {
                 throw new Exception("Could not download image from: " + url, ex);
             }

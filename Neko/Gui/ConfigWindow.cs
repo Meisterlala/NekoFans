@@ -123,7 +123,7 @@ namespace Neko.Gui
                 Plugin.Config.QueueDownloadCount = QueueDonwloadCount;
                 Plugin.Config.Save();
                 if (Plugin.GuiMain != null)
-                    Plugin.GuiMain.queue.UpdateQueueLength();
+                    Plugin.GuiMain.Queue.UpdateQueueLength();
             }
             ImGui.SameLine(); Common.HelpMarker("The amount of images which are downloaded from the internet.\n" +
                                                 "Increasing this will result in higher RAM usage. Recomended: 5");
@@ -136,7 +136,7 @@ namespace Neko.Gui
                 Plugin.Config.QueuePreloadCount = QueuePreloadCount;
                 Plugin.Config.Save();
                 if (Plugin.GuiMain != null)
-                    Plugin.GuiMain.queue.UpdateQueueLength();
+                    Plugin.GuiMain.Queue.UpdateQueueLength();
             }
             ImGui.SameLine(); Common.HelpMarker("The amount of images which are decoded and loaded into the GPU.\n" +
                                                 "Increasing this will result in higher VRAM usage. Recomended: 2");
@@ -145,7 +145,7 @@ namespace Neko.Gui
             if (ImGui.Button("Clear all downloaded images"))
             {
                 if (Plugin.GuiMain != null)
-                    Plugin.GuiMain.queue.Refresh();
+                    Plugin.GuiMain.Queue.Refresh();
             }
             ImGui.SameLine(); Common.HelpMarker("This will force all images to be downloaded again.");
             ImGui.PopItemWidth();
@@ -211,9 +211,9 @@ namespace Neko.Gui
         private void DrawDev()
         {
             if (ImGui.CollapsingHeader("Image Queue"))
-                ImGui.Text(Plugin.GuiMain?.queue.ToString() ?? "GuiMain not loaded");
+                ImGui.Text(Plugin.GuiMain?.Queue.ToString() ?? "GuiMain not loaded");
             if (ImGui.CollapsingHeader("Image Sources"))
-                ImGui.Text(Plugin.Config.ImageSource.ToString());
+                ImGui.Text(Plugin.ImageSource.ToString());
         }
     }
 }

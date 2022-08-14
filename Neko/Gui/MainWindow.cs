@@ -7,7 +7,7 @@ using ImGuiScene;
 
 namespace Neko.Gui
 {
-    public class NekoWindow
+    public class MainWindow
     {
         private bool visible = false;
 
@@ -25,18 +25,16 @@ namespace Neko.Gui
             }
         }
 
+        public readonly NekoQueue Queue;
+
         private bool imageGrayed = false;
 
         private Task<NekoImage>? nekoTaskCurrent;
         private Task<NekoImage>? nekoTaskNext;
-        public readonly NekoQueue queue;
 
-
-        public NekoWindow()
+        public MainWindow()
         {
-            // Load config
-            // var configs = Plugin.Configuration;
-            queue = new(); // Start loading images
+            Queue = new(); // Start loading images
             AsnyncNextNeko();
         }
 
@@ -86,7 +84,7 @@ namespace Neko.Gui
                 // Load Neko or fallback to default
                 TextureWrap? currentNeko;
                 if (nekoTaskCurrent != null
-                    && nekoTaskCurrent.IsCompleted
+                    && nekoTaskCurrent.IsCompletedSuccessfully
                     && nekoTaskCurrent.Result.ImageStatus == ImageStatus.Successfull)
                     currentNeko = nekoTaskCurrent.Result.Texture;
                 else
@@ -149,7 +147,7 @@ namespace Neko.Gui
             if (nekoTaskNext != null && nekoTaskNext.IsCompleted) nekoTaskNext.Dispose();
 
             // Get next image from Queue
-            nekoTaskNext = queue.Pop();
+            nekoTaskNext = Queue.Pop();
 
             var processResult = (Task<NekoImage> task) =>
             {

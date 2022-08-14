@@ -1,9 +1,21 @@
+using System;
+using System.Collections.Generic;
 using Dalamud.Configuration;
+using Dalamud.Logging;
+using Neko.Sources;
 
 namespace Neko
 {
     public class Configuration : IPluginConfiguration
     {
+        
+        public class SourceConfig
+        {
+            public NekosLife.Config NekosLife = new();
+            public ShibeOnline.Config ShibeOnline = new();
+            public Catboys.Config Catboys = new();
+        }
+
         public enum ImageAlignment
         {
             TopLeft, Top, TopRight, Left, Center, Right, BottomLeft, Bottom, BottomRight
@@ -11,6 +23,7 @@ namespace Neko
 
         public int Version { get; set; } = 1;
 
+        public SourceConfig Sources = new();
         public float GuiMainOpacity = 0f;
         public bool GuiMainShowResize = false;
         public bool GuiMainShowTitleBar = true;
@@ -20,8 +33,6 @@ namespace Neko
         public int QueueDownloadCount = 5;
         public int QueuePreloadCount = 2;
 
-        public Sources.CombinedSource ImageSource = new(new Sources.NekosLife());
-
         public ImageAlignment Alignment = ImageAlignment.Center;
 
         public void Save()
@@ -29,9 +40,28 @@ namespace Neko
             Plugin.PluginInterface.SavePluginConfig(this);
         }
 
+        public CombinedSource LoadSources()
+        {
+            CombinedSource combined = new();
+            combined.AddSource(Sources.NekosLife.LoadConfig());
+            combined.AddSource(Sources.ShibeOnline.LoadConfig());
+            combined.AddSource(Sources.Catboys.LoadConfig());
+            return combined;
+        }
+
         public static Configuration Load()
         {
-            return Plugin.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+            try
+            {
+                return Plugin.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+            }
+            catch (System.Exception ex)
+            {
+                PluginLog.LogWarning(ex, "Could not load Neko Fans config");
+                return new Configuration();
+            }
         }
     }
+
+
 }

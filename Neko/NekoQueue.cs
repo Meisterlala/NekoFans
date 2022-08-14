@@ -170,7 +170,7 @@ namespace Neko
 
             var item = new QueueItem();
 
-            var download = Plugin.Config.ImageSource.Next(tokenSource.Token);
+            var download = Plugin.ImageSource.Next(tokenSource.Token);
 
             download.ContinueWith((task) =>
             {
