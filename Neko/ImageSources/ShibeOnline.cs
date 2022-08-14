@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
 using ImGuiNET;
-using Newtonsoft.Json;
 
 
 namespace Neko.Sources
@@ -59,24 +58,14 @@ namespace Neko.Sources
             if (url == null)
                 throw new Exception("Could not Dequeue shibe url");
 
-            return await Common.DownloadImage(url);
+            return await Common.DownloadImage(url, ct);
         }
 
         private async Task GetURLs()
         {
             var url = "http://shibe.online/api/shibes?count=" + URLCount + "&urls=true&httpsUrls=true";
 
-            var client = new HttpClient();
-            List<string> urls;
-            try
-            {
-                string downloaded = await client.GetStringAsync(url);
-                urls = JsonConvert.DeserializeObject<List<string>>(downloaded) ?? throw new Exception("Could not convert to json");
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Could not get a list of shibe images to download", e);
-            }
+            var urls = await Common.ParseJson<List<string>>(url);
 
             foreach (var s in urls)
             {

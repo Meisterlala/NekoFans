@@ -6,13 +6,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
 using ImGuiNET;
-using Newtonsoft.Json;
 
 
 namespace Neko.Sources
 {
     public static class Common
     {
+        static readonly JsonSerializerOptions jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            AllowTrailingCommas = true,
+            ReadCommentHandling = JsonCommentHandling.Skip
+        };
+
 
         public async static Task<NekoImage> DownloadImage(string url, CancellationToken ct = default)
         {
@@ -42,13 +48,13 @@ namespace Neko.Sources
         public async static Task<T> ParseJson<T>(string url, CancellationToken ct = default)
         {
             HttpClient client = new();
-            T result;
+            T? result;
             try
             {
                 client.DefaultRequestHeaders.Accept.Add(
                     new MediaTypeWithQualityHeaderValue("application/json"));
-                string downloaded = await client.GetStringAsync(url, ct);
-                result = JsonConvert.DeserializeObject<T>(downloaded) ?? throw new Exception("Could not convert to .json");
+                var stream = await client.GetStreamAsync(url, ct);
+                result = await JsonSerializer.DeserializeAsync<T>(stream, jsonOptions, ct);
             }
             catch (HttpRequestException ex)
             {
@@ -58,6 +64,10 @@ namespace Neko.Sources
             {
                 throw new Exception("Could not Parse .json File from: " + url, ex);
             }
+
+            if (result == null)
+                throw new Exception("Could not Parse .json File from: " + url);
+
             ct.ThrowIfCancellationRequested();
             return result;
         }
