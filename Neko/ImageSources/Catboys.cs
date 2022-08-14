@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using Dalamud.Logging;
 
 
-namespace Neko.Sources
-{
+namespace Neko.Sources;
+
     public class Catboys : IImageSource
     {
         public class Config : IImageConfig
@@ -47,4 +47,3 @@ namespace Neko.Sources
         }
 
     }
-}

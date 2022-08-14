@@ -6,187 +6,187 @@ using System.Threading.Tasks;
 using Dalamud.Logging;
 using ImGuiScene;
 
-namespace Neko
+namespace Neko;
+
+public enum ImageStatus
 {
-    public enum ImageStatus
+    Successfull, Faulty, HasData, Unknown
+}
+
+public class NekoImage
+{
+    private enum Architecture // Support for multi CPU computers
     {
-        Successfull, Faulty, HasData, Unknown
+        Workstation32Bit, Workstation64Bit, Server32Bit, Server64Bit
     }
 
-    public class NekoImage
+    // Realistically only Workstation64Bit and Server64Bit will ever be used, since FFXIV is 64Bit only
+    // see https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/workstation-server-gc
+    // and https://mattwarren.org/2016/08/16/Preventing-dotNET-Garbage-Collections-with-the-TryStartNoGCRegion-API/
+    private static long EphemeralMemorySizeTable(Architecture arch) =>
+        arch switch
+        {
+            Architecture.Workstation32Bit => 1024 * 1024 * 15,  //  15 MB
+            Architecture.Workstation64Bit => 1024 * 1024 * 243, // 243 MB
+            Architecture.Server32Bit => 1024 * 1024 * 255,      // 255 MB
+            Architecture.Server64Bit => 1024 * 1024 * 1024,     //   1 GB
+            _ => throw new ArgumentOutOfRangeException(nameof(arch)),
+        };
+
+
+    // see https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals#ephemeral-generations-and-segments
+    private static long? _ephemeralMemorySize;
+    private static long EphemeralMemorySize
     {
-        private enum Architecture // Support for multi CPU computers
+        get
         {
-            Workstation32Bit, Workstation64Bit, Server32Bit, Server64Bit
+            if (_ephemeralMemorySize != null) return (long)_ephemeralMemorySize;
+            // Get GC type. see https://docs.microsoft.com/en-us/dotnet/core/runtime-config/garbage-collector
+            var gc_type = Environment.GetEnvironmentVariable("DOTNET_gcServer") ??
+                          Environment.GetEnvironmentVariable("COMPlus_gcServer") ?? "0";
+            var arch = Architecture.Server32Bit;
+            if (Environment.Is64BitProcess & gc_type == "0")
+                arch = Architecture.Workstation64Bit;
+            else if (!Environment.Is64BitProcess & gc_type == "0")
+                arch = Architecture.Workstation32Bit;
+            else if (Environment.Is64BitProcess)
+                arch = Architecture.Server64Bit;
+            _ephemeralMemorySize = EphemeralMemorySizeTable(arch);
+            PluginLog.LogDebug("Detectec GC architecture: " + arch);
+            return (long)_ephemeralMemorySize;
         }
+    }
 
-        // Realistically only Workstation64Bit and Server64Bit will ever be used, since FFXIV is 64Bit only
-        // see https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/workstation-server-gc
-        // and https://mattwarren.org/2016/08/16/Preventing-dotNET-Garbage-Collections-with-the-TryStartNoGCRegion-API/
-        private static long EphemeralMemorySizeTable(Architecture arch) =>
-            arch switch
-            {
-                Architecture.Workstation32Bit => 1024 * 1024 * 15,  //  15 MB
-                Architecture.Workstation64Bit => 1024 * 1024 * 243, // 243 MB
-                Architecture.Server32Bit => 1024 * 1024 * 255,      // 255 MB
-                Architecture.Server64Bit => 1024 * 1024 * 1024,     //   1 GB
-                _ => throw new ArgumentOutOfRangeException(nameof(arch)),
-            };
+    private byte[] _data;
+    private TextureWrap? _texture;
+    private static int inNoGCRegion = 0;   // 1 = in NoGCRegon
 
+    public ImageStatus ImageStatus { get; set; }
 
-        // see https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals#ephemeral-generations-and-segments
-        private static long? _ephemeralMemorySize;
-        private static long EphemeralMemorySize
+    public TextureWrap Texture
+    {
+        get
         {
-            get
-            {
-                if (_ephemeralMemorySize != null) return (long)_ephemeralMemorySize;
-                // Get GC type. see https://docs.microsoft.com/en-us/dotnet/core/runtime-config/garbage-collector
-                var gc_type = Environment.GetEnvironmentVariable("DOTNET_gcServer") ??
-                              Environment.GetEnvironmentVariable("COMPlus_gcServer") ?? "0";
-                var arch = Architecture.Server32Bit;
-                if (Environment.Is64BitProcess & gc_type == "0")
-                    arch = Architecture.Workstation64Bit;
-                else if (!Environment.Is64BitProcess & gc_type == "0")
-                    arch = Architecture.Workstation32Bit;
-                else if (Environment.Is64BitProcess)
-                    arch = Architecture.Server64Bit;
-                _ephemeralMemorySize = EphemeralMemorySizeTable(arch);
-                PluginLog.LogDebug("Detectec GC architecture: " + arch);
-                return (long)_ephemeralMemorySize;
-            }
+            if (_texture != null) return _texture;
+            throw new Exception("await LoadImage() before accessing the texture");
         }
+    }
 
-        private byte[] _data;
-        private TextureWrap? _texture;
-        private static int inNoGCRegion = 0;   // 1 = in NoGCRegon
+    public NekoImage(byte[] data)
+    {
+        _data = data;
+        ImageStatus = ImageStatus.HasData;
+    }
 
-        public ImageStatus ImageStatus { get; set; }
+    public NekoImage()
+    {
+        _data = Array.Empty<Byte>();
+        ImageStatus = ImageStatus.Faulty;
+    }
 
-        public TextureWrap Texture
-        {
-            get
-            {
-                if (_texture != null) return _texture;
-                throw new Exception("await LoadImage() before accessing the texture");
-            }
-        }
+    ~NekoImage()
+    {
+        Dispose();
+    }
 
-        public NekoImage(byte[] data)
-        {
-            _data = data;
-            ImageStatus = ImageStatus.HasData;
-        }
-
-        public NekoImage()
-        {
-            _data = Array.Empty<Byte>();
-            ImageStatus = ImageStatus.Faulty;
-        }
-
-        ~NekoImage()
-        {
-            Dispose();
-        }
-
-        public void Dispose()
-        {
+    public void Dispose()
+    {
 #if DEBUG
-            PluginLog.LogDebug("Disposing Image  " + this.ToString());
+        PluginLog.LogDebug("Disposing Image  " + this.ToString());
 #endif
-            _texture?.Dispose();
-            _texture = null;
+        _texture?.Dispose();
+        _texture = null;
 
-            _data = Array.Empty<Byte>();
+        _data = Array.Empty<Byte>();
+    }
+
+    public override string ToString()
+    {
+        if (_texture == null && _data != null)
+            return $"Data: {Helper.SizeSuffix(_data.Length)} Texture: not loaded";
+        else if (_texture != null && _data != null)
+            return $"Data: {Helper.SizeSuffix(_data.Length)} Texture: {Helper.SizeSuffix(_texture.Height * _texture.Width * 4)}";
+        else
+            return "Invalid Image";
+    }
+
+    /// <summary>
+    /// Load image from RAM to GPU VRAM
+    /// </summar>
+    public async Task<TextureWrap> LoadImage()
+    {
+        if (_texture != null) // If already loaded
+            return _texture;
+
+        if (_data == Array.Empty<Byte>() || _data.Length == 0)
+        {
+            ImageStatus = ImageStatus.Faulty;
+            throw new Exception("No Image data provided");
         }
 
-        public override string ToString()
+        // Pause GC
+        try
         {
-            if (_texture == null && _data != null)
-                return $"Data: {Helper.SizeSuffix(_data.Length)} Texture: not loaded";
-            else if (_texture != null && _data != null)
-                return $"Data: {Helper.SizeSuffix(_data.Length)} Texture: {Helper.SizeSuffix(_texture.Height * _texture.Width * 4)}";
-            else
-                return "Invalid Image";
+            // try correct size
+            if (0 == Interlocked.Exchange(ref inNoGCRegion, 1))
+            {
+                System.GC.TryStartNoGCRegion(EphemeralMemorySize, true);
+            }
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            // This will catch, if:
+            // - EphemeralMemorySize is to big: Fallback to 32bit GC size
+            // - Already in NoGCRegion
+            PluginLog.Log("Fallback to smaller GC bufffer " + Helper.SizeSuffix(EphemeralMemorySizeTable(Architecture.Workstation32Bit), 3));
+            System.GC.TryStartNoGCRegion(EphemeralMemorySizeTable(Architecture.Workstation32Bit), true);
+        }
+        catch (InvalidOperationException)
+        {
+            // This will catch, if already in NoGCRegion
+            PluginLog.Debug("Already in NoGCRegion");
         }
 
-        /// <summary>
-        /// Load image from RAM to GPU VRAM
-        /// </summar>
-        public async Task<TextureWrap> LoadImage()
+        try
         {
-            if (_texture != null) // If already loaded
-                return _texture;
+            // Load Image to GPU
+            // This will cause a System.AccessViolationException if a GC colletion happens
+            _texture = await Plugin.PluginInterface.UiBuilder.LoadImageAsync(_data);
 
-            if (_data == Array.Empty<Byte>() || _data.Length == 0)
-            {
-                ImageStatus = ImageStatus.Faulty;
-                throw new Exception("No Image data provided");
-            }
+            if (_texture == null) // This should never happen
+                throw new Exception("Image null");
+        }
+        catch (System.Exception ex)
+        {
+            // This will catch, if:
+            // - the GC is collected while the image is loading
+            // - there is not enough ram avalible
+            // - there is not enough vram avalible
+            // - the NoGCRegion totalSize was too small and a GC collection happend
+            // - the image data is corrupt
+            ImageStatus = ImageStatus.Faulty;
+            throw new Exception("Could not load image", ex);
+        }
 
-            // Pause GC
-            try
+        // Restart GC
+        try
+        {
+            if (1 == Interlocked.Exchange(ref inNoGCRegion, 0))
             {
-                // try correct size
-                if (0 == Interlocked.Exchange(ref inNoGCRegion, 1))
-                {
-                    System.GC.TryStartNoGCRegion(EphemeralMemorySize, true);
-                }
+                System.GC.EndNoGCRegion();
             }
-            catch (ArgumentOutOfRangeException)
-            {
-                // This will catch, if:
-                // - EphemeralMemorySize is to big: Fallback to 32bit GC size
-                // - Already in NoGCRegion
-                PluginLog.Log("Fallback to smaller GC bufffer " + Helper.SizeSuffix(EphemeralMemorySizeTable(Architecture.Workstation32Bit), 3));
-                System.GC.TryStartNoGCRegion(EphemeralMemorySizeTable(Architecture.Workstation32Bit), true);
-            }
-            catch (InvalidOperationException)
-            {
-                // This will catch, if already in NoGCRegion
-                PluginLog.Debug("Already in NoGCRegion");
-            }
+        }
+        catch (System.Exception ex)
+        {
+            // This will catch, if:
+            // - NoGCRegion totalSize was too small
+            // - NoGCRegion was never started
+            PluginLog.LogDebug(ex, "Ephemeral memory to small to load image");
+        }
 
-            try
-            {
-                // Load Image to GPU
-                // This will cause a System.AccessViolationException if a GC colletion happens
-                _texture = await Plugin.PluginInterface.UiBuilder.LoadImageAsync(_data);
-
-                if (_texture == null) // This should never happen
-                    throw new Exception("Image null");
-            }
-            catch (System.Exception ex)
-            {
-                // This will catch, if:
-                // - the GC is collected while the image is loading
-                // - there is not enough ram avalible
-                // - there is not enough vram avalible
-                // - the NoGCRegion totalSize was too small and a GC collection happend
-                // - the image data is corrupt
-                ImageStatus = ImageStatus.Faulty;
-                throw new Exception("Could not load image", ex);
-            }
-
-            // Restart GC
-            try
-            {
-                if (1 == Interlocked.Exchange(ref inNoGCRegion, 0))
-                {
-                    System.GC.EndNoGCRegion();
-                }
-            }
-            catch (System.Exception ex)
-            {
-                // This will catch, if:
-                // - NoGCRegion totalSize was too small
-                // - NoGCRegion was never started
-                PluginLog.LogDebug(ex, "Ephemeral memory to small to load image");
-            }
-
-            PluginLog.Debug("Decompressed {0} to {1} and loaded into GPU VRAM",
-                            _data != null ? Helper.SizeSuffix(_data.Length) : "???",
-                            Helper.SizeSuffix(_texture.Width * _texture.Height * 4));
+        PluginLog.Debug("Decompressed {0} to {1} and loaded into GPU VRAM",
+                        _data != null ? Helper.SizeSuffix(_data.Length) : "???",
+                        Helper.SizeSuffix(_texture.Width * _texture.Height * 4));
 
 #if !DEBUG
             // we can delete the original image data to clear up ram, 
@@ -194,51 +194,50 @@ namespace Neko
             _data = Array.Empty<Byte>();
 #endif
 
-            ImageStatus = ImageStatus.Successfull;
-            return _texture;
-        }
+        ImageStatus = ImageStatus.Successfull;
+        return _texture;
+    }
 
-        static private NekoImage? defaultNekoImage; // uses 7.3 MB vram
-        static public TextureWrap DefaultNekoTexture
+    static private NekoImage? defaultNekoImage; // uses 7.3 MB vram
+    static public TextureWrap DefaultNekoTexture
+    {
+        get
         {
-            get
-            {
-                if (defaultNekoImage != null) return defaultNekoImage.Texture;
-                throw new Exception("Default image not yet loaded");
-            }
+            if (defaultNekoImage != null) return defaultNekoImage.Texture;
+            throw new Exception("Default image not yet loaded");
         }
+    }
 
-        static public bool DefaultNekoReady { get; private set; }
+    static public bool DefaultNekoReady { get; private set; }
 
-        static public async Task<NekoImage> DefaultNeko()
+    static public async Task<NekoImage> DefaultNeko()
+    {
+        // Only load texture if it was never loaded. 
+        if (defaultNekoImage != null) return defaultNekoImage;
+
+        // Load embedded error icon
+        if (DefaultNekoReady)
+            PluginLog.LogWarning("Reloading default Neko image");
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = "Neko.resources.error.jpg";
+
+        try
         {
-            // Only load texture if it was never loaded. 
-            if (defaultNekoImage != null) return defaultNekoImage;
-
-            // Load embedded error icon
-            if (DefaultNekoReady)
-                PluginLog.LogWarning("Reloading default Neko image");
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "Neko.resources.error.jpg";
-
-            try
-            {
-                using Stream? stream = assembly.GetManifestResourceStream(resourceName);
-                using var memoryStream = new MemoryStream();
-                stream?.CopyTo(memoryStream);
-                var bytes = memoryStream.ToArray();
-                var img = new NekoImage(bytes);
-                await img.LoadImage();
-                defaultNekoImage = img;
-            }
-            catch (System.Exception)
-            {
-                PluginLog.LogFatal("Could not load default image");
-                throw;
-            }
-
-            DefaultNekoReady = true;
-            return defaultNekoImage;
+            using Stream? stream = assembly.GetManifestResourceStream(resourceName);
+            using var memoryStream = new MemoryStream();
+            stream?.CopyTo(memoryStream);
+            var bytes = memoryStream.ToArray();
+            var img = new NekoImage(bytes);
+            await img.LoadImage();
+            defaultNekoImage = img;
         }
+        catch (System.Exception)
+        {
+            PluginLog.LogFatal("Could not load default image");
+            throw;
+        }
+
+        DefaultNekoReady = true;
+        return defaultNekoImage;
     }
 }

@@ -9,8 +9,8 @@ using Dalamud.Logging;
 using ImGuiNET;
 
 
-namespace Neko.Sources
-{
+namespace Neko.Sources;
+
     public static class Common
     {
         static readonly JsonSerializerOptions jsonOptions = new()
@@ -78,4 +78,3 @@ namespace Neko.Sources
         }
 
     }
-}
