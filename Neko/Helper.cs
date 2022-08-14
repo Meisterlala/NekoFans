@@ -31,7 +31,5 @@ namespace Neko
                 adjustedSize,
                 SizeSuffixes[mag]);
         }
-
-
     }
 }

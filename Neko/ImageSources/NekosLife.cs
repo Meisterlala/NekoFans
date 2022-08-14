@@ -10,7 +10,7 @@ namespace Neko.Sources
             public bool enabled = true;
 
             public IImageSource? LoadConfig()
-            {;
+            {
                 if (enabled)
                     return new NekosLife();
                 return null;
@@ -31,6 +31,11 @@ namespace Neko.Sources
             NekosLifeJson response = await Common.ParseJson<NekosLifeJson>(url, ct);
             // Download  image
             return await Common.DownloadImage(response.url, ct); ;
+        }
+
+        public override string ToString()
+        {
+            return "Nekos.life";
         }
 
     }

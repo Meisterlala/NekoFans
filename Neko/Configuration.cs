@@ -8,12 +8,13 @@ namespace Neko
 {
     public class Configuration : IPluginConfiguration
     {
-        
+
         public class SourceConfig
         {
             public NekosLife.Config NekosLife = new();
             public ShibeOnline.Config ShibeOnline = new();
             public Catboys.Config Catboys = new();
+            public Waifuim.Config Waifuim = new();
         }
 
         public enum ImageAlignment
@@ -46,6 +47,7 @@ namespace Neko
             combined.AddSource(Sources.NekosLife.LoadConfig());
             combined.AddSource(Sources.ShibeOnline.LoadConfig());
             combined.AddSource(Sources.Catboys.LoadConfig());
+            combined.AddSource(Sources.Waifuim.LoadConfig());
             return combined;
         }
 

@@ -10,9 +10,12 @@ namespace Neko.Sources
         public List<IImageSource> sources = new();
         private readonly Random random = new();
 
-        public CombinedSource(IImageSource source)
+        public CombinedSource(params IImageSource[] source)
         {
-            AddSource(source);
+            foreach (var s in source)
+            {
+                AddSource(s);
+            }
         }
 
         public CombinedSource()
@@ -30,7 +33,12 @@ namespace Neko.Sources
 
         public void AddSource(IImageSource? source)
         {
-            if (source != null)
+            if (source == null)
+                return;
+
+            if (source.GetType() == typeof(CombinedSource))
+                sources.AddRange(((CombinedSource)source).GetSources());
+            else
                 sources.Add(source);
         }
 
@@ -38,11 +46,12 @@ namespace Neko.Sources
         public void RemoveAll(Type source) => sources.RemoveAll((e) => e.GetType() == source);
         public bool Contains(Type source) => sources.Find((e) => e.GetType() == source) != null;
         public int Count() => sources.Count;
+        public List<IImageSource> GetSources() => sources;
 
 
         public override string ToString()
         {
-            var res = "";
+            var res = $"Loaded image sources: {sources.Count}\n";
             foreach (var s in sources)
             {
                 res += s.ToString() + "\n";

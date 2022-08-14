@@ -41,6 +41,10 @@ namespace Neko.Sources
             return await Common.DownloadImage(response.url, ct);
         }
 
+        public override string ToString()
+        {
+            return "Catboys";
+        }
 
     }
 }
