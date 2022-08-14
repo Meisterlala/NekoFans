@@ -16,6 +16,7 @@ public class Configuration : IPluginConfiguration
         public Catboys.Config Catboys = new();
         public Waifuim.Config Waifuim = new();
         public WaifuPics.Config WaifuPics = new();
+        public PicRe.Config PicRe = new();
     }
 
     public enum ImageAlignment
@@ -50,6 +51,7 @@ public class Configuration : IPluginConfiguration
         combined.AddSource(Sources.Catboys.LoadConfig());
         combined.AddSource(Sources.Waifuim.LoadConfig());
         combined.AddSource(Sources.WaifuPics.LoadConfig());
+        combined.AddSource(Sources.PicRe.LoadConfig());
         return combined;
     }
 

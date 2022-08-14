@@ -40,16 +40,22 @@ public class ImageSourcesGUI
             new ImageSourceConfig("waifu.im", "Anime Waifus","https://waifu.im/",
                 typeof(Waifuim), Plugin.Config.Sources.Waifuim),
             new ImageSourceConfig("Waifu.pics", "Anime Waifus","https://waifu.pics/",
-                typeof(WaifuPics), Plugin.Config.Sources.WaifuPics)
+                typeof(WaifuPics), Plugin.Config.Sources.WaifuPics),
+            new ImageSourceConfig("Pic.re", "High resolution Anime Images","https://pic.re/",
+                typeof(PicRe), Plugin.Config.Sources.PicRe)
         };
 
     private const float INDENT = 32f;
 
     public void Draw()
     {
+        //  ------------ nekos.life --------------
         SourceCheckbox(SourceList[0], ref Plugin.Config.Sources.NekosLife.enabled);
+        //  ------------ shibe.online --------------
         SourceCheckbox(SourceList[1], ref Plugin.Config.Sources.ShibeOnline.enabled);
+        //  ------------ Catboys --------------
         SourceCheckbox(SourceList[2], ref Plugin.Config.Sources.Catboys.enabled);
+        //  ------------ waifu.im --------------
         SourceCheckbox(SourceList[3], ref Plugin.Config.Sources.Waifuim.enabled);
         if (Plugin.Config.Sources.Waifuim.enabled && NSFW_ENABELD)
         {
@@ -64,6 +70,7 @@ public class ImageSourcesGUI
             }
             ImGui.Unindent(INDENT);
         }
+        //  ------------ Waifu.pics --------------
         SourceCheckbox(SourceList[4], ref Plugin.Config.Sources.WaifuPics.enabled);
         if (Plugin.Config.Sources.WaifuPics.enabled)
         {
@@ -108,6 +115,8 @@ public class ImageSourcesGUI
             }
             ImGui.Unindent(INDENT);
         }
+        //  ------------ Pic.re --------------
+        SourceCheckbox(SourceList[5], ref Plugin.Config.Sources.PicRe.enabled);
         CheckIfNoSource();
     }
 
