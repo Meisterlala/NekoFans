@@ -33,7 +33,7 @@ public class ImageSourcesGUI
     private readonly List<ImageSourceConfig> SourceList = new() {
             new ImageSourceConfig("nekos.life", "Anime Catgirls", "https://nekos.life/",
                 typeof(NekosLife), Plugin.Config.Sources.NekosLife),
-            new ImageSourceConfig("shibe.online", "Shiba Inu dogs", "https://shibe.online/",
+            new ImageSourceConfig("shibe.online", "Shiba Inu Dogs", "https://shibe.online/",
                 typeof(ShibeOnline), Plugin.Config.Sources.ShibeOnline),
             new ImageSourceConfig("Catboys", "Anime Catboys","https://catboys.com/",
                 typeof(Catboys), Plugin.Config.Sources.Catboys),
@@ -42,7 +42,9 @@ public class ImageSourcesGUI
             new ImageSourceConfig("Waifu.pics", "Anime Waifus","https://waifu.pics/",
                 typeof(WaifuPics), Plugin.Config.Sources.WaifuPics),
             new ImageSourceConfig("Pic.re", "High resolution Anime Images","https://pic.re/",
-                typeof(PicRe), Plugin.Config.Sources.PicRe)
+                typeof(PicRe), Plugin.Config.Sources.PicRe),
+            new ImageSourceConfig("Dog CEO", "Dogs","https://dog.ceo/",
+                typeof(DogCEO), Plugin.Config.Sources.DogCEO)
         };
 
     private const float INDENT = 32f;
@@ -117,6 +119,8 @@ public class ImageSourcesGUI
         }
         //  ------------ Pic.re --------------
         SourceCheckbox(SourceList[5], ref Plugin.Config.Sources.PicRe.enabled);
+        //  ------------ Dog CEO --------------
+        SourceCheckbox(SourceList[6], ref Plugin.Config.Sources.DogCEO.enabled);
         CheckIfNoSource();
     }
 
@@ -154,7 +158,6 @@ public class ImageSourcesGUI
             Plugin.Config.Save();
         }
     }
-
 
     private static void SourceCheckbox(ImageSourceConfig source, ref bool enabled)
     {

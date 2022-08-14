@@ -37,13 +37,9 @@ public class Waifuim : IImageSource
     {
         this.nsfw = nsfw;
         if (nsfw)
-            URLs = new(
-                "https://api.waifu.im/random/?is_nsfw=true&gif=false&many=true",
-                ExtractStrings);
+            URLs = new("https://api.waifu.im/random/?is_nsfw=true&gif=false&many=true");
         else
-            URLs = new(
-                "https://api.waifu.im/random/?is_nsfw=false&gif=false&many=true",
-                ExtractStrings);
+            URLs = new("https://api.waifu.im/random/?is_nsfw=false&gif=false&many=true");
     }
 
     public async Task<NekoImage> Next(CancellationToken ct = default)
@@ -54,21 +50,11 @@ public class Waifuim : IImageSource
 
     public override string ToString()
     {
-        return $"waifu.im ({(nsfw ? "NSFW" : "SFW")}) Remaining urls: {URLs.URLCount}";
-    }
-
-    private List<String> ExtractStrings(WaifuImJson json)
-    {
-        List<String> res = new();
-        foreach (var img in json.images)
-        {
-            res.Add(img.url);
-        }
-        return res;
+        return $"waifu.im ({(nsfw ? "NSFW" : "SFW")})\tURLs: {URLs.URLCount}";
     }
 
 #pragma warning disable
-    public class WaifuImJson
+    public class WaifuImJson : IJsonToList
     {
         public class Image
         {
@@ -95,6 +81,16 @@ public class Waifuim : IImageSource
             public List<Tag> tags { get; set; }
         }
         public List<Image> images { get; set; }
+
+        public List<string> ToList()
+        {
+            List<String> res = new();
+            foreach (var img in images)
+            {
+                res.Add(img.url);
+            }
+            return res;
+        }
     }
 #pragma warning restore
 }

@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Neko.Sources;
 
-
+/// <summary>
+/// A source for new Images form an API
+/// </summary>
 public interface IImageSource
 {
     /// <summary>
@@ -20,4 +23,12 @@ public interface IImageConfig
 {
     public IImageSource? LoadConfig();
 
+}
+
+/// <summary>
+/// Convert self to List<string>
+/// </summary>
+public interface IJsonToList
+{
+    public List<string> ToList();
 }

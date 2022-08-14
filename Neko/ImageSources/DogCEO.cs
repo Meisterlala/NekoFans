@@ -8,7 +8,7 @@ using Dalamud.Logging;
 
 namespace Neko.Sources;
 
-public class ShibeOnline : IImageSource
+public class DogCEO : IImageSource
 {
     public class Config : IImageConfig
     {
@@ -17,31 +17,34 @@ public class ShibeOnline : IImageSource
         public IImageSource? LoadConfig()
         {
             if (enabled)
-                return new ShibeOnline();
+                return new DogCEO();
             return null;
         }
     }
 
-    private const int URL_COUNT = 100;
-    private static readonly MultiURLs<ShibeOnlineJson> URLs = new(
-            "http://shibe.online/api/shibes?count=" + URL_COUNT + "&urls=true&httpsUrls=true");
+    private const int URL_COUNT = 10; // max 50
+    private static readonly MultiURLs<DogCEOJson> URLs = new(
+            "https://dog.ceo/api/breeds/image/random/" + URL_COUNT);
+
 
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
-        string url = await URLs.GetURL();
+        var url = await URLs.GetURL();
         return await Common.DownloadImage(url, ct);
     }
 
     public override string ToString()
     {
-        return "Shibe.online\tURLs: " + URLs.URLCount;
+        return "Dog CEO\tURLs: " + URLs.URLCount;
     }
 
 #pragma warning disable
-    public class ShibeOnlineJson : List<string>, IJsonToList
+    public class DogCEOJson : IJsonToList
     {
-        public List<string> ToList() => this;
+        public List<string> message { get; set; }
+        public string status { get; set; }
+
+        public List<string> ToList() => message;
     }
 #pragma warning restore
-
 }
