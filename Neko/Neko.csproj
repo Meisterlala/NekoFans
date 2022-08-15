@@ -58,18 +58,9 @@
   </ItemGroup>
    
   <ItemGroup> 
-    <PackageReference Include="DalamudPackager" Version="2.1.7" /> 
+    <PackageReference Include="DalamudPackager" Version="2.1.7"  GeneratePathProperty="false" /> 
   </ItemGroup>
-  <!-- 
-  <Target Name="PackagePlugin" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
-    <DalamudPackager
-      ProjectDir="$(ProjectDir)"
-      OutputPath="$(OutputPath)"
-      AssemblyName="$(AssemblyName)"
-      VersionComponents="3"
-    />
-  </Target>  
-  -->
+ 
   <ItemGroup>
     <None Include="Neko.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
