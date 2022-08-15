@@ -61,7 +61,7 @@ public class NekoImage
     private TextureWrap? _texture;
     private static int inNoGCRegion = 0;   // 1 = in NoGCRegon
 
-    public ImageStatus ImageStatus { get; set; }
+    public ImageStatus ImageStatus { get; private set; }
 
     public TextureWrap Texture
     {
