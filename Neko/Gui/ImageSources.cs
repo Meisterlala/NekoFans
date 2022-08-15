@@ -165,7 +165,7 @@ public class ImageSourcesGUI
         {
             for (int i = 0; i < names.Length; i++)
             {
-                if (ImGui.Selectable(names[i], i == Plugin.Config.Sources.DogCEO.selected))
+                if (ImGui.Selectable(names[i] + "##" + i, i == Plugin.Config.Sources.DogCEO.selected))
                 {
                     Plugin.Config.Sources.DogCEO.selected = i;
                     Plugin.Config.Sources.DogCEO.breed = breeds[i];
@@ -208,7 +208,7 @@ public class ImageSourcesGUI
         {
             for (int i = 0; i < names.Length; i++)
             {
-                if (ImGui.Selectable(names[i], i == Plugin.Config.Sources.TheCatAPI.selected))
+                if (ImGui.Selectable(names[i] + "##" + i, i == Plugin.Config.Sources.TheCatAPI.selected))
                 {
                     Plugin.Config.Sources.TheCatAPI.selected = i;
                     Plugin.Config.Sources.TheCatAPI.breed = breeds[i];
@@ -246,7 +246,7 @@ public class ImageSourcesGUI
 
     private static void EnumSelectable<T>(ImageSourceConfig source, string name, T single, ref T combined) where T : Enum
     {
-        if (ImGui.Selectable(name, combined.HasFlag(single), ImGuiSelectableFlags.DontClosePopups))
+        if (ImGui.Selectable(name + "##" + source.Name, combined.HasFlag(single), ImGuiSelectableFlags.DontClosePopups))
         {
             int comb = Convert.ToInt32(combined);
             int sing = Convert.ToInt32(single);
