@@ -59,7 +59,7 @@ public class NekoQueue
 
     public override string ToString()
     {
-        string res = $"Queue length: {TargetDownloadCount}   preloaded: {TargetPreloadCount}";
+        string res = $"Queue length: {TargetDownloadCount}   preloaded: {TargetPreloadCount}{(StopQueue ? "   Queue Stopped" : "")}";
         for (int i = 0; i < queue.Count; i++)
         {
             var item = queue[i];
@@ -102,7 +102,7 @@ public class NekoQueue
         //      If there are images in VRAM use the latest
         //      else use the first
         int index = 0;
-        for (int i = 0; i < TargetPreloadCount; i++)
+        for (int i = 0; i < TargetPreloadCount && i < queue.Count; i++)
         {
             var item = queue[i];
             if ((item.downloadTask?.IsFaulted ?? true)
