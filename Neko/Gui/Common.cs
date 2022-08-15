@@ -7,24 +7,23 @@ public static class Common
 {
     public static void HelpMarker(string desc)
     {
+        if (desc == "")
+            return;
+
         ImGui.TextDisabled("(?)");
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.BeginTooltip();
-            ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35.0f);
-            ImGui.TextUnformatted(desc);
-            ImGui.PopTextWrapPos();
-            ImGui.EndTooltip();
-        }
+        ToolTip(desc);
     }
 
     public static void ToolTip(string desc)
     {
+        if (desc == "")
+            return;
+
         if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
             ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35.0f);
-            ImGui.TextUnformatted(desc);
+            ImGui.Text(desc);
             ImGui.PopTextWrapPos();
             ImGui.EndTooltip();
         }

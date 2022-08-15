@@ -165,7 +165,7 @@ public class ImageSourcesGUI
         {
             for (int i = 0; i < names.Length; i++)
             {
-                if (ImGui.Selectable(names[i], i == Plugin.Config.Sources.TheCatAPI.selected))
+                if (ImGui.Selectable(names[i], i == Plugin.Config.Sources.DogCEO.selected))
                 {
                     Plugin.Config.Sources.DogCEO.selected = i;
                     Plugin.Config.Sources.DogCEO.breed = breeds[i];
@@ -173,6 +173,10 @@ public class ImageSourcesGUI
                     Plugin.ImageSource.AddSource(source.Config.LoadConfig());
                     Plugin.Config.Save();
                 }
+                if (ImGui.IsItemHovered()
+                    && breeds[i] != DogCEO.Breed.all
+                    && DogCEO.BreedDictionary.ContainsKey(breeds[i]))
+                    Common.ToolTip(DogCEO.BreedDictionary[breeds[i]].Description);
             }
 
             ImGui.EndCombo();
@@ -212,10 +216,11 @@ public class ImageSourcesGUI
                     Plugin.ImageSource.AddSource(source.Config.LoadConfig());
                     Plugin.Config.Save();
                 }
-                if (ImGui.IsItemHovered() && breeds[i] != TheCatAPI.Breed.All)
+                if (ImGui.IsItemHovered()
+                    && breeds[i] != TheCatAPI.Breed.All
+                    && TheCatAPI.BreedDictionary.ContainsKey(breeds[i]))
                     Common.ToolTip(TheCatAPI.BreedDictionary[breeds[i]].Description);
             }
-
             ImGui.EndCombo();
         }
         ImGui.Unindent(INDENT);
