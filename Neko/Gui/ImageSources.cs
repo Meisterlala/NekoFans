@@ -51,6 +51,7 @@ public class ImageSourcesGUI
 
     private const float INDENT = 32f;
     private static (TheCatAPI.Breed[], string[])? TheCatAPIBreedNames;
+    private static (DogCEO.Breed[], string[])? DogCEOBreedNames;
 
     public void Draw()
     {
@@ -67,11 +68,13 @@ public class ImageSourcesGUI
         //  ------------ Waifu.pics --------------
         SourceCheckbox(SourceList[4], ref Plugin.Config.Sources.WaifuPics.enabled);
         if (Plugin.Config.Sources.WaifuPics.enabled)
-            DrawWaifuPics();
+            DrawWaifuPics(SourceList[4]);
         //  ------------ Pic.re --------------
         SourceCheckbox(SourceList[5], ref Plugin.Config.Sources.PicRe.enabled);
         //  ------------ Dog CEO --------------
         SourceCheckbox(SourceList[6], ref Plugin.Config.Sources.DogCEO.enabled);
+        if (Plugin.Config.Sources.DogCEO.enabled)
+            DrawDogCEO(SourceList[6]);
         //  ------------ TheCatAPI --------------
         SourceCheckbox(SourceList[7], ref Plugin.Config.Sources.TheCatAPI.enabled);
         if (Plugin.Config.Sources.TheCatAPI.enabled)
@@ -79,7 +82,8 @@ public class ImageSourcesGUI
         CheckIfNoSource();
     }
 
-    private void DrawWaifuPics()
+
+    private static void DrawWaifuPics(ImageSourceConfig source)
     {
         ImGui.Indent(INDENT);
         var wp = Plugin.Config.Sources.WaifuPics;
@@ -97,18 +101,18 @@ public class ImageSourcesGUI
         else
             preview = "No categories selected";
 
-        if (ImGui.BeginCombo("Categories", preview))
+        if (ImGui.BeginCombo("Categories##WaifuPics", preview))
         {
-            EnumSelectable(SourceList[4], "Waifu", WaifuPics.CategoriesSFW.Waifu, ref wp.sfwCategories);
-            EnumSelectable(SourceList[4], "Neko", WaifuPics.CategoriesSFW.Neko, ref wp.sfwCategories);
-            EnumSelectable(SourceList[4], "Shinobi", WaifuPics.CategoriesSFW.Shinobu, ref wp.sfwCategories);
-            EnumSelectable(SourceList[4], "Megumin", WaifuPics.CategoriesSFW.Megumin, ref wp.sfwCategories);
-            EnumSelectable(SourceList[4], "Awoo", WaifuPics.CategoriesSFW.Awoo, ref wp.sfwCategories);
+            EnumSelectable(source, "Waifu##WaifuPics", WaifuPics.CategoriesSFW.Waifu, ref wp.sfwCategories);
+            EnumSelectable(source, "Neko##WaifuPics", WaifuPics.CategoriesSFW.Neko, ref wp.sfwCategories);
+            EnumSelectable(source, "Shinobi##WaifuPics", WaifuPics.CategoriesSFW.Shinobu, ref wp.sfwCategories);
+            EnumSelectable(source, "Megumin##WaifuPics", WaifuPics.CategoriesSFW.Megumin, ref wp.sfwCategories);
+            EnumSelectable(source, "Awoo##WaifuPics", WaifuPics.CategoriesSFW.Awoo, ref wp.sfwCategories);
             if (NSFW_ENABELD)
             {
-                EnumSelectable(SourceList[4], "NSFW Waifu", WaifuPics.CategoriesNSFW.Waifu, ref wp.nsfwCategories);
-                EnumSelectable(SourceList[4], "NSFW Neko", WaifuPics.CategoriesNSFW.Neko, ref wp.nsfwCategories);
-                EnumSelectable(SourceList[4], "NSFW Trap", WaifuPics.CategoriesNSFW.Trap, ref wp.nsfwCategories);
+                EnumSelectable(source, "NSFW Waifu##WaifuPics", WaifuPics.CategoriesNSFW.Waifu, ref wp.nsfwCategories);
+                EnumSelectable(source, "NSFW Neko##WaifuPics", WaifuPics.CategoriesNSFW.Neko, ref wp.nsfwCategories);
+                EnumSelectable(source, "NSFW Trap##WaifuPics", WaifuPics.CategoriesNSFW.Trap, ref wp.nsfwCategories);
             }
             ImGui.EndCombo();
         }
@@ -123,10 +127,10 @@ public class ImageSourcesGUI
         ImGui.Unindent(INDENT);
     }
 
-    private void DrawWaifuim(ImageSourceConfig source)
+    private static void DrawWaifuim(ImageSourceConfig source)
     {
         ImGui.Indent(INDENT);
-        if (ImGui.Combo("Content", ref Plugin.Config.Sources.Waifuim.ContentComboboxIndex, new string[] { "SFW", "NSFW", "Both" }, 3))
+        if (ImGui.Combo("Content##Waifuim", ref Plugin.Config.Sources.Waifuim.ContentComboboxIndex, new string[] { "SFW", "NSFW", "Both" }, 3))
         {
             Plugin.Config.Sources.Waifuim.sfw = Plugin.Config.Sources.Waifuim.ContentComboboxIndex == 0
                                              || Plugin.Config.Sources.Waifuim.ContentComboboxIndex == 2;
@@ -137,7 +141,47 @@ public class ImageSourcesGUI
         ImGui.Unindent(INDENT);
     }
 
-    private void DrawTheCatAPI(ImageSourceConfig source)
+
+    private static void DrawDogCEO(ImageSourceConfig source)
+    {
+        if (DogCEOBreedNames == null) // Load names only once, then use cached
+        {
+            var b = (DogCEO.Breed[])Enum.GetValues(typeof(DogCEO.Breed));
+            var n = new string[b.Length];
+            for (int i = 0; i < b.Length; i++)
+            {
+                if (b[i] == DogCEO.Breed.all)
+                    n[i] = "All";
+                else
+                    n[i] = DogCEO.BreedName(b[i]);
+            }
+            DogCEOBreedNames = (b, n);
+        }
+
+        ImGui.Indent(INDENT);
+        var (breeds, names) = DogCEOBreedNames ?? default;
+
+        if (ImGui.BeginCombo("Breed##DogCeo", names[Plugin.Config.Sources.DogCEO.selected], ImGuiComboFlags.HeightLarge))
+        {
+            for (int i = 0; i < names.Length; i++)
+            {
+                if (ImGui.Selectable(names[i], i == Plugin.Config.Sources.TheCatAPI.selected))
+                {
+                    Plugin.Config.Sources.DogCEO.selected = i;
+                    Plugin.Config.Sources.DogCEO.breed = breeds[i];
+                    Plugin.ImageSource.RemoveAll(source.Type);
+                    Plugin.ImageSource.AddSource(source.Config.LoadConfig());
+                    Plugin.Config.Save();
+                }
+            }
+
+            ImGui.EndCombo();
+        }
+        ImGui.Unindent(INDENT);
+
+    }
+
+    private static void DrawTheCatAPI(ImageSourceConfig source)
     {
         if (TheCatAPIBreedNames == null) // Load names only once, then use cached
         {
@@ -156,7 +200,7 @@ public class ImageSourcesGUI
         ImGui.Indent(INDENT);
         var (breeds, names) = TheCatAPIBreedNames ?? default;
 
-        if (ImGui.BeginCombo("Breed", names[Plugin.Config.Sources.TheCatAPI.selected]))
+        if (ImGui.BeginCombo("Breed##TheCatApi", names[Plugin.Config.Sources.TheCatAPI.selected], ImGuiComboFlags.HeightLarge))
         {
             for (int i = 0; i < names.Length; i++)
             {
