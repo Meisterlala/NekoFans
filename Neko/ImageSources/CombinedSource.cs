@@ -5,6 +5,10 @@ using System.Threading.Tasks;
 
 namespace Neko.Sources;
 
+/// <summary>
+/// Combines multible <see cref="IImageSource"/> to one.
+/// A random Image source is choosen, when <see cref="Next"/> is called
+/// </summary>
 public class CombinedSource : IImageSource
 {
     public List<IImageSource> sources = new();

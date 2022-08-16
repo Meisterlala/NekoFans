@@ -31,6 +31,9 @@ public static class Common
         ReadCommentHandling = JsonCommentHandling.Skip
     };
 
+    /// <summary>
+    /// Download an Image and Store it in a <see cref="NekoImage"/>
+    /// </summary>
     public async static Task<NekoImage> DownloadImage(string url, CancellationToken ct = default)
     {
         byte[]? bytes;
@@ -64,6 +67,9 @@ public static class Common
         return image;
     }
 
+    /// <summary>
+    /// Downloads and Parses a .json file
+    /// </summary>
     public async static Task<T> ParseJson<T>(string url, CancellationToken ct = default)
     {
         T? result;

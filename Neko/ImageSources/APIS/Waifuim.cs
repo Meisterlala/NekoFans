@@ -35,8 +35,8 @@ public class Waifuim : IImageSource
 
     public Waifuim(bool nsfw)
     {
-        this.nsfw = nsfw;
-        if (nsfw)
+        this.nsfw = nsfw && NSFW.AllowNSFW; // NSFW Check
+        if (this.nsfw)
             URLs = new("https://api.waifu.im/random/?is_nsfw=true&gif=false&many=true");
         else
             URLs = new("https://api.waifu.im/random/?is_nsfw=false&gif=false&many=true");

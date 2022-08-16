@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Build Debug",
+      "label": "Neko Build Debug",
       "command": "dotnet",
       "type": "process",
       "args": [
@@ -17,12 +17,29 @@
       }
     },
     {
-      "label": "Build Release",
+      "label": "Neko Build Release",
       "command": "dotnet",
       "type": "process",
       "args": [
         "build",
         "${workspaceFolder}/Neko/Neko.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary",
+        "-c",
+        "Release"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "NekoLewd Build Release",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/NekoLewd/NekoLewd.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary",
         "-c",

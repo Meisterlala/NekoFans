@@ -13,6 +13,15 @@ public enum ImageStatus
     Successfull, Faulty, HasData, Unknown
 }
 
+/// <summary>
+/// Handles loading an Image from a data[] to GPU. 
+/// <para>
+/// The reason, that this class is so complicated is that calling <see cref="Dalamud.Interface.UiBuilder.LoadImageAsync"/> 
+/// sometimes causes a <see cref="AccessViolationException"/> when the Garbage Collector is collecting during the loading 
+/// of the Image. This is 'fixed' by pausing the GC before loading, and then restarting it afterwards. This will still 
+/// cause a <see cref="AccessViolationException"/> when the Ephemeral memory is to small.
+/// </para>
+/// </summary>
 public class NekoImage
 {
     private enum Architecture // Support for multi CPU computers

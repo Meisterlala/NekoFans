@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace Neko.Sources;
 
 /// <summary>
-/// A source for new Images form an API
+/// A source for new Images from an API
 /// </summary>
 public interface IImageSource
 {

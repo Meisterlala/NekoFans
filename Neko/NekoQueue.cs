@@ -8,6 +8,11 @@ using ImGuiScene;
 
 namespace Neko;
 
+/// <summary>
+/// Loads the next images, which will be displayed. This is all done async.
+/// The amount of images loaded depends on the Queue length and if the Queue is stopped.
+/// Use Pop() to get the next image.
+/// </summary>
 public class NekoQueue
 {
     class QueueItem

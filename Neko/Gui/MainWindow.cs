@@ -7,6 +7,9 @@ using ImGuiScene;
 
 namespace Neko.Gui;
 
+/// <summary>
+/// The Main GUI of the Plugin (/neko). It displays the image.
+/// </summary>
 public class MainWindow
 {
     private bool visible = false;
@@ -62,8 +65,6 @@ public class MainWindow
         ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(size, size * 20);
         ImGui.SetNextWindowBgAlpha(Plugin.Config.GuiMainOpacity);
-
-        ImGui.SetNextWindowPos(Vector2.One, ImGuiCond.Once);
 
         var flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse;
 

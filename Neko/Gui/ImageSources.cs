@@ -7,11 +7,11 @@ using Neko.Sources;
 
 namespace Neko.Gui;
 
-
+/// <summary>
+/// The "Image Sources" tab in the Config Menu
+/// </summary>
 public class ImageSourcesGUI
 {
-    const bool NSFW_ENABELD = false;
-
     class ImageSourceConfig
     {
         public string Name;
@@ -63,7 +63,7 @@ public class ImageSourcesGUI
         SourceCheckbox(SourceList[2], ref Plugin.Config.Sources.Catboys.enabled);
         //  ------------ waifu.im --------------
         SourceCheckbox(SourceList[3], ref Plugin.Config.Sources.Waifuim.enabled);
-        if (Plugin.Config.Sources.Waifuim.enabled && NSFW_ENABELD)
+        if (Plugin.Config.Sources.Waifuim.enabled && NSFW.AllowNSFW) // NSFW Check
             DrawWaifuim(SourceList[3]);
         //  ------------ Waifu.pics --------------
         SourceCheckbox(SourceList[4], ref Plugin.Config.Sources.WaifuPics.enabled);
@@ -92,9 +92,12 @@ public class ImageSourcesGUI
         {
             preview += (Enum.GetName(typeof(WaifuPics.CategoriesSFW), f) ?? "unknown") + ", ";
         }
-        foreach (var f in Helper.GetFlags(wp.nsfwCategories))
+        if (NSFW.AllowNSFW) // NSFW Check
         {
-            preview += "NSFW " + (Enum.GetName(typeof(WaifuPics.CategoriesNSFW), f) ?? "unknown") + ", ";
+            foreach (var f in Helper.GetFlags(wp.nsfwCategories))
+            {
+                preview += "NSFW " + (Enum.GetName(typeof(WaifuPics.CategoriesNSFW), f) ?? "unknown") + ", ";
+            }
         }
         if (preview.Length > 3)
             preview = preview[..^2];
@@ -108,7 +111,7 @@ public class ImageSourcesGUI
             EnumSelectable(source, "Shinobi##WaifuPics", WaifuPics.CategoriesSFW.Shinobu, ref wp.sfwCategories);
             EnumSelectable(source, "Megumin##WaifuPics", WaifuPics.CategoriesSFW.Megumin, ref wp.sfwCategories);
             EnumSelectable(source, "Awoo##WaifuPics", WaifuPics.CategoriesSFW.Awoo, ref wp.sfwCategories);
-            if (NSFW_ENABELD)
+            if (NSFW.AllowNSFW) // NSFW Check
             {
                 EnumSelectable(source, "NSFW Waifu##WaifuPics", WaifuPics.CategoriesNSFW.Waifu, ref wp.nsfwCategories);
                 EnumSelectable(source, "NSFW Neko##WaifuPics", WaifuPics.CategoriesNSFW.Neko, ref wp.nsfwCategories);
@@ -119,7 +122,7 @@ public class ImageSourcesGUI
         if (preview.Length > 35)
             Common.ToolTip(preview);
 
-        if (wp.sfwCategories == WaifuPics.CategoriesSFW.None && wp.nsfwCategories == WaifuPics.CategoriesNSFW.None)
+        if (wp.sfwCategories == WaifuPics.CategoriesSFW.None && (wp.nsfwCategories == WaifuPics.CategoriesNSFW.None || !NSFW.AllowNSFW))
         {
             ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), "WARNING:"); ImGui.SameLine();
             ImGui.TextWrapped("No categories selected. Please select at least one image category,");

@@ -1,0 +1,11 @@
+<Project>
+    <Target Name="PackagePlugin" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <DalamudPackager
+      ProjectDir="$(ProjectDir)"
+      OutputPath="$(OutputPath)"
+      AssemblyName="$(AssemblyName)"
+      VersionComponents="3"
+      MakeZip="true"
+    />
+    </Target>
+</Project>

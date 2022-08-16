@@ -31,8 +31,10 @@ public static class Common
 
     /// <summary>
     /// Aligns an image in a rectange. imageSize doesnt have to fit in rectange
-    /// Returns starting position and end posotion of aligned image
     /// </summary>
+    /// <returns> 
+    /// Starting position and End position of the aligned image.
+    /// </returns>
     public static (Vector2, Vector2) AlignImage(Vector2 imgSize, Vector2 rectangle, Configuration.ImageAlignment alignment)
     {
         var imageRatio = imgSize.X / imgSize.Y;

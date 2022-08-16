@@ -4,6 +4,9 @@ using ImGuiNET;
 
 namespace Neko.Gui;
 
+/// <summary>
+/// The Configuration GUI (/nekocfg)
+/// </summary>
 public class ConfigWindow
 {
     public bool Visible = false;
