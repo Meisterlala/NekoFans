@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +7,8 @@ using ImGuiScene;
 
 namespace Neko;
 
+#pragma warning disable CA1711 // The Class is a Queue type
+
 /// <summary>
 /// Loads the next images, which will be displayed. This is all done async.
 /// The amount of images loaded depends on the Queue length and if the Queue is stopped.
@@ -15,16 +16,16 @@ namespace Neko;
 /// </summary>
 public class NekoQueue
 {
-    class QueueItem
+    private class QueueItem
     {
         public Task<NekoImage>? downloadTask;
         public Task<TextureWrap>? imageTask;
-        public bool imageShouldLoad = false;
+        public bool imageShouldLoad;
     }
 
     private readonly List<QueueItem> queue;
     private CancellationTokenSource tokenSource;
-    public bool StopQueue = false;
+    public bool StopQueue;
 
     public NekoQueue()
     {
@@ -35,27 +36,9 @@ public class NekoQueue
         LoadImages();
     }
 
-    private int TargetDownloadCount
-    {
-        get
-        {
-            if (StopQueue)
-                return 0;
-            else
-                return Plugin.Config.QueueDownloadCount;
-        }
-    }
+    private int TargetDownloadCount => StopQueue ? 0 : Plugin.Config.QueueDownloadCount;
 
-    private int TargetPreloadCount
-    {
-        get
-        {
-            if (StopQueue)
-                return 0;
-            else
-                return Plugin.Config.QueuePreloadCount;
-        }
-    }
+    private int TargetPreloadCount => StopQueue ? 0 : Plugin.Config.QueuePreloadCount;
 
     ~NekoQueue()
     {
@@ -64,8 +47,8 @@ public class NekoQueue
 
     public override string ToString()
     {
-        string res = $"Queue length: {TargetDownloadCount}   preloaded: {TargetPreloadCount}{(StopQueue ? "   Queue Stopped" : "")}";
-        for (int i = 0; i < queue.Count; i++)
+        var res = $"Queue length: {TargetDownloadCount}   preloaded: {TargetPreloadCount}{(StopQueue ? "   Queue Stopped" : "")}";
+        for (var i = 0; i < queue.Count; i++)
         {
             var item = queue[i];
             if (item.downloadTask == null)
@@ -106,8 +89,8 @@ public class NekoQueue
         // If there are none:
         //      If there are images in VRAM use the latest
         //      else use the first
-        int index = 0;
-        for (int i = 0; i < TargetPreloadCount && i < queue.Count; i++)
+        var index = 0;
+        for (var i = 0; i < TargetPreloadCount && i < queue.Count; i++)
         {
             var item = queue[i];
             if ((item.downloadTask?.IsFaulted ?? true)
@@ -116,7 +99,7 @@ public class NekoQueue
                 break;
             }
             else if ((item.downloadTask?.IsCompletedSuccessfully ?? false)
-                     && (item.imageTask?.IsCompletedSuccessfully ?? false))
+                       && (item.imageTask?.IsCompletedSuccessfully ?? false))
             {
                 index = i;
                 break;
@@ -156,10 +139,7 @@ public class NekoQueue
         await popped.imageTask;
 
         // Return if image load didnt succeed 
-        if (popped.imageTask.IsFaulted)
-            return new NekoImage();
-
-        return await popped.downloadTask;
+        return popped.imageTask.IsFaulted ? new NekoImage() : await popped.downloadTask;
     }
 
     public void UpdateQueueLength()
@@ -212,7 +192,7 @@ public class NekoQueue
 
     private void LoadImages()
     {
-        for (int i = 0; i < TargetPreloadCount && i < queue.Count; i++)
+        for (var i = 0; i < TargetPreloadCount && i < queue.Count; i++)
         {
             queue[i].imageShouldLoad = true;
             LoadImage(queue[i]);
@@ -225,7 +205,9 @@ public class NekoQueue
             || !item.imageShouldLoad                        // If it should not load
             || item.downloadTask == null                    // If never downloaded
             || !item.downloadTask.IsCompletedSuccessfully)  // If couldnt download
+        {
             return;
+        }
 
         var img = item.downloadTask.Result;
         item.imageTask = img.LoadImage();

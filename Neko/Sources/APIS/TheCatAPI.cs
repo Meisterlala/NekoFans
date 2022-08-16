@@ -1,27 +1,20 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Logging;
 
 
-namespace Neko.Sources;
+namespace Neko.Sources.APIS;
 
 public class TheCatAPI : IImageSource
 {
     public class Config : IImageConfig
     {
-        public bool enabled = false;
+        public bool enabled;
         public Breed breed = Breed.All;
-        public int selected = 0;
+        public int selected;
 
-        public IImageSource? LoadConfig()
-        {
-            if (enabled)
-                return new TheCatAPI(breed);
-            return null;
-        }
+        public IImageSource? LoadConfig() => enabled ? new TheCatAPI(breed) : (IImageSource?)null;
     }
 
     private const int URL_COUNT = 10;
@@ -49,17 +42,14 @@ public class TheCatAPI : IImageSource
 
     public static BreedInfo GetBreedInfo(Breed b)
     {
-        if (b == Breed.All)
-            throw new Exception("Cannot get BreedInfo for All breeds");
-        if (!BreedDictionary.TryGetValue(b, out BreedInfo info))
-            throw new Exception("Breed not in Database");
-        return info;
+        return b == Breed.All
+            ? throw new Exception("Cannot get BreedInfo for All breeds")
+            : !BreedDictionary.TryGetValue(b, out var info)
+            ? throw new Exception("Breed not in Database")
+            : info;
     }
 
-    public override string ToString()
-    {
-        return $"TheCatAPI\tBreed: {Plugin.Config.Sources.TheCatAPI.breed}\t URLs: {URLs.URLCount}";
-    }
+    public override string ToString() => $"TheCatAPI\tBreed: {Plugin.Config.Sources.TheCatAPI.breed}\t URLs: {URLs.URLCount}";
 
 #pragma warning disable
 
@@ -83,7 +73,7 @@ public class TheCatAPI : IImageSource
         }
     }
 
-#pragma warning restore
+
 
     public enum Breed
     {
@@ -190,4 +180,6 @@ public class TheCatAPI : IImageSource
         {Breed.Turkish_Van,          new BreedInfo("tvan","Turkish Van","While the Turkish Van loves to jump and climb, play with toys, retrieve and play chase, she is is big and ungainly; this is one cat who doesn’t always land on his feet. While not much of a lap cat, the Van will be happy to cuddle next to you and sleep in your bed. ")},
         {Breed.York_Chocolate,       new BreedInfo("ycho","York Chocolate","York Chocolate cats are known to be true lap cats with a sweet temperament. They love to be cuddled and petted. Their curious nature makes them follow you all the time and participate in almost everything you do, even if it's related to water: unlike many other cats, York Chocolates love it.")}
     };
+
+#pragma warning restore
 }

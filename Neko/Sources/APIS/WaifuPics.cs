@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Logging;
 
-namespace Neko.Sources;
+namespace Neko.Sources.APIS;
 
 public class WaifuPics : IImageSource
 {
@@ -48,14 +45,13 @@ public class WaifuPics : IImageSource
                 comNSFW.AddSource(new WaifuPics("nsfw", category));
             }
 
-            if (comSFW.Count() > 0 && comNSFW.Count() > 0 && NSFW.AllowNSFW) // NSFW Check
-                return new CombinedSource(comSFW, comNSFW);
-            else if (comSFW.Count() > 0)
-                return comSFW;
-            else if (comNSFW.Count() > 0 && NSFW.AllowNSFW) // NSFW Check
-                return comNSFW;
-            else
-                return null;
+            return comSFW.Count() > 0 && comNSFW.Count() > 0 && NSFW.AllowNSFW
+                ? new CombinedSource(comSFW, comNSFW)
+                : comSFW.Count() > 0
+                ? comSFW
+                : comNSFW.Count() > 0 && NSFW.AllowNSFW
+                ? comNSFW
+                : (IImageSource?)null;
         }
     }
 
@@ -76,10 +72,7 @@ public class WaifuPics : IImageSource
         return await Common.DownloadImage(json.url, ct);
     }
 
-    public override string ToString()
-    {
-        return $"Waifu Pics ({type.ToUpper()}) {category}";
-    }
+    public override string ToString() => $"Waifu Pics ({type.ToUpper()}) {category}";
 
 #pragma warning disable
     class WaifuPicsJson

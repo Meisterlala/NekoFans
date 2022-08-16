@@ -1,9 +1,6 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
 using System.Threading.Tasks;
-using Dalamud.Logging;
 using ImGuiNET;
-using ImGuiScene;
 
 namespace Neko.Gui;
 
@@ -12,7 +9,7 @@ namespace Neko.Gui;
 /// </summary>
 public class MainWindow
 {
-    private bool visible = false;
+    private bool visible;
 
     public bool Visible
     {
@@ -30,7 +27,7 @@ public class MainWindow
 
     public readonly NekoQueue Queue;
 
-    private bool imageGrayed = false;
+    private bool imageGrayed;
 
     private Task<NekoImage>? nekoTaskCurrent;
     private Task<NekoImage>? nekoTaskNext;
@@ -83,13 +80,11 @@ public class MainWindow
         if (ImGui.Begin("Neko", ref visible, flags))
         {
             // Load Neko or fallback to default
-            TextureWrap? currentNeko;
-            if (nekoTaskCurrent != null
+            var currentNeko = nekoTaskCurrent != null
                 && nekoTaskCurrent.IsCompletedSuccessfully
-                && nekoTaskCurrent.Result.ImageStatus == ImageStatus.Successfull)
-                currentNeko = nekoTaskCurrent.Result.Texture;
-            else
-                currentNeko = NekoImage.DefaultNekoTexture;
+                && nekoTaskCurrent.Result.ImageStatus == ImageStatus.Successfull
+                ? nekoTaskCurrent.Result.Texture
+                : NekoImage.DefaultNekoTexture;
 
             // Get Window Size
             var windowSize = ImGui.GetWindowSize();

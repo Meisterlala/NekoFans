@@ -1,8 +1,7 @@
-using System;
-using System.Collections.Generic;
 using Dalamud.Configuration;
 using Dalamud.Logging;
 using Neko.Sources;
+using Neko.Sources.APIS;
 
 namespace Neko;
 
@@ -29,21 +28,18 @@ public class Configuration : IPluginConfiguration
     public int Version { get; set; } = 1;
 
     public SourceConfig Sources = new();
-    public float GuiMainOpacity = 0f;
-    public bool GuiMainShowResize = false;
+    public float GuiMainOpacity;
+    public bool GuiMainShowResize;
     public bool GuiMainShowTitleBar = true;
     public bool GuiMainAllowResize = true;
-    public bool GuiMainVisible = false;
+    public bool GuiMainVisible;
 
     public int QueueDownloadCount = 5;
     public int QueuePreloadCount = 2;
 
     public ImageAlignment Alignment = ImageAlignment.Center;
 
-    public void Save()
-    {
-        Plugin.PluginInterface.SavePluginConfig(this);
-    }
+    public void Save() => Plugin.PluginInterface.SavePluginConfig(this);
 
     public CombinedSource LoadSources()
     {

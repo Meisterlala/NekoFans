@@ -10,7 +10,7 @@ namespace Neko;
 /// </summary>
 public static class NSFW
 {
-    private static bool allowNSFW = false;
+    private static bool allowNSFW;
     public static bool AllowNSFW
     {
         get

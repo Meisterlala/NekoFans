@@ -1,9 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Numerics;
-using Dalamud.Logging;
 using ImGuiNET;
 using Neko.Sources;
+using Neko.Sources.APIS;
 
 namespace Neko.Gui;
 
@@ -12,7 +11,7 @@ namespace Neko.Gui;
 /// </summary>
 public class ImageSourcesGUI
 {
-    class ImageSourceConfig
+    private class ImageSourceConfig
     {
         public string Name;
         public string Description;
@@ -99,10 +98,8 @@ public class ImageSourcesGUI
                 preview += "NSFW " + (Enum.GetName(typeof(WaifuPics.CategoriesNSFW), f) ?? "unknown") + ", ";
             }
         }
-        if (preview.Length > 3)
-            preview = preview[..^2];
-        else
-            preview = "No categories selected";
+
+        preview = preview.Length > 3 ? preview[..^2] : "No categories selected";
 
         if (ImGui.BeginCombo("Categories##WaifuPics", preview))
         {
@@ -135,10 +132,8 @@ public class ImageSourcesGUI
         ImGui.Indent(INDENT);
         if (ImGui.Combo("Content##Waifuim", ref Plugin.Config.Sources.Waifuim.ContentComboboxIndex, new string[] { "SFW", "NSFW", "Both" }, 3))
         {
-            Plugin.Config.Sources.Waifuim.sfw = Plugin.Config.Sources.Waifuim.ContentComboboxIndex == 0
-                                             || Plugin.Config.Sources.Waifuim.ContentComboboxIndex == 2;
-            Plugin.Config.Sources.Waifuim.nsfw = Plugin.Config.Sources.Waifuim.ContentComboboxIndex == 1
-                                              || Plugin.Config.Sources.Waifuim.ContentComboboxIndex == 2;
+            Plugin.Config.Sources.Waifuim.sfw = Plugin.Config.Sources.Waifuim.ContentComboboxIndex is 0 or 2;
+            Plugin.Config.Sources.Waifuim.nsfw = Plugin.Config.Sources.Waifuim.ContentComboboxIndex is 1 or 2;
             UpdateImageSource(source, true);
         }
         ImGui.Unindent(INDENT);
@@ -151,12 +146,9 @@ public class ImageSourcesGUI
         {
             var b = (DogCEO.Breed[])Enum.GetValues(typeof(DogCEO.Breed));
             var n = new string[b.Length];
-            for (int i = 0; i < b.Length; i++)
+            for (var i = 0; i < b.Length; i++)
             {
-                if (b[i] == DogCEO.Breed.all)
-                    n[i] = "All";
-                else
-                    n[i] = DogCEO.BreedName(b[i]);
+                n[i] = b[i] == DogCEO.Breed.all ? "All" : DogCEO.BreedName(b[i]);
             }
             DogCEOBreedNames = (b, n);
         }
@@ -166,7 +158,7 @@ public class ImageSourcesGUI
 
         if (ImGui.BeginCombo("Breed##DogCeo", names[Plugin.Config.Sources.DogCEO.selected], ImGuiComboFlags.HeightLarge))
         {
-            for (int i = 0; i < names.Length; i++)
+            for (var i = 0; i < names.Length; i++)
             {
                 if (ImGui.Selectable(names[i] + "##" + i, i == Plugin.Config.Sources.DogCEO.selected))
                 {
@@ -179,7 +171,9 @@ public class ImageSourcesGUI
                 if (ImGui.IsItemHovered()
                     && breeds[i] != DogCEO.Breed.all
                     && DogCEO.BreedDictionary.ContainsKey(breeds[i]))
+                {
                     Common.ToolTip(DogCEO.BreedDictionary[breeds[i]].Description);
+                }
             }
 
             ImGui.EndCombo();
@@ -194,12 +188,9 @@ public class ImageSourcesGUI
         {
             var b = (TheCatAPI.Breed[])Enum.GetValues(typeof(TheCatAPI.Breed));
             var n = new string[b.Length];
-            for (int i = 0; i < b.Length; i++)
+            for (var i = 0; i < b.Length; i++)
             {
-                if (b[i] == TheCatAPI.Breed.All)
-                    n[i] = "All";
-                else
-                    n[i] = TheCatAPI.BreedDictionary[b[i]].Name;
+                n[i] = b[i] == TheCatAPI.Breed.All ? "All" : TheCatAPI.BreedDictionary[b[i]].Name;
             }
             TheCatAPIBreedNames = (b, n);
         }
@@ -209,7 +200,7 @@ public class ImageSourcesGUI
 
         if (ImGui.BeginCombo("Breed##TheCatApi", names[Plugin.Config.Sources.TheCatAPI.selected], ImGuiComboFlags.HeightLarge))
         {
-            for (int i = 0; i < names.Length; i++)
+            for (var i = 0; i < names.Length; i++)
             {
                 if (ImGui.Selectable(names[i] + "##" + i, i == Plugin.Config.Sources.TheCatAPI.selected))
                 {
@@ -222,7 +213,9 @@ public class ImageSourcesGUI
                 if (ImGui.IsItemHovered()
                     && breeds[i] != TheCatAPI.Breed.All
                     && TheCatAPI.BreedDictionary.ContainsKey(breeds[i]))
+                {
                     Common.ToolTip(TheCatAPI.BreedDictionary[breeds[i]].Description);
+                }
             }
             ImGui.EndCombo();
         }
@@ -251,8 +244,8 @@ public class ImageSourcesGUI
     {
         if (ImGui.Selectable(name + "##" + source.Name, combined.HasFlag(single), ImGuiSelectableFlags.DontClosePopups))
         {
-            int comb = Convert.ToInt32(combined);
-            int sing = Convert.ToInt32(single);
+            var comb = Convert.ToInt32(combined);
+            var sing = Convert.ToInt32(single);
             if (combined.HasFlag(single))
                 comb &= ~sing;
             else

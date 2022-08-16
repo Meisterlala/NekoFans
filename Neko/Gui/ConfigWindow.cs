@@ -1,4 +1,3 @@
-using System;
 using System.Numerics;
 using ImGuiNET;
 
@@ -9,7 +8,7 @@ namespace Neko.Gui;
 /// </summary>
 public class ConfigWindow
 {
-    public bool Visible = false;
+    public bool Visible;
 
     private int QueueDonwloadCount;
     private int QueuePreloadCount;
@@ -187,19 +186,19 @@ public class ConfigWindow
                 Configuration.ImageAlignment.Bottom,
                 Configuration.ImageAlignment.BottomRight };
 
-        for (int y = 0; y < 3; y++)
+        for (var y = 0; y < 3; y++)
         {
-            for (int x = 0; x < 3; x++)
+            for (var x = 0; x < 3; x++)
             {
                 var alignment = new Vector2(x / 2f, y / 2f);
-                var isSelected = Plugin.Config.Alignment == alignmentents[y * 3 + x];
+                var isSelected = Plugin.Config.Alignment == alignmentents[(y * 3) + x];
 
                 if (x > 0)
                     ImGui.SameLine();
                 ImGui.PushStyleVar(ImGuiStyleVar.SelectableTextAlign, alignment);
-                if (ImGui.Selectable(names[y * 3 + x], isSelected, ImGuiSelectableFlags.None, buttonSize))
+                if (ImGui.Selectable(names[(y * 3) + x], isSelected, ImGuiSelectableFlags.None, buttonSize))
                 {
-                    Plugin.Config.Alignment = alignmentents[y * 3 + x];
+                    Plugin.Config.Alignment = alignmentents[(y * 3) + x];
                     Plugin.Config.Save();
                 }
                 ImGui.PopStyleVar();

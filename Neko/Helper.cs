@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Neko;
 
 public static class Helper
 {
-    static readonly string[] SizeSuffixes =
+    private static readonly string[] SizeSuffixes =
                    { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
     public static string SizeSuffix(long value, int decimalPlaces = 1)
     {
@@ -14,11 +15,11 @@ public static class Helper
         if (value == 0) { return string.Format("{0:n" + decimalPlaces + "} bytes", 0); }
 
         // mag is 0 for bytes, 1 for KB, 2, for MB, etc.
-        int mag = (int)Math.Log(value, 1024);
+        var mag = (int)Math.Log(value, 1024);
 
         // 1L << (mag * 10) == 2 ^ (10 * mag) 
         // [i.e. the number of bytes in the unit corresponding to mag]
-        decimal adjustedSize = (decimal)value / (1L << (mag * 10));
+        var adjustedSize = (decimal)value / (1L << (mag * 10));
 
         // make adjustment when the value is large enough that
         // it would round up to 1000 or more
@@ -34,9 +35,9 @@ public static class Helper
     }
     public static IEnumerable<Enum> GetFlags(Enum input)
     {
-        foreach (Enum value in Enum.GetValues(input.GetType()))
-            if (input.HasFlag(value) && Convert.ToInt32(value) > 0)
-                yield return value;
+        return from Enum value in Enum.GetValues(input.GetType())
+               where input.HasFlag(value) && Convert.ToInt32(value) > 0
+               select value;
     }
 }
 

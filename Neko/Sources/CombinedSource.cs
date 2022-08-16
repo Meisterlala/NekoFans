@@ -11,7 +11,7 @@ namespace Neko.Sources;
 /// </summary>
 public class CombinedSource : IImageSource
 {
-    public List<IImageSource> sources = new();
+    private readonly List<IImageSource> sources = new();
     private readonly Random random = new();
 
     public CombinedSource(params IImageSource[] source)
@@ -57,7 +57,7 @@ public class CombinedSource : IImageSource
     }
     public bool Contains(Type source) => sources.Find((e) => e.GetType() == source) != null;
     public int Count() => sources.Count;
-    public List<IImageSource> GetSources() => sources;
+
 
 
     public override string ToString()
@@ -78,8 +78,5 @@ public class CombinedSource : IImageSource
         return res;
     }
 
-    public IImageSource? LoadConfig(object config)
-    {
-        throw new NotImplementedException();
-    }
+    public IImageSource? LoadConfig(object config) => throw new NotImplementedException();
 }

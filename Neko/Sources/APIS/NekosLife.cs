@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Neko.Sources;
+namespace Neko.Sources.APIS;
 
 public class NekosLife : IImageSource
 {
@@ -9,12 +9,7 @@ public class NekosLife : IImageSource
     {
         public bool enabled = true;
 
-        public IImageSource? LoadConfig()
-        {
-            if (enabled)
-                return new NekosLife();
-            return null;
-        }
+        public IImageSource? LoadConfig() => enabled ? new NekosLife() : (IImageSource?)null;
     }
 
 #pragma warning disable
@@ -28,15 +23,12 @@ public class NekosLife : IImageSource
     {
         var url = "https://nekos.life/api/v2/img/neko";
         // Get a random image URL
-        NekosLifeJson response = await Common.ParseJson<NekosLifeJson>(url, ct);
+        var response = await Common.ParseJson<NekosLifeJson>(url, ct);
         // Download  image
         return await Common.DownloadImage(response.url, ct); ;
     }
 
-    public override string ToString()
-    {
-        return "Nekos.life";
-    }
+    public override string ToString() => "Nekos.life";
 
 }
 

@@ -1,27 +1,20 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Logging;
 
-namespace Neko.Sources;
+namespace Neko.Sources.APIS;
 
 public class DogCEO : IImageSource
 {
     public class Config : IImageConfig
     {
-        public bool enabled = false;
+        public bool enabled;
         public Breed breed = Breed.all;
-        public int selected = 0;
+        public int selected;
 
-        public IImageSource? LoadConfig()
-        {
-            if (enabled)
-                return new DogCEO(breed);
-            return null;
-        }
+        public IImageSource? LoadConfig() => enabled ? new DogCEO(breed) : (IImageSource?)null;
     }
 
 
@@ -30,10 +23,9 @@ public class DogCEO : IImageSource
 
     public DogCEO(Breed b)
     {
-        if (b == Breed.all)
-            URLs = new($"https://dog.ceo/api/breeds/image/random/{URL_COUNT}");
-        else
-            URLs = new($"https://dog.ceo/api/breed/{BreedPath(b)}/images/random/{URL_COUNT}");
+        URLs = b == Breed.all
+            ? (new($"https://dog.ceo/api/breeds/image/random/{URL_COUNT}"))
+            : (new($"https://dog.ceo/api/breed/{BreedPath(b)}/images/random/{URL_COUNT}"));
     }
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
@@ -49,10 +41,10 @@ public class DogCEO : IImageSource
 
     public static string BreedName(Breed b)
     {
-        TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+        var textInfo = new CultureInfo("en-US", false).TextInfo;
         var name = Enum.GetName(typeof(Breed), b)?.Trim() ?? "Unknown";
         name = name.Replace("_", " (");
-        if (name.Contains("("))
+        if (name.Contains('('))
             name += ")";
         return textInfo.ToTitleCase(name);
     }
@@ -71,8 +63,6 @@ public class DogCEO : IImageSource
 
         public List<string> ToList() => message;
     }
-#pragma warning restore
-
     public enum Breed
     {
         all,
@@ -314,6 +304,7 @@ public class DogCEO : IImageSource
         {Breed.wolfhound,                   new BreedInfo("Once fearless big-game hunters capable of dispatching a wolf in single combat, Wolfhounds today are the most serene and agreeable of companions.")},
         {Breed.wolfhound_irish,             new BreedInfo("Irish wolfhounds are big-hearted, gentle and sensitive but their size is an important consideration. They're the size of another person and owners must plan accordingly.")},
     };
+#pragma warning restore
 
 
 }

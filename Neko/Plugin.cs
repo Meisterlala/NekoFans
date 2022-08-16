@@ -1,6 +1,5 @@
 using Dalamud.Game.Command;
 using Dalamud.IoC;
-using Dalamud.Logging;
 using Dalamud.Plugin;
 using Neko.Gui;
 
@@ -70,10 +69,16 @@ public class Plugin : IDalamudPlugin
     private void OnCommand(string command, string args)
     {
         var input = command + args;
-        if (input.Contains("cfg") || input.Contains("config"))
+
+        if (input.Contains("cfg", System.StringComparison.CurrentCultureIgnoreCase)
+         || input.Contains("config", System.StringComparison.CurrentCultureIgnoreCase))
+        {
             ToggleConfigGui();
+        }
         else
+        {
             ToggleMainGui();
+        }
     }
 
     private void DrawUI()

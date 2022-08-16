@@ -1,25 +1,15 @@
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Logging;
 
-
-namespace Neko.Sources;
+namespace Neko.Sources.APIS;
 
 public class Catboys : IImageSource
 {
     public class Config : IImageConfig
     {
-        public bool enabled = false;
+        public bool enabled;
 
-        public IImageSource? LoadConfig()
-        {
-            if (enabled)
-                return new Catboys();
-            return null;
-        }
+        public IImageSource? LoadConfig() => enabled ? new Catboys() : (IImageSource?)null;
     }
 
 
@@ -37,13 +27,10 @@ public class Catboys : IImageSource
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
         var url = "https://api.catboys.com/img";
-        CatboysJson response = await Common.ParseJson<CatboysJson>(url, ct);
+        var response = await Common.ParseJson<CatboysJson>(url, ct);
         return await Common.DownloadImage(response.url, ct);
     }
 
-    public override string ToString()
-    {
-        return "Catboys";
-    }
+    public override string ToString() => "Catboys";
 
 }

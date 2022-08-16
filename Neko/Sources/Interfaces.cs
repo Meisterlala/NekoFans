@@ -1,9 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Neko.Sources;
+
+#pragma warning disable CA1716 // I dont care about InterOp
 
 /// <summary>
 /// A source for new Images from an API

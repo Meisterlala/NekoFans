@@ -1,32 +1,28 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Logging;
 
 
-namespace Neko.Sources;
+namespace Neko.Sources.APIS;
 
 public class Waifuim : IImageSource
 {
 
     public class Config : IImageConfig
     {
-        public bool enabled = false;
-        public bool nsfw = false;
+        public bool enabled;
+        public bool nsfw;
         public bool sfw = true;
-        public int ContentComboboxIndex = 0;
+        public int ContentComboboxIndex;
 
         public IImageSource? LoadConfig()
         {
-            if (!enabled)
-                return null;
-
-            if (sfw && nsfw)
-                return new CombinedSource(new Waifuim(false), new Waifuim(true));
-
-            return new Waifuim(nsfw);
+            return !enabled
+            ? null
+            : sfw && nsfw
+            ? new CombinedSource(new Waifuim(false), new Waifuim(true))
+            : new Waifuim(nsfw);
         }
     }
 
@@ -36,22 +32,18 @@ public class Waifuim : IImageSource
     public Waifuim(bool nsfw)
     {
         this.nsfw = nsfw && NSFW.AllowNSFW; // NSFW Check
-        if (this.nsfw)
-            URLs = new("https://api.waifu.im/random/?is_nsfw=true&gif=false&many=true");
-        else
-            URLs = new("https://api.waifu.im/random/?is_nsfw=false&gif=false&many=true");
+        URLs = this.nsfw
+            ? (new("https://api.waifu.im/random/?is_nsfw=true&gif=false&many=true"))
+            : (new("https://api.waifu.im/random/?is_nsfw=false&gif=false&many=true"));
     }
 
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
-        string url = await URLs.GetURL();
+        var url = await URLs.GetURL();
         return await Common.DownloadImage(url, ct);
     }
 
-    public override string ToString()
-    {
-        return $"waifu.im ({(nsfw ? "NSFW" : "SFW")})\tURLs: {URLs.URLCount}";
-    }
+    public override string ToString() => $"waifu.im ({(nsfw ? "NSFW" : "SFW")})\tURLs: {URLs.URLCount}";
 
 #pragma warning disable
     public class WaifuImJson : IJsonToList
@@ -84,7 +76,7 @@ public class Waifuim : IImageSource
 
         public List<string> ToList()
         {
-            List<String> res = new();
+            List<string> res = new();
             foreach (var img in images)
             {
                 res.Add(img.url);

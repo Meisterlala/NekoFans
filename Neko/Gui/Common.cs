@@ -40,9 +40,9 @@ public static class Common
         var imageRatio = imgSize.X / imgSize.Y;
         var rectangeRatio = rectangle.Y / rectangle.X;
         var scaled = new Vector2(rectangle.Y / imageRatio, rectangle.X * imageRatio);
-        bool widthReduced = rectangeRatio > imageRatio; // True when width of image is bigger than rectangle
+        var widthReduced = rectangeRatio > imageRatio; // True when width of image is bigger than rectangle
 
-        Vector2 start = alignment switch
+        var start = alignment switch
         {
             Configuration.ImageAlignment.TopLeft => Vector2.Zero,
             Configuration.ImageAlignment.Top when widthReduced => Vector2.Zero,
@@ -64,7 +64,7 @@ public static class Common
             _ => Vector2.Zero
         };
 
-        Vector2 end = alignment switch
+        var end = alignment switch
         {
             Configuration.ImageAlignment.TopLeft when widthReduced => new Vector2(rectangle.X, scaled.Y),
             Configuration.ImageAlignment.TopLeft => new Vector2(scaled.X, rectangle.Y),

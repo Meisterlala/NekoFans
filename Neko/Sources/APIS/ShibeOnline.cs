@@ -1,25 +1,17 @@
-using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Logging;
 
 
-namespace Neko.Sources;
+namespace Neko.Sources.APIS;
 
 public class ShibeOnline : IImageSource
 {
     public class Config : IImageConfig
     {
-        public bool enabled = false;
+        public bool enabled;
 
-        public IImageSource? LoadConfig()
-        {
-            if (enabled)
-                return new ShibeOnline();
-            return null;
-        }
+        public IImageSource? LoadConfig() => enabled ? new ShibeOnline() : (IImageSource?)null;
     }
 
     private const int URL_COUNT = 100;
@@ -28,14 +20,11 @@ public class ShibeOnline : IImageSource
 
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
-        string url = await URLs.GetURL();
+        var url = await URLs.GetURL();
         return await Common.DownloadImage(url, ct);
     }
 
-    public override string ToString()
-    {
-        return "Shibe.online\tURLs: " + URLs.URLCount;
-    }
+    public override string ToString() => "Shibe.online\tURLs: " + URLs.URLCount;
 
 #pragma warning disable
     public class ShibeOnlineJson : List<string>, IJsonToList

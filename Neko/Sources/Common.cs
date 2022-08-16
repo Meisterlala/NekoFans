@@ -1,19 +1,17 @@
 using System;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
-using ImGuiNET;
 
 
 namespace Neko.Sources;
 
 public static class Common
 {
-    static readonly HttpClient client = new()
+    private static readonly HttpClient client = new()
     {
         DefaultRequestHeaders = {
             UserAgent =
@@ -23,8 +21,7 @@ public static class Common
             }
         }
     };
-
-    static readonly JsonSerializerOptions jsonOptions = new()
+    private static readonly JsonSerializerOptions jsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         AllowTrailingCommas = true,
@@ -34,7 +31,7 @@ public static class Common
     /// <summary>
     /// Download an Image and Store it in a <see cref="NekoImage"/>
     /// </summary>
-    public async static Task<NekoImage> DownloadImage(string url, CancellationToken ct = default)
+    public static async Task<NekoImage> DownloadImage(string url, CancellationToken ct = default)
     {
         byte[]? bytes;
         try
@@ -70,7 +67,7 @@ public static class Common
     /// <summary>
     /// Downloads and Parses a .json file
     /// </summary>
-    public async static Task<T> ParseJson<T>(string url, CancellationToken ct = default)
+    public static async Task<T> ParseJson<T>(string url, CancellationToken ct = default)
     {
         T? result;
         try
