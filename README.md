@@ -37,11 +37,11 @@ You can change to look and feel of the plugin in the Configutaion Menu, which ca
 
 ## Supported APIs
 
-- Catboys
-- Dog CEO
-- Nekos Life
-- Pic re
-- Shibe Online
-- The Cat API
-- Waifu im
-- Waifu Pics
+- [Catboys](https://catboys.com/)
+- [Dog CEO](https://dog.ceo/dog-api/)
+- [Nekos.life](https://nekos.life/)
+- [Pic.re](https://pic.re/)
+- [shibe.online](https://shibe.online/)
+- [The Cat API](https://thecatapi.com/)
+- [WAIFU.IM](https://waifu.im/)
+- [Waifu.pics](https://waifu.im/)

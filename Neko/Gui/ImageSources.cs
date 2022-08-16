@@ -31,13 +31,13 @@ public class ImageSourcesGUI
     }
 
     private readonly ImageSourceConfig[] SourceList = {
-            new ImageSourceConfig("nekos.life", "Anime Catgirls", "https://nekos.life/",
+            new ImageSourceConfig("Nekos.life", "Anime Catgirls", "https://nekos.life/",
                 typeof(NekosLife), Plugin.Config.Sources.NekosLife),
             new ImageSourceConfig("shibe.online", "Shiba Inu Dogs", "https://shibe.online/",
                 typeof(ShibeOnline), Plugin.Config.Sources.ShibeOnline),
             new ImageSourceConfig("Catboys", "Anime Catboys","https://catboys.com/",
                 typeof(Catboys), Plugin.Config.Sources.Catboys),
-            new ImageSourceConfig("waifu.im", "Anime Waifus","https://waifu.im/",
+            new ImageSourceConfig("WAIFU.IM", "Anime Waifus","https://waifu.im/",
                 typeof(Waifuim), Plugin.Config.Sources.Waifuim),
             new ImageSourceConfig("Waifu.pics", "Anime Waifus","https://waifu.pics/",
                 typeof(WaifuPics), Plugin.Config.Sources.WaifuPics),
