@@ -6,6 +6,8 @@ using Dalamud.Plugin.Ipc;
 
 namespace NekoLewd;
 
+#pragma warning disable CA1816 // Dispose warining
+
 /// <summary>
 /// This Plugin returns true via IPC.
 /// The offical repository doesnt allow some content. This Plugin is only hosted on third party repositorys.

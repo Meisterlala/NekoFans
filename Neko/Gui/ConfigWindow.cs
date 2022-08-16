@@ -72,7 +72,7 @@ public class ConfigWindow
     }
 
 
-    private void DrawLook()
+    private static void DrawLook()
     {
         ImGui.PushItemWidth(-200);
 
@@ -154,7 +154,7 @@ public class ConfigWindow
         ImGui.PopItemWidth();
     }
 
-    private void DrawAlign()
+    private static void DrawAlign()
     {
         // Center Child
         var windowWidth = ImGui.GetWindowWidth();
@@ -211,7 +211,7 @@ public class ConfigWindow
     }
 
 
-    private void DrawDev()
+    private static void DrawDev()
     {
         if (ImGui.CollapsingHeader("Image Queue"))
             ImGui.Text(Plugin.GuiMain?.Queue.ToString() ?? "GuiMain not loaded");

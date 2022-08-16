@@ -6,6 +6,8 @@ using Neko.Gui;
 
 namespace Neko;
 
+#pragma warning disable CA1816 // Dispose warining
+
 public class Plugin : IDalamudPlugin
 {
 
@@ -54,7 +56,6 @@ public class Plugin : IDalamudPlugin
 #endif
     }
 
-#pragma warning disable CA1816
     public void Dispose()
     {
         if (GuiMain != null)
@@ -65,7 +66,6 @@ public class Plugin : IDalamudPlugin
         CommandManager.RemoveHandler(CommandConfig);
         CommandManager.RemoveHandler(CommandMain);
     }
-#pragma warning restore
 
     private void OnCommand(string command, string args)
     {
