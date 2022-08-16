@@ -22,10 +22,6 @@ public class CombinedSource : IImageSource
         }
     }
 
-    public CombinedSource()
-    {
-    }
-
     public Task<NekoImage> Next(CancellationToken ct = default)
     {
         if (sources.Count <= 0)
@@ -57,8 +53,6 @@ public class CombinedSource : IImageSource
     }
     public bool Contains(Type source) => sources.Find((e) => e.GetType() == source) != null;
     public int Count() => sources.Count;
-
-
 
     public override string ToString()
     {
