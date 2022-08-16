@@ -2,10 +2,10 @@
   {
     "Author": "Meisterlala",
     "Name": "Neko Fans",
-    "Punchline": "Frustrated in a dungeon? Look at a cute cat girl.",
-    "Description": "Shows you an image of a random neko character. Click on the image to view the next one. \nWarning: You might see naughty images",
+    "Punchline": "Frustrated in a dungeon? Look at a cute cat girl!",
+    "Description": "Shows you an image of a random neko character. Click on the image to view the next one.\nMultiple Image APIs are supported, allowing you to look at Catboys, Waifus, Cats, Dogs and more.\nWarning: You might see naughty images",
     "InternalName": "Neko",
-    "AssemblyVersion": "1.0.7",
+    "AssemblyVersion": "1.1.0",
     "RepoUrl": "https://github.com/Meisterlala/NekoFans",
     "ApplicableVersion": "any",
     "Tags": [
@@ -23,7 +23,37 @@
     "IsHide": "False",
     "IsTestingExclusive": "False",
     "LastUpdated": 1659598652,
-    "DownloadCount": 72,
+    "DownloadCount": 74,
+    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.7/NekoPlugin.zip",
+    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.7/NekoPlugin.zip",
+    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.7/NekoPlugin.zip"
+  },
+  {
+    "Author": "Meisterlala",
+    "Name": "Neko Fans NSFW 18+ Patch",
+    "Punchline": "Frustrated in a dungeon? Look at a cute cat girl! Or look at sexy anime tiddies!",
+    "Description": "This Plugin does nothing on its own. Neko Fans needs to be installed.\nYou now have access to NSFW images in Neko Fans.",
+    "InternalName": "NekoLewd",
+    "AssemblyVersion": "1.0.0",
+    "RepoUrl": "https://github.com/Meisterlala/NekoFans",
+    "ApplicableVersion": "any",
+    "Tags": [
+      "anime",
+      "neko",
+      "waifu",
+      "miqote",
+      "image",
+      "NSFW"
+    ],
+    "CategoryTags": [
+      "UI"
+    ],
+    "DalamudApiLevel": 6,
+    "IconUrl": "https://raw.githubusercontent.com/Meisterlala/NekoFans/master/icon18.png",
+    "IsHide": "False",
+    "IsTestingExclusive": "False",
+    "LastUpdated": 1659598652,
+    "DownloadCount": 74,
     "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.7/NekoPlugin.zip",
     "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.7/NekoPlugin.zip",
     "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.7/NekoPlugin.zip"
