@@ -40,8 +40,8 @@ jobs:
 
       - name: Create artifacts
         run: |
-          Compress-Archive -Path "bin/Neko/" -DestinationPath NekoFans.zip
-          Compress-Archive -Path "bin/NekoLewd/" -DestinationPath NekoFansLewd.zip
+          Compress-Archive -Path "bin/Neko/*" -DestinationPath NekoFans.zip
+          Compress-Archive -Path "bin/NekoLewd/*" -DestinationPath NekoFansLewd.zip
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2.2.1
