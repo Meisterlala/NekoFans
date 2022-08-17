@@ -33,19 +33,20 @@ jobs:
       - name: Build
         run: |
           dotnet restore
-          dotnet build --configuration Release --nologo --output bin/
+          dotnet build Neko --configuration Release --nologo --output bin/
         env:
           DOTNET_CLI_TELEMETRY_OUTPUT: true
 
-      - name: Create artifact
+      - name: Create artifacts
         run: |
-          Compress-Archive -Path "bin/*" -DestinationPath NekoPlugin.zip
+          Compress-Archive -Path "bin/Neko/*" -DestinationPath NekoFans.zip
+          Compress-Archive -Path "bin/NekoLewd/*" -DestinationPath NekoFansLewd.zip
 
-      - name: Upload artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v2.2.1
         with:
           name: PluginZip
-          path: NekoPlugin.zip
+          path: Neko*.zip
           if-no-files-found: error
 
   release:
@@ -59,7 +60,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download artifact
+      - name: Download artifacts
         uses: actions/download-artifact@v2
         id: download
         with:
@@ -75,7 +76,7 @@ jobs:
           name: ${{ env.PROJECT_NAME }} ${{ steps.tag.outputs.tag }}
           tag_name: ${{ steps.tag.outputs.tag }}
           body: ${{ github.events.commits[0].message }}
-          files: ${{ steps.download.outputs.download-path }}/NekoPlugin.zip
+          files: ${{ steps.download.outputs.download-path }}/Neko*.zip
 
       - name: Trigger plugin repo update
         uses: peter-evans/repository-dispatch@v1
