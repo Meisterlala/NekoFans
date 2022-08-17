@@ -1,4 +1,6 @@
 using System.Numerics;
+using Dalamud.Interface;
+using Dalamud.Interface.Components;
 using ImGuiNET;
 
 namespace Neko.Gui;
@@ -7,11 +9,12 @@ public static class Common
 {
     public static void HelpMarker(string desc)
     {
+
         if (desc == "")
             return;
 
-        ImGui.TextDisabled("(?)");
-        ToolTip(desc);
+        ImGuiComponents.HelpMarker(desc);
+        // ToolTip(desc);
     }
 
     public static void ToolTip(string desc)

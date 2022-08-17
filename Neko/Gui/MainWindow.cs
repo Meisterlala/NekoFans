@@ -121,7 +121,7 @@ public class MainWindow
             }
 
             // Allow move with right mouse button
-            if (ImGui.IsMouseDragging(ImGuiMouseButton.Right))
+            if (ImGui.IsMouseDragging(ImGuiMouseButton.Right) && ImGui.IsWindowHovered())
                 ImGui.SetWindowPos(ImGui.GetIO().MouseDelta + ImGui.GetWindowPos());
 
             // Allow close with middle mouse button
