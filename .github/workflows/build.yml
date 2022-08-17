@@ -10,7 +10,7 @@ on:
     branches: [main]
 
 env:
-  PROJECT_NAME: Neko
+  PROJECT_NAME: Neko Fans
 
 jobs:
   build:

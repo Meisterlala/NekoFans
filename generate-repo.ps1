@@ -8,14 +8,16 @@ $branch = "master"
 $nekoname = "NekoFans.zip"
 $nekolewdname = "NekoFansLewd.zip"
 
-# Fetch the release data from the Gibhub API
-$data = Invoke-WebRequest -Uri "https://api.github.com/repos/$($username)/$($repo)/releases/latest"
-$json = ConvertFrom-Json $data.content
+$nekolewdtag = "1.0.0 NSFW"
 
 
 ##############
 # Neko Fans
 ##############
+
+# Fetch the release data from the Gibhub API
+$data = Invoke-WebRequest -Uri "https://api.github.com/repos/$($username)/$($repo)/releases/latest"
+$json = ConvertFrom-Json $data.content
 
 # Select Neko Fans zip
 $asset = $json.assets | Where-Object { $_.Name -eq $nekoname } #Darts
@@ -55,15 +57,19 @@ $pluginsOut += $config
 # Neko Lewd
 ##############
 
+# Fetch the release data from the Gibhub API
+$dataL = Invoke-WebRequest -Uri "https://api.github.com/repos/$($username)/$($repo)/releases/$($nekolewdtag)"
+$jsonL = ConvertFrom-Json $dataL.content
+
 # Select Neko Fans zip
-$assetL = $json.assets | Where-Object { $_.Name -eq $nekolewdname }
+$assetL = $jsonL.assets | Where-Object { $_.Name -eq $nekolewdname }
 
 # Get data from the api request.
 $countL = $assetL.download_count
 $downloadL = $assetL.browser_download_url
 
 # Get timestamp for the release.
-$timeL = [Int](New-TimeSpan -Start (Get-Date "01/01/1970") -End ([DateTime]$json.published_at)).TotalSeconds
+$timeL = [Int](New-TimeSpan -Start (Get-Date "01/01/1970") -End ([DateTime]$jsonL.published_at)).TotalSeconds
 
 # Get the config data from the repo.
 $configDataL = Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$($username)/$($repo)/$($branch)/NekoLewd/NekoLewd.json"
