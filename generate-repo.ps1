@@ -58,7 +58,7 @@ $pluginsOut += $config
 ##############
 
 # Fetch the release data from the Gibhub API
-$dataL = Invoke-WebRequest -Uri "https://api.github.com/repos/$($username)/$($repo)/releases/tag/$($nekolewdtag)"
+$dataL = Invoke-WebRequest -Uri "https://api.github.com/repos/$($username)/$($repo)/releases/tags/$($nekolewdtag)"
 $jsonL = ConvertFrom-Json $dataL.content
 
 # Select Neko Fans zip
