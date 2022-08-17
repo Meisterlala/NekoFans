@@ -33,14 +33,15 @@ jobs:
       - name: Build
         run: |
           dotnet restore
-          dotnet build Neko --configuration Release --nologo --output bin/
+          dotnet build Neko --configuration Release --nologo --output bin/Neko/
+          dotnet build NekoLewd --configuration Release --nologo --output bin/NekoLewd/
         env:
           DOTNET_CLI_TELEMETRY_OUTPUT: true
 
       - name: Create artifacts
         run: |
-          Compress-Archive -Path "bin/Neko/*" -DestinationPath NekoFans.zip
-          Compress-Archive -Path "bin/NekoLewd/*" -DestinationPath NekoFansLewd.zip
+          Compress-Archive -Path "bin/Neko/" -DestinationPath NekoFans.zip
+          Compress-Archive -Path "bin/NekoLewd/" -DestinationPath NekoFansLewd.zip
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2.2.1
