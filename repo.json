@@ -22,11 +22,11 @@
     "IconUrl": "https://raw.githubusercontent.com/Meisterlala/NekoFans/master/icon.png",
     "IsHide": "False",
     "IsTestingExclusive": "False",
-    "LastUpdated": 1659598652,
-    "DownloadCount": 129,
-    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.7/NekoPlugin.zip",
-    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.7/NekoPlugin.zip",
-    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.7/NekoPlugin.zip"
+    "LastUpdated": 1660751245,
+    "DownloadCount": 0,
+    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.1.0/NekoPlugin.zip",
+    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.1.0/NekoPlugin.zip",
+    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.1.0/NekoPlugin.zip"
   },
   {
     "Author": "Meisterlala",
@@ -52,10 +52,10 @@
     "IconUrl": "https://raw.githubusercontent.com/Meisterlala/NekoFans/master/icon18.png",
     "IsHide": "False",
     "IsTestingExclusive": "False",
-    "LastUpdated": 1659598652,
-    "DownloadCount": 129,
-    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.7/NekoPlugin.zip",
-    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.7/NekoPlugin.zip",
-    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.7/NekoPlugin.zip"
+    "LastUpdated": 1660751245,
+    "DownloadCount": 0,
+    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.1.0/NekoPlugin.zip",
+    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.1.0/NekoPlugin.zip",
+    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.1.0/NekoPlugin.zip"
   }
 ]
