@@ -8,7 +8,7 @@ $branch = "master"
 $nekoname = "NekoFans.zip"
 $nekolewdname = "NekoFansLewd.zip"
 
-$nekolewdtag = "1.0.0 NSFW"
+$nekolewdtag = "1.0.0-NSFW"
 
 
 ##############
@@ -58,7 +58,7 @@ $pluginsOut += $config
 ##############
 
 # Fetch the release data from the Gibhub API
-$dataL = Invoke-WebRequest -Uri "https://api.github.com/repos/$($username)/$($repo)/releases/$($nekolewdtag)"
+$dataL = Invoke-WebRequest -Uri "https://api.github.com/repos/$($username)/$($repo)/releases/tag/$($nekolewdtag)"
 $jsonL = ConvertFrom-Json $dataL.content
 
 # Select Neko Fans zip
