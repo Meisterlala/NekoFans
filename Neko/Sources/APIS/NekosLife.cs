@@ -9,11 +9,11 @@ public class NekosLife : IImageSource
     {
         public bool enabled = true;
 
-        public IImageSource? LoadConfig() => enabled ? new NekosLife() : (IImageSource?)null;
+        public IImageSource? LoadConfig() => enabled ? new NekosLife() : null;
     }
 
 #pragma warning disable
-    class NekosLifeJson
+    public class NekosLifeJson
     {
         public string url { get; set; }
     }

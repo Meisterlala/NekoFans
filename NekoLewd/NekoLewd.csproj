@@ -12,7 +12,8 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <PreserveCompilationContext>false</PreserveCompilationContext>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>$(AppData)\XIVLauncher\devPlugins\NekoLewd</OutputPath>
+    <OutputPath Condition="'$(OS)' == 'Windows_NT'">$(AppData)\XIVLauncher\devPlugins\Neko</OutputPath>
+    <OutputPath Condition="'$(OS)' == 'Unix'">./bin/</OutputPath>
   </PropertyGroup>
 
   <ProjectExtensions>
@@ -38,7 +39,8 @@
   </ProjectExtensions>
 
   <PropertyGroup>
-    <DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+    <DalamudLibPath Condition="'$(OS)' == 'Windows_NT'">$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+    <DalamudLibPath Condition="'$(OS)' == 'Unix'">../../dalamud-distrib/</DalamudLibPath>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 

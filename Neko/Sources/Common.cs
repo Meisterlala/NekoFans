@@ -1,9 +1,12 @@
 using System;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using Dalamud.Logging;
 
 
@@ -20,12 +23,6 @@ public static class Common
                 new("(a Plugin for Final Fantasy XIV)")
             }
         }
-    };
-    private static readonly JsonSerializerOptions jsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        AllowTrailingCommas = true,
-        ReadCommentHandling = JsonCommentHandling.Skip
     };
 
     /// <summary>
@@ -83,10 +80,14 @@ public static class Common
                 }
             };
 
+            // Download
             var response = await client.SendAsync(request, ct).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
             var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
-            result = await JsonSerializer.DeserializeAsync<T>(stream, jsonOptions, ct).ConfigureAwait(false);
+
+            // Parse Json
+            var context = JsonContext.GetTypeInfo<T>();
+            result = await JsonSerializer.DeserializeAsync(stream, context, ct).ConfigureAwait(false);
         }
         catch (HttpRequestException ex)
         {

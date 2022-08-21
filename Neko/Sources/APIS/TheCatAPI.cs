@@ -14,7 +14,7 @@ public class TheCatAPI : IImageSource
         public Breed breed = Breed.All;
         public int selected;
 
-        public IImageSource? LoadConfig() => enabled ? new TheCatAPI(breed) : (IImageSource?)null;
+        public IImageSource? LoadConfig() => enabled ? new TheCatAPI(breed) : null;
     }
 
     private const int URL_COUNT = 10;

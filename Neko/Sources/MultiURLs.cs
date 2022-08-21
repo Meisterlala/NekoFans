@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
 
+
 namespace Neko.Sources;
 
 /// <summary>
@@ -11,7 +12,8 @@ namespace Neko.Sources;
 /// This is used when the API returns a list of many URLs to images
 /// </summary>
 /// <typeparam name="T">Json to parse into</typeparam>
-public class MultiURLs<T> where T : IJsonToList
+public class MultiURLs<T>
+    where T : IJsonToList
 {
     public int URLCount => urlCount;
 
