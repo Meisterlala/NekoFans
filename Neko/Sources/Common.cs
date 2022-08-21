@@ -1,12 +1,9 @@
 using System;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 using Dalamud.Logging;
 
 

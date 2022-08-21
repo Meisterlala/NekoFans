@@ -72,5 +72,5 @@ public class CombinedSource : IImageSource
         return res;
     }
 
-    public IImageSource? LoadConfig(object config) => throw new NotImplementedException();
+    public IImageSource? LoadConfig(object _) => throw new NotImplementedException();
 }
