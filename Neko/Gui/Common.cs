@@ -31,6 +31,11 @@ public static class Common
         }
     }
 
+    public static void Notification(string text)
+    {
+        // TODO: Implement
+    }
+
     /// <summary>
     /// Aligns an image in a rectange. imageSize doesnt have to fit in rectange
     /// </summary>

@@ -61,7 +61,7 @@
   </ItemGroup>
    
   <ItemGroup> 
-    <PackageReference Include="DalamudPackager" Version="2.1.7" Condition="'$(OS)' == 'Windows_NT'"/> 
+    <PackageReference Include="DalamudPackager" Version="2.1.7" Condition="'$(OS)' == 'Windows_NT'" /> 
   </ItemGroup>
  
   <ItemGroup>
@@ -72,5 +72,9 @@
 
   <ItemGroup>
     <EmbeddedResource Include="resources/error.jpg" />
+  </ItemGroup>
+
+  <ItemGroup> <!--  Used to manipulate Clipboard   -->
+    <PackageReference Include="TextCopy" Version="6.1.0" />
   </ItemGroup>
 </Project>

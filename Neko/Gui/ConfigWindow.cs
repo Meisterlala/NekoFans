@@ -105,6 +105,9 @@ public class ConfigWindow
         if (ImGui.CollapsingHeader("Image alignment"))
             DrawAlign();
 
+        // Tips
+        // TODO: Display a list of all hotkeys
+
         ImGui.PopItemWidth();
     }
 

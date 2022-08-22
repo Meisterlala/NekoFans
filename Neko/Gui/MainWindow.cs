@@ -128,6 +128,24 @@ public class MainWindow
             if (!Plugin.Config.GuiMainShowTitleBar && ImGui.IsMouseClicked(ImGuiMouseButton.Middle))
                 Visible = false;
 
+            // Copy to clipboard with c
+            if (ImGui.IsKeyPressed(ImGuiKey.C)
+             && (ImGui.IsWindowFocused() || ImGui.IsWindowHovered())
+             && nekoTaskCurrent != null
+             && nekoTaskCurrent.IsCompletedSuccessfully)
+            {
+                Helper.CopyToClipboard(nekoTaskCurrent?.Result.URL ?? "");
+            }
+
+            // Open in Browser with b
+            if (ImGui.IsKeyPressed(ImGuiKey.B)
+             && (ImGui.IsWindowFocused() || ImGui.IsWindowHovered())
+             && nekoTaskCurrent != null
+             && nekoTaskCurrent.IsCompletedSuccessfully)
+            {
+                Helper.OpenInBrowser(nekoTaskCurrent?.Result.URL ?? "");
+            }
+
             ImGui.PopStyleColor(3);
             ImGui.EndChild();
             //  ImGui.PopStyleColor();

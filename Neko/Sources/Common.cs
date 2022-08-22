@@ -54,7 +54,7 @@ public static class Common
         PluginLog.Log($"Downloaded {Helper.SizeSuffix(bytes.LongLength, 1)} from {url}");
 
         ct.ThrowIfCancellationRequested();
-        NekoImage? image = new(bytes);
+        NekoImage? image = new(bytes, url);
         return image;
     }
 
