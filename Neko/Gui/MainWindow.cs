@@ -59,7 +59,7 @@ public class MainWindow
         var fontScale = ImGui.GetIO().FontGlobalScale;
         var size = new Vector2(100 * fontScale, 100 * fontScale);
 
-        ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
+        ImGui.SetNextWindowSize(size * 4, ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(size, size * 20);
         ImGui.SetNextWindowBgAlpha(Plugin.Config.GuiMainOpacity);
 
