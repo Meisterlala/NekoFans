@@ -77,6 +77,10 @@ public class MainWindow
         if (!Plugin.Config.GuiMainAllowResize)
             flags |= ImGuiWindowFlags.NoResize;
 
+        // Locking
+        if (Plugin.Config.GuiMainLocked)
+            flags |= ImGuiWindowFlags.NoMove;
+
         if (ImGui.Begin("Neko", ref visible, flags))
         {
             // Load Neko or fallback to default
@@ -121,27 +125,37 @@ public class MainWindow
             }
 
             // Allow move with right mouse button
-            if (ImGui.IsMouseDragging(ImGuiMouseButton.Right) && ImGui.IsWindowHovered())
+            if (ImGui.IsMouseDragging(ImGuiMouseButton.Right)
+            && (ImGui.IsWindowHovered()
+                || (ImGui.IsWindowFocused()
+                && ImGui.IsMouseDown(ImGuiMouseButton.Right))))
+            {
+                ImGui.SetWindowFocus(); // This is needed, if you drag to fast and the window cant keep up
                 ImGui.SetWindowPos(ImGui.GetIO().MouseDelta + ImGui.GetWindowPos());
+            }
 
             // Allow close with middle mouse button
-            if (!Plugin.Config.GuiMainShowTitleBar && ImGui.IsMouseClicked(ImGuiMouseButton.Middle))
+            if (!Plugin.Config.GuiMainShowTitleBar
+            && ImGui.IsMouseDragging(ImGuiMouseButton.Middle)
+            && ImGui.IsWindowFocused())
+            {
                 Visible = false;
+            }
 
             // Copy to clipboard with c
-            if (ImGui.IsKeyPressed(ImGuiKey.C)
-             && (ImGui.IsWindowFocused() || ImGui.IsWindowHovered())
-             && nekoTaskCurrent != null
-             && nekoTaskCurrent.IsCompletedSuccessfully)
+            if (Helper.KeyPressed(Dalamud.Game.ClientState.Keys.VirtualKey.C)
+            && (ImGui.IsWindowFocused() || ImGui.IsWindowHovered())
+            && nekoTaskCurrent != null
+            && nekoTaskCurrent.IsCompletedSuccessfully)
             {
                 Helper.CopyToClipboard(nekoTaskCurrent?.Result.URL ?? "");
             }
 
             // Open in Browser with b
-            if (ImGui.IsKeyPressed(ImGuiKey.B)
-             && (ImGui.IsWindowFocused() || ImGui.IsWindowHovered())
-             && nekoTaskCurrent != null
-             && nekoTaskCurrent.IsCompletedSuccessfully)
+            if (Helper.KeyPressed(Dalamud.Game.ClientState.Keys.VirtualKey.B)
+            && (ImGui.IsWindowFocused() || ImGui.IsWindowHovered())
+            && nekoTaskCurrent != null
+            && nekoTaskCurrent.IsCompletedSuccessfully)
             {
                 Helper.OpenInBrowser(nekoTaskCurrent?.Result.URL ?? "");
             }

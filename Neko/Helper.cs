@@ -37,6 +37,7 @@ public static class Helper
             adjustedSize,
             SizeSuffixes[mag]);
     }
+
     public static IEnumerable<Enum> GetFlags(Enum input)
     {
         return from Enum value in Enum.GetValues(input.GetType())
@@ -48,19 +49,23 @@ public static class Helper
     {
         if (text == "")
         {
-            Gui.Common.Notification("Unable to copy to Clipboard");
+            Gui.Common.Notification("Unable to copy to Clipboard", Dalamud.Interface.Internal.Notifications.NotificationType.Error);
             return;
         }
 
+        // This is using TextCopy.dll / the TextCopy nuget package
+        // Microsoft removed Windows.Forms in .Net6 and that contained the Clipboard Class.
+        // It is possible to add Windows.Forms back to a project, but using this is easier
+        // and is cross platform
         ClipboardService.SetText(text);
-        Gui.Common.Notification($"Copied \"{text}\" to Clipboard");
+        Gui.Common.Notification($"Copied \"{text}\" to Clipboard", Dalamud.Interface.Internal.Notifications.NotificationType.Success);
     }
 
     public static void OpenInBrowser(string url)
     {
         if (url == "")
         {
-            Gui.Common.Notification("Unable to open in a Browser");
+            Gui.Common.Notification("Unable to open in a Browser", Dalamud.Interface.Internal.Notifications.NotificationType.Error);
             return;
         }
 
@@ -74,15 +79,18 @@ public static class Helper
         }
         catch (Exception ex)
         {
-            Gui.Common.Notification("Unable to open in a Browser, Invalid URL");
+            Gui.Common.Notification("Unable to open in a Browser, Invalid URL", Dalamud.Interface.Internal.Notifications.NotificationType.Error);
             PluginLog.Error(ex, "URL unsafe");
             return;
         }
+
+        var successNotification = () => Gui.Common.Notification($"Opening {url}", Dalamud.Interface.Internal.Notifications.NotificationType.Info);
 
         // Execute url as process
         try
         {
             Process.Start(url);
+            successNotification();
         }
         catch
         {
@@ -91,20 +99,33 @@ public static class Helper
             {
                 url = url.Replace("&", "^&");
                 Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                successNotification();
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 Process.Start("xdg-open", url);
+                successNotification();
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 Process.Start("open", url);
+                successNotification();
             }
             else
             {
-                Gui.Common.Notification("Unable to open in a Browser");
+                Gui.Common.Notification("Unable to open in a Browser", Dalamud.Interface.Internal.Notifications.NotificationType.Error);
             }
         }
+    }
+
+    public static bool KeyPressed(Dalamud.Game.ClientState.Keys.VirtualKey key)
+    {
+        if (Plugin.KeyState[key])
+        {
+            Plugin.KeyState[key] = false;
+            return true;
+        }
+        return false;
     }
 }
 

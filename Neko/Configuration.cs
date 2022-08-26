@@ -33,6 +33,7 @@ public class Configuration : IPluginConfiguration
     public bool GuiMainShowTitleBar = true;
     public bool GuiMainAllowResize = true;
     public bool GuiMainVisible;
+    public bool GuiMainLocked;
 
     public int QueueDownloadCount = 5;
     public int QueuePreloadCount = 2;

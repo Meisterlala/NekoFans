@@ -16,6 +16,13 @@ public static class Common
         // ToolTip(desc);
     }
 
+    public static void FontAwesomeIcon(Dalamud.Interface.FontAwesomeIcon icon)
+    {
+        ImGui.PushFont(Dalamud.Interface.UiBuilder.IconFont);
+        ImGui.Text(Dalamud.Interface.FontAwesomeExtensions.ToIconString(icon));
+        ImGui.PopFont();
+    }
+
     public static void ToolTip(string desc)
     {
         if (desc == "")
@@ -31,10 +38,8 @@ public static class Common
         }
     }
 
-    public static void Notification(string text)
-    {
-        // TODO: Implement
-    }
+    public static void Notification(string text, Dalamud.Interface.Internal.Notifications.NotificationType type = default) =>
+            Plugin.PluginInterface.UiBuilder.AddNotification(text, "Neko Fans", type);
 
     /// <summary>
     /// Aligns an image in a rectange. imageSize doesnt have to fit in rectange

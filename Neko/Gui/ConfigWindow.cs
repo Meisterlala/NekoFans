@@ -1,4 +1,5 @@
 using System.Numerics;
+using Dalamud.Interface;
 using ImGuiNET;
 
 namespace Neko.Gui;
@@ -51,13 +52,11 @@ public class ConfigWindow
                     DrawAdvanced();
                     ImGui.EndTabItem();
                 }
-#if DEBUG
-                if (ImGui.BeginTabItem("Dev"))
+                if (Plugin.PluginInterface.IsDevMenuOpen && ImGui.BeginTabItem("Dev"))
                 {
                     DrawDev();
                     ImGui.EndTabItem();
                 }
-#endif
                 if (ImGui.TabItemButton(Plugin.GuiMain?.Visible ?? false ? "Hide Neko window" : "Show Neko window"))
                     Plugin.ToggleMainGui();
                 Common.ToolTip("type /neko in the chat to view the main window");
@@ -94,6 +93,11 @@ public class ConfigWindow
 
         }
 
+        // Lock Window
+        if (ImGui.Checkbox("Lock position", ref Plugin.Config.GuiMainLocked))
+            Plugin.Config.Save();
+        ImGui.SameLine(); Common.HelpMarker("Lock the position of the window, not allowing it to be moved.\nYou can always move the window by holdng down the right mouse button and dragging.");
+
         // Show Title Bar
         if (ImGui.Checkbox("Show window title bar", ref Plugin.Config.GuiMainShowTitleBar))
             Plugin.Config.Save();
@@ -105,11 +109,23 @@ public class ConfigWindow
         if (ImGui.CollapsingHeader("Image alignment"))
             DrawAlign();
 
-        // Tips
-        // TODO: Display a list of all hotkeys
+        // List Hotkeys
+        if (ImGui.CollapsingHeader("Hotkeys"))
+        {
+            ImGui.TextWrapped("The following Hotkeys are only active when the main window is active.");
+            (string, string, bool)[] keybind = {
+                ("left mouse button", "next image", true),
+                ("middle mouse botton", "close window", !Plugin.Config.GuiMainShowTitleBar),
+                ("right mouse button", "move window", true),
+                ("B", "open image in web browser", true),
+                ("C", "copy image link to clipboard", true)};
+
+            DrawKeybinds(keybind);
+        }
 
         ImGui.PopItemWidth();
     }
+
 
 
     private void DrawAdvanced()
@@ -219,5 +235,38 @@ public class ConfigWindow
             ImGui.Text(Plugin.GuiMain?.Queue.ToString() ?? "GuiMain not loaded");
         if (ImGui.CollapsingHeader("Image Sources"))
             ImGui.Text(Plugin.ImageSource.ToString());
+    }
+
+    private static void DrawKeybinds((string, string, bool)[] keybinds)
+    {
+        ImGui.BeginTable("Keybinds##ConfigWindow", 3);
+
+        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed);
+        ImGui.TableSetupColumn("Arrow", ImGuiTableColumnFlags.WidthFixed, 20);
+        ImGui.TableSetupColumn("Description", ImGuiTableColumnFlags.WidthFixed);
+
+        foreach (var keybind in keybinds)
+        {
+            // Skip if bool is false
+            if (!keybind.Item3)
+                continue;
+
+            // Right Align the first column (name of key)
+            ImGui.TableNextColumn();
+            var posX = ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(keybind.Item1).X - ImGui.GetScrollX();
+            if (posX > ImGui.GetCursorPosX())
+                ImGui.SetCursorPosX(posX);
+            ImGui.Text(keybind.Item1);
+            // Arrow ->
+            ImGui.TableNextColumn();
+            Common.FontAwesomeIcon(FontAwesomeIcon.LongArrowAltRight);
+            // Description
+            ImGui.TableNextColumn();
+            ImGui.TextWrapped(keybind.Item2);
+            ImGui.TableNextRow();
+        }
+
+
+        ImGui.EndTable();
     }
 }

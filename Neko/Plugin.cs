@@ -12,6 +12,7 @@ public class Plugin : IDalamudPlugin
 
     [PluginService] public static CommandManager CommandManager { get; private set; } = null!;
     [PluginService] public static DalamudPluginInterface PluginInterface { get; private set; } = null!;
+    [PluginService] public static Dalamud.Game.ClientState.Keys.KeyState KeyState { get; private set; } = null!;
 
     public string Name => "Neko Fans";
 
