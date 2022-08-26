@@ -58,6 +58,6 @@
   </ItemGroup>
 
   <ItemGroup> 
-    <PackageReference Include="DalamudPackager" Version="2.1.7"/> 
+    <PackageReference Include="DalamudPackager" Version="2.1.8" /> 
   </ItemGroup>
 </Project>
