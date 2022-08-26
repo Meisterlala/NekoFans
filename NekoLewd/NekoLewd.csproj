@@ -13,7 +13,7 @@
     <PreserveCompilationContext>false</PreserveCompilationContext>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <OutputPath Condition="'$(OS)' == 'Windows_NT'">$(AppData)\XIVLauncher\devPlugins\Neko</OutputPath>
-    <OutputPath Condition="'$(OS)' == 'Unix'">./bin/</OutputPath>
+    <OutputPath Condition="'$(OS)' == 'Unix'">$(HOME)/.xlcore/devPlugins/Neko</OutputPath>
   </PropertyGroup>
 
   <ProjectExtensions>
@@ -40,7 +40,7 @@
 
   <PropertyGroup>
     <DalamudLibPath Condition="'$(OS)' == 'Windows_NT'">$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
-    <DalamudLibPath Condition="'$(OS)' == 'Unix'">../../dalamud-distrib/</DalamudLibPath>
+    <DalamudLibPath Condition="'$(OS)' == 'Unix'">$(HOME)/.xlcore/dalamud/Hooks/dev/</DalamudLibPath>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 

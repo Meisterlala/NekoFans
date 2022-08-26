@@ -9,7 +9,7 @@ namespace Neko.Gui;
 /// </summary>
 public class MainWindow
 {
-    private bool visible;
+    private bool visible = Plugin.Config.GuiMainVisible;
 
     public bool Visible
     {
@@ -83,6 +83,9 @@ public class MainWindow
 
         if (ImGui.Begin("Neko", ref visible, flags))
         {
+            // Save visible State
+            Visible = visible;
+
             // Load Neko or fallback to default
             var currentNeko = nekoTaskCurrent != null
                 && nekoTaskCurrent.IsCompletedSuccessfully
@@ -162,7 +165,6 @@ public class MainWindow
 
             ImGui.PopStyleColor(3);
             ImGui.EndChild();
-            //  ImGui.PopStyleColor();
         }
         if (!Plugin.Config.GuiMainShowResize)
             ImGui.PopStyleColor();

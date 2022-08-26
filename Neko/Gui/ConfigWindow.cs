@@ -126,8 +126,6 @@ public class ConfigWindow
         ImGui.PopItemWidth();
     }
 
-
-
     private void DrawAdvanced()
     {
         ImGui.PushItemWidth(-200);
@@ -243,7 +241,7 @@ public class ConfigWindow
 
         ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed);
         ImGui.TableSetupColumn("Arrow", ImGuiTableColumnFlags.WidthFixed, 20);
-        ImGui.TableSetupColumn("Description", ImGuiTableColumnFlags.WidthFixed);
+        ImGui.TableSetupColumn("Description", ImGuiTableColumnFlags.WidthStretch);
 
         foreach (var keybind in keybinds)
         {

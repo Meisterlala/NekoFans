@@ -84,6 +84,9 @@ public class NekoQueue
             LoadImages();
         }
 
+        // Check for NSFW mode (check for changes)
+        var _ = NSFW.AllowNSFW;
+
         // Check if there are faulted images in the preloaded Queue
         // If there are: just use the first image.
         // If there are none:

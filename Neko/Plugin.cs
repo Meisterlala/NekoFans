@@ -58,14 +58,11 @@ public class Plugin : IDalamudPlugin
 
     public void Dispose()
     {
-        if (GuiMain != null)
-            GuiMain.Visible = false;
-        if (GuiConfig != null)
-            GuiConfig.Visible = false;
-
         CommandManager.RemoveHandler(CommandConfig);
         CommandManager.RemoveHandler(CommandMain);
     }
+
+    public static void ReloadImageSources() => ImageSource = Config.LoadSources();
 
     private void OnCommand(string command, string args)
     {
