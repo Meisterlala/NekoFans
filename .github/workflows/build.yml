@@ -33,8 +33,9 @@ jobs:
       - name: Build
         run: |
           dotnet restore
+          dotnet restore NekoLewd/NekoLewd.csproj
           dotnet build Neko --configuration Release --nologo --output bin/Neko/
-          dotnet build NekoLewd --configuration Release --nologo --output bin/NekoLewd/
+          dotnet build NekoLewd/NekoLewd.csproj --configuration Release --nologo --output bin/NekoLewd/
         env:
           DOTNET_CLI_TELEMETRY_OUTPUT: true
 
