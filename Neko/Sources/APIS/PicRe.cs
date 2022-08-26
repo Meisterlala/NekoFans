@@ -10,7 +10,7 @@ public class PicRe : IImageSource
     {
         public bool enabled;
 
-        public IImageSource? LoadConfig() => enabled ? new PicRe() : (IImageSource?)null;
+        public IImageSource? LoadConfig() => enabled ? new PicRe() : null;
     }
 
     public async Task<NekoImage> Next(CancellationToken ct = default)

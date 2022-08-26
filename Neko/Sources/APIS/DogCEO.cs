@@ -14,7 +14,7 @@ public class DogCEO : IImageSource
         public Breed breed = Breed.all;
         public int selected;
 
-        public IImageSource? LoadConfig() => enabled ? new DogCEO(breed) : (IImageSource?)null;
+        public IImageSource? LoadConfig() => enabled ? new DogCEO(breed) : null;
     }
 
 

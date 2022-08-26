@@ -51,7 +51,7 @@ public class WaifuPics : IImageSource
                 ? comSFW
                 : comNSFW.Count() > 0 && NSFW.AllowNSFW
                 ? comNSFW
-                : (IImageSource?)null;
+                : null;
         }
     }
 
@@ -75,7 +75,7 @@ public class WaifuPics : IImageSource
     public override string ToString() => $"Waifu Pics ({type.ToUpper()}) {category}";
 
 #pragma warning disable
-    class WaifuPicsJson
+    public class WaifuPicsJson
     {
         public string url { get; set; }
     }

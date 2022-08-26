@@ -11,7 +11,7 @@ public class ShibeOnline : IImageSource
     {
         public bool enabled;
 
-        public IImageSource? LoadConfig() => enabled ? new ShibeOnline() : (IImageSource?)null;
+        public IImageSource? LoadConfig() => enabled ? new ShibeOnline() : null;
     }
 
     private const int URL_COUNT = 100;

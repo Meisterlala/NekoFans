@@ -9,7 +9,7 @@ public class Catboys : IImageSource
     {
         public bool enabled;
 
-        public IImageSource? LoadConfig() => enabled ? new Catboys() : (IImageSource?)null;
+        public IImageSource? LoadConfig() => enabled ? new Catboys() : null;
     }
 
 

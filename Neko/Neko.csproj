@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>1.1.0</Version>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <Version>1.1.1</Version>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
@@ -13,12 +13,14 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <PreserveCompilationContext>false</PreserveCompilationContext>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>$(AppData)\XIVLauncher\devPlugins\Neko</OutputPath>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <OutputPath Condition="'$(OS)' == 'Windows_NT'">$(AppData)\XIVLauncher\devPlugins\Neko</OutputPath>
+    <OutputPath Condition="'$(OS)' == 'Unix'">$(HOME)/.xlcore/devPlugins/Neko</OutputPath>
   </PropertyGroup>
 
   <ProjectExtensions>
     <DalamudPlugin>
-      <ApiLevel>6</ApiLevel>
+      <ApiLevel>7</ApiLevel>
       <Author>Meisterlala</Author>
       <Name>Neko Fans</Name>
       <Punchline>Frustrated in a dungeon? Look at a cute cat girl!</Punchline>
@@ -39,7 +41,8 @@
   </ProjectExtensions>
 
   <PropertyGroup>
-    <DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+    <DalamudLibPath Condition="'$(OS)' == 'Windows_NT'">$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+    <DalamudLibPath Condition="'$(OS)' == 'Unix'">$(HOME)/.xlcore/dalamud/Hooks/dev/</DalamudLibPath>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 
@@ -59,7 +62,7 @@
   </ItemGroup>
    
   <ItemGroup> 
-    <PackageReference Include="DalamudPackager" Version="2.1.7"/> 
+    <PackageReference Include="DalamudPackager" Version="2.1.7" Condition="'$(OS)' == 'Windows_NT'" /> 
   </ItemGroup>
  
   <ItemGroup>
@@ -70,5 +73,12 @@
 
   <ItemGroup>
     <EmbeddedResource Include="resources/error.jpg" />
+  </ItemGroup>
+
+  <ItemGroup> <!--  Used to manipulate Clipboard   -->
+    <PackageReference Include="TextCopy"> 
+        <Version>6.1.0</Version>
+        <GeneratePathProperty>true</GeneratePathProperty>
+      </PackageReference>
   </ItemGroup>
 </Project>

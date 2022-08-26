@@ -9,7 +9,7 @@ namespace Neko.Gui;
 /// </summary>
 public class MainWindow
 {
-    private bool visible;
+    private bool visible = Plugin.Config.GuiMainVisible;
 
     public bool Visible
     {
@@ -59,7 +59,7 @@ public class MainWindow
         var fontScale = ImGui.GetIO().FontGlobalScale;
         var size = new Vector2(100 * fontScale, 100 * fontScale);
 
-        ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
+        ImGui.SetNextWindowSize(size * 4, ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(size, size * 20);
         ImGui.SetNextWindowBgAlpha(Plugin.Config.GuiMainOpacity);
 
@@ -77,8 +77,15 @@ public class MainWindow
         if (!Plugin.Config.GuiMainAllowResize)
             flags |= ImGuiWindowFlags.NoResize;
 
+        // Locking
+        if (Plugin.Config.GuiMainLocked)
+            flags |= ImGuiWindowFlags.NoMove;
+
         if (ImGui.Begin("Neko", ref visible, flags))
         {
+            // Save visible State
+            Visible = visible;
+
             // Load Neko or fallback to default
             var currentNeko = nekoTaskCurrent != null
                 && nekoTaskCurrent.IsCompletedSuccessfully
@@ -121,16 +128,43 @@ public class MainWindow
             }
 
             // Allow move with right mouse button
-            if (ImGui.IsMouseDragging(ImGuiMouseButton.Right) && ImGui.IsWindowHovered())
+            if (ImGui.IsMouseDragging(ImGuiMouseButton.Right)
+            && (ImGui.IsWindowHovered()
+                || (ImGui.IsWindowFocused()
+                && ImGui.IsMouseDown(ImGuiMouseButton.Right))))
+            {
+                ImGui.SetWindowFocus(); // This is needed, if you drag to fast and the window cant keep up
                 ImGui.SetWindowPos(ImGui.GetIO().MouseDelta + ImGui.GetWindowPos());
+            }
 
             // Allow close with middle mouse button
-            if (!Plugin.Config.GuiMainShowTitleBar && ImGui.IsMouseClicked(ImGuiMouseButton.Middle))
+            if (!Plugin.Config.GuiMainShowTitleBar
+            && ImGui.IsMouseDragging(ImGuiMouseButton.Middle)
+            && ImGui.IsWindowFocused())
+            {
                 Visible = false;
+            }
+
+            // Copy to clipboard with c
+            if (Helper.KeyPressed(Dalamud.Game.ClientState.Keys.VirtualKey.C)
+            && (ImGui.IsWindowFocused() || ImGui.IsWindowHovered())
+            && nekoTaskCurrent != null
+            && nekoTaskCurrent.IsCompletedSuccessfully)
+            {
+                Helper.CopyToClipboard(nekoTaskCurrent?.Result.URL ?? "");
+            }
+
+            // Open in Browser with b
+            if (Helper.KeyPressed(Dalamud.Game.ClientState.Keys.VirtualKey.B)
+            && (ImGui.IsWindowFocused() || ImGui.IsWindowHovered())
+            && nekoTaskCurrent != null
+            && nekoTaskCurrent.IsCompletedSuccessfully)
+            {
+                Helper.OpenInBrowser(nekoTaskCurrent?.Result.URL ?? "");
+            }
 
             ImGui.PopStyleColor(3);
             ImGui.EndChild();
-            //  ImGui.PopStyleColor();
         }
         if (!Plugin.Config.GuiMainShowResize)
             ImGui.PopStyleColor();

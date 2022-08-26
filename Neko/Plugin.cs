@@ -12,6 +12,7 @@ public class Plugin : IDalamudPlugin
 
     [PluginService] public static CommandManager CommandManager { get; private set; } = null!;
     [PluginService] public static DalamudPluginInterface PluginInterface { get; private set; } = null!;
+    [PluginService] public static Dalamud.Game.ClientState.Keys.KeyState KeyState { get; private set; } = null!;
 
     public string Name => "Neko Fans";
 
@@ -57,14 +58,11 @@ public class Plugin : IDalamudPlugin
 
     public void Dispose()
     {
-        if (GuiMain != null)
-            GuiMain.Visible = false;
-        if (GuiConfig != null)
-            GuiConfig.Visible = false;
-
         CommandManager.RemoveHandler(CommandConfig);
         CommandManager.RemoveHandler(CommandMain);
     }
+
+    public static void ReloadImageSources() => ImageSource = Config.LoadSources();
 
     private void OnCommand(string command, string args)
     {

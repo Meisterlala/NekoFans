@@ -21,12 +21,6 @@ public static class Common
             }
         }
     };
-    private static readonly JsonSerializerOptions jsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        AllowTrailingCommas = true,
-        ReadCommentHandling = JsonCommentHandling.Skip
-    };
 
     /// <summary>
     /// Download an Image and Store it in a <see cref="NekoImage"/>
@@ -60,7 +54,7 @@ public static class Common
         PluginLog.Log($"Downloaded {Helper.SizeSuffix(bytes.LongLength, 1)} from {url}");
 
         ct.ThrowIfCancellationRequested();
-        NekoImage? image = new(bytes);
+        NekoImage? image = new(bytes, url);
         return image;
     }
 
@@ -83,10 +77,14 @@ public static class Common
                 }
             };
 
+            // Download
             var response = await client.SendAsync(request, ct).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
             var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
-            result = await JsonSerializer.DeserializeAsync<T>(stream, jsonOptions, ct).ConfigureAwait(false);
+
+            // Parse Json
+            var context = JsonContext.GetTypeInfo<T>();
+            result = await JsonSerializer.DeserializeAsync(stream, context, ct).ConfigureAwait(false);
         }
         catch (HttpRequestException ex)
         {

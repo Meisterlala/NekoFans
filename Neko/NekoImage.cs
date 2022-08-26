@@ -75,6 +75,15 @@ public class NekoImage
 
     public TextureWrap Texture => _texture ?? throw new Exception("await LoadImage() before accessing the texture");
 
+    public string? URL { get; private set; }
+
+    public NekoImage(byte[] data, string url)
+    {
+        _data = data;
+        URL = url;
+        ImageStatus = ImageStatus.HasData;
+    }
+
     public NekoImage(byte[] data)
     {
         _data = data;
@@ -105,11 +114,15 @@ public class NekoImage
 
     public override string ToString()
     {
-        return _texture == null && _data != null
-            ? $"Data: {Helper.SizeSuffix(_data.Length)} Texture: not loaded"
-            : _texture != null && _data != null
-            ? $"Data: {Helper.SizeSuffix(_data.Length)} Texture: {Helper.SizeSuffix(_texture.Height * _texture.Width * 4)}"
-            : "Invalid Image";
+        var name = "";
+        if (_data != null)
+            name += $"Data: {Helper.SizeSuffix(_data.Length)}\t";
+        if (_texture != null)
+            name += $"Texture: {Helper.SizeSuffix(_texture.Height * _texture.Width * 4)}\t";
+        if (URL != null)
+            name += $"URL: {URL}";
+
+        return name == "" ? "Invalid Texture" : name;
     }
 
     /// <summary>
