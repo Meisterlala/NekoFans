@@ -16,8 +16,15 @@ public class Slideshow
         UpdateFromConfig();
     }
 
+    ~Slideshow()
+    {
+        timer.Stop();
+        timer.Dispose();
+    }
+
     public void UpdateFromConfig()
     {
+        timer.Stop();
         // Check for miminimum interval
         if (Plugin.Config.SlideshowIntervalSeconds < MININTERVAL)
             Plugin.Config.SlideshowIntervalSeconds = MININTERVAL;

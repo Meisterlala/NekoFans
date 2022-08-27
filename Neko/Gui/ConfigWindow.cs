@@ -143,11 +143,15 @@ public class ConfigWindow
         if (Plugin.Config.SlideshowEnabled)
         {
             var span = TimeSpan.FromSeconds(Plugin.Config.SlideshowIntervalSeconds);
-            var interval = span.TotalHours >= 1
-                ? $"{span.Hours}h {span.Minutes}m {span.Seconds}s"
-                : span.TotalMinutes >= 1
-                ? $"{span.Minutes}m {span.Seconds}s"
-                : $"{span.Seconds}s";
+            var interval = "";
+            if (span.Hours > 0)
+                interval += $"{span.Hours}h ";
+            if (span.Minutes > 0)
+                interval += $"{span.Minutes}m ";
+            if (span.Seconds > 0)
+                interval += $"{span.Seconds}s ";
+            if (span.Milliseconds > 0)
+                interval += $"{span.Milliseconds}ms";
 
             if (ImGui.InputDouble("Interval", ref Plugin.Config.SlideshowIntervalSeconds, 1, 60, interval))
             {
