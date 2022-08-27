@@ -27,6 +27,8 @@ public class MainWindow
 
     public readonly NekoQueue Queue;
 
+    public readonly Sources.Slideshow Slideshow;
+
     private bool imageGrayed;
 
     private Task<NekoImage>? nekoTaskCurrent;
@@ -35,6 +37,7 @@ public class MainWindow
     public MainWindow()
     {
         Queue = new(); // Start loading images
+        Slideshow = new(AsnyncNextNeko);
         AsnyncNextNeko();
     }
 
@@ -173,6 +176,10 @@ public class MainWindow
 
     private void AsnyncNextNeko()
     {
+        // Restart the timer for the slideshow
+        Slideshow.Restart();
+
+        // Dont load next neko if the current one is loading
         if (nekoTaskNext != null && !nekoTaskNext.IsCompleted) return;
         if (nekoTaskNext != null && nekoTaskNext.IsCompleted) nekoTaskNext.Dispose();
 

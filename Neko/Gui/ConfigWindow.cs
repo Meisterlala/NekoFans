@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using Dalamud.Interface;
 using ImGuiNET;
@@ -129,6 +130,37 @@ public class ConfigWindow
     private void DrawAdvanced()
     {
         ImGui.PushItemWidth(-200);
+
+        // Slideshow Enable / Disable
+        if (ImGui.Checkbox("Slideshow", ref Plugin.Config.SlideshowEnabled))
+        {
+            Plugin.Config.Save();
+            Plugin.GuiMain?.Slideshow.UpdateFromConfig();
+        }
+        ImGui.SameLine(); Common.HelpMarker("Automatically display a new image after the specified interval.");
+
+        // Slideshow Interval
+        if (Plugin.Config.SlideshowEnabled)
+        {
+            var span = TimeSpan.FromSeconds(Plugin.Config.SlideshowIntervalSeconds);
+            var interval = span.TotalHours >= 1
+                ? $"{span.Hours}h {span.Minutes}m {span.Seconds}s"
+                : span.TotalMinutes >= 1
+                ? $"{span.Minutes}m {span.Seconds}s"
+                : $"{span.Seconds}s";
+
+            if (ImGui.InputDouble("Interval", ref Plugin.Config.SlideshowIntervalSeconds, 1, 60, interval))
+            {
+                // Check for miminimum interval
+                if (Plugin.Config.SlideshowIntervalSeconds < Sources.Slideshow.MININTERVAL)
+                    Plugin.Config.SlideshowIntervalSeconds = Sources.Slideshow.MININTERVAL;
+                Plugin.Config.Save();
+                Plugin.GuiMain?.Slideshow.UpdateFromConfig();
+            }
+            Common.ToolTip("Input the interval length in seconds.\nHolding Control while pressing the + or - button changes the inverval by 1 minute.");
+            ImGui.SameLine(); Common.HelpMarker("How long to wait before displaying a new image.");
+        }
+
 
         // Image Queue System
         ImGui.Text("Image preloading system");
