@@ -142,18 +142,7 @@ public class ConfigWindow
         // Slideshow Interval
         if (Plugin.Config.SlideshowEnabled)
         {
-            var span = TimeSpan.FromSeconds(Plugin.Config.SlideshowIntervalSeconds);
-            var interval = "";
-            if (span.Hours > 0)
-                interval += $"{span.Hours}h ";
-            if (span.Minutes > 0)
-                interval += $"{span.Minutes}m ";
-            if (span.Seconds > 0)
-                interval += $"{span.Seconds}s ";
-            if (span.Milliseconds > 0)
-                interval += $"{span.Milliseconds}ms";
-
-            if (ImGui.InputDouble("Interval", ref Plugin.Config.SlideshowIntervalSeconds, 1, 60, interval))
+            if (ImGui.InputDouble("Interval", ref Plugin.Config.SlideshowIntervalSeconds, 1, 60, Helper.SecondsToString(Plugin.Config.SlideshowIntervalSeconds)))
             {
                 // Check for miminimum interval
                 if (Plugin.Config.SlideshowIntervalSeconds < Sources.Slideshow.MININTERVAL)
@@ -269,6 +258,8 @@ public class ConfigWindow
             ImGui.Text(Plugin.GuiMain?.Queue.ToString() ?? "GuiMain not loaded");
         if (ImGui.CollapsingHeader("Image Sources"))
             ImGui.Text(Plugin.ImageSource.ToString());
+        if (ImGui.CollapsingHeader("Slideshow Status"))
+            ImGui.Text(Plugin.GuiMain?.Slideshow.ToString() ?? "GuiMain not loaded");
     }
 
     private static void DrawKeybinds((string, string, bool)[] keybinds)

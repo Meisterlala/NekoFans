@@ -24,10 +24,10 @@ public class ShibeOnline : IImageSource
         return await Common.DownloadImage(url, ct);
     }
 
-    public override string ToString() => "Shibe.online\tURLs: " + URLs.URLCount;
+    public override string ToString() => $"Shibe.online\t{URLs}";
 
 #pragma warning disable
-    public class ShibeOnlineJson : List<string>, IJsonToList
+    public class ShibeOnlineJson : List<string>, IJsonToList<string>
     {
         public List<string> ToList() => this;
     }

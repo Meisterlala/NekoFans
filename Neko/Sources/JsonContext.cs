@@ -1,8 +1,8 @@
+using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
-using System.Collections.Generic;
 using Neko.Sources.APIS;
-using System;
 
 namespace Neko.Sources;
 
@@ -16,6 +16,7 @@ public class JsonContext
         { typeof(NekosLife.NekosLifeJson), NekosLifeContext.Default },
         { typeof(ShibeOnline.ShibeOnlineJson), ShibeOnlineContext.Default },
         { typeof(TheCatAPI.TheCatAPIJson), TheCatAPIContext.Default },
+        { typeof(Twitter.TwitterSearchJson), TwitterSearchJsonContext.Default },
         { typeof(Waifuim.WaifuImJson), WaifuimContext.Default },
         { typeof(WaifuPics.WaifuPicsJson), WaifuPicsContext.Default }
     };
@@ -44,6 +45,9 @@ internal partial class NekosLifeContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(ShibeOnline.ShibeOnlineJson))]
 internal partial class ShibeOnlineContext : JsonSerializerContext { }
+
+[JsonSerializable(typeof(Twitter.TwitterSearchJson))]
+internal partial class TwitterSearchJsonContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(TheCatAPI.TheCatAPIJson))]
 internal partial class TheCatAPIContext : JsonSerializerContext { }

@@ -36,7 +36,7 @@ public class DogCEO : IImageSource
     public override string ToString()
     {
         var breed = Plugin.Config.Sources.DogCEO.breed;
-        return $"Dog CEO\tBreed: {BreedName(breed)}\tURLs: {URLs.URLCount}";
+        return $"Dog CEO\tBreed: {BreedName(breed)}\t{URLs}";
     }
 
     public static string BreedName(Breed b)
@@ -56,7 +56,7 @@ public class DogCEO : IImageSource
     }
 
 #pragma warning disable
-    public class DogCEOJson : IJsonToList
+    public class DogCEOJson : IJsonToList<string>
     {
         public List<string> message { get; set; }
         public string status { get; set; }

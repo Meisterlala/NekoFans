@@ -36,10 +36,10 @@ public class NekoImage
     {
         return arch switch
         {
-            Architecture.Workstation32Bit => 1024 * 1024 * 15,  //  15 MB
-            Architecture.Workstation64Bit => 1024 * 1024 * 243, // 243 MB
-            Architecture.Server32Bit => 1024 * 1024 * 255,      // 255 MB
-            Architecture.Server64Bit => 1024 * 1024 * 1024,     //   1 GB
+            Architecture.Workstation32Bit => 1000 * 1000 * 15,  //  15 MB
+            Architecture.Workstation64Bit => 1000 * 1000 * 243, // 243 MB
+            Architecture.Server32Bit => 1000 * 1000 * 255,      // 255 MB
+            Architecture.Server64Bit => 1000 * 1000 * 1000,     //   1 GB
             _ => throw new ArgumentOutOfRangeException(nameof(arch)),
         };
     }
@@ -75,12 +75,15 @@ public class NekoImage
 
     public TextureWrap Texture => _texture ?? throw new Exception("await LoadImage() before accessing the texture");
 
-    public string? URL { get; private set; }
+    public string? URLImage { get; private set; }
+    public string? URLClick { get; set; }
+    public string? Description { get; set; }
 
     public NekoImage(byte[] data, string url)
     {
         _data = data;
-        URL = url;
+        URLImage = url;
+        URLClick = url;
         ImageStatus = ImageStatus.HasData;
     }
 
@@ -104,7 +107,7 @@ public class NekoImage
     public void Dispose()
     {
 #if DEBUG
-        PluginLog.LogDebug("Disposing Image  " + ToString());
+        PluginLog.LogVerbose("Disposing Image  " + ToString());
 #endif
         _texture?.Dispose();
         _texture = null;
@@ -119,8 +122,8 @@ public class NekoImage
             name += $"Data: {Helper.SizeSuffix(_data.Length)}\t";
         if (_texture != null)
             name += $"Texture: {Helper.SizeSuffix(_texture.Height * _texture.Width * 4)}\t";
-        if (URL != null)
-            name += $"URL: {URL}";
+        if (URLImage != null)
+            name += $"URL: {URLImage}";
 
         return name == "" ? "Invalid Texture" : name;
     }

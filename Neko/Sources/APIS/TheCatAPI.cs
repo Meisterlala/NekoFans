@@ -49,11 +49,11 @@ public class TheCatAPI : IImageSource
             : info;
     }
 
-    public override string ToString() => $"TheCatAPI\tBreed: {Plugin.Config.Sources.TheCatAPI.breed}\t URLs: {URLs.URLCount}";
+    public override string ToString() => $"TheCatAPI\tBreed: {Plugin.Config.Sources.TheCatAPI.breed}\t{URLs}";
 
 #pragma warning disable
 
-    public class TheCatAPIJson : List<TheCatAPIJson.Entry>, IJsonToList
+    public class TheCatAPIJson : List<TheCatAPIJson.Entry>, IJsonToList<string>
     {
         public class Entry
         {

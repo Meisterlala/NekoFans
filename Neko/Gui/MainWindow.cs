@@ -130,6 +130,15 @@ public class MainWindow
                 AsnyncNextNeko();
             }
 
+            // Show Image description
+            if (ImGui.IsItemHovered()
+            && nekoTaskCurrent != null
+            && nekoTaskCurrent.IsCompletedSuccessfully
+            && !string.IsNullOrWhiteSpace(nekoTaskCurrent.Result.Description))
+            {
+                Common.ToolTip(nekoTaskCurrent.Result.Description);
+            }
+
             // Allow move with right mouse button
             if (ImGui.IsMouseDragging(ImGuiMouseButton.Right)
             && (ImGui.IsWindowHovered()
@@ -154,7 +163,7 @@ public class MainWindow
             && nekoTaskCurrent != null
             && nekoTaskCurrent.IsCompletedSuccessfully)
             {
-                Helper.CopyToClipboard(nekoTaskCurrent?.Result.URL ?? "");
+                Helper.CopyToClipboard(nekoTaskCurrent?.Result.URLImage ?? "");
             }
 
             // Open in Browser with b
@@ -163,7 +172,7 @@ public class MainWindow
             && nekoTaskCurrent != null
             && nekoTaskCurrent.IsCompletedSuccessfully)
             {
-                Helper.OpenInBrowser(nekoTaskCurrent?.Result.URL ?? "");
+                Helper.OpenInBrowser(nekoTaskCurrent?.Result.URLClick ?? "");
             }
 
             ImGui.PopStyleColor(3);

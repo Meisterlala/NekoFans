@@ -27,9 +27,9 @@ public interface IImageConfig
 }
 
 /// <summary>
-/// Convert self to List<string>
+/// Convert self to List<T>
 /// </summary>
-public interface IJsonToList
+public interface IJsonToList<T>
 {
-    public List<string> ToList();
+    public List<T> ToList();
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
 using Neko.Sources;
@@ -45,7 +46,9 @@ public class ImageSourcesGUI
             new ImageSourceConfig("Dog CEO", "Dogs","https://dog.ceo/",
                 typeof(DogCEO), Plugin.Config.Sources.DogCEO),
             new ImageSourceConfig("The Cat API", "Cats","https://thecatapi.com/",
-                typeof(TheCatAPI), Plugin.Config.Sources.TheCatAPI)
+                typeof(TheCatAPI), Plugin.Config.Sources.TheCatAPI),
+            new ImageSourceConfig("Twitter", "Twitter","https://twitter.com/",
+                typeof(Twitter), Plugin.Config.Sources.Twitter),
         };
 
     private const float INDENT = 32f;
@@ -78,9 +81,12 @@ public class ImageSourcesGUI
         SourceCheckbox(SourceList[7], ref Plugin.Config.Sources.TheCatAPI.enabled);
         if (Plugin.Config.Sources.TheCatAPI.enabled)
             DrawTheCatAPI(SourceList[7]);
+        //  ------------ Twitter --------------
+        SourceCheckbox(SourceList[8], ref Plugin.Config.Sources.Twitter.enabled);
+        if (Plugin.Config.Sources.Twitter.enabled)
+            DrawTwitter(SourceList[8]);
         CheckIfNoSource();
     }
-
 
     private static void DrawWaifuPics(ImageSourceConfig source)
     {
@@ -219,6 +225,25 @@ public class ImageSourcesGUI
             }
             ImGui.EndCombo();
         }
+        ImGui.Unindent(INDENT);
+    }
+
+    private static string twitterin = "";
+
+    private static void DrawTwitter(ImageSourceConfig source)
+    {
+        ImGui.Indent(INDENT);
+
+        ImGui.InputText("Search text", ref twitterin, 999);
+
+        if (ImGui.Button("Check"))
+        {
+            Plugin.Config.Sources.Twitter.queries = new(new string[] { twitterin });
+            Plugin.Config.Save();
+            Plugin.ImageSource.RemoveAll(source.Type);
+            Plugin.ImageSource.AddSource(source.Config.LoadConfig());
+        }
+
         ImGui.Unindent(INDENT);
     }
 

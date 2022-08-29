@@ -43,10 +43,10 @@ public class Waifuim : IImageSource
         return await Common.DownloadImage(url, ct);
     }
 
-    public override string ToString() => $"waifu.im ({(nsfw ? "NSFW" : "SFW")})\tURLs: {URLs.URLCount}";
+    public override string ToString() => $"waifu.im ({(nsfw ? "NSFW" : "SFW")})\t{URLs}";
 
 #pragma warning disable
-    public class WaifuImJson : IJsonToList
+    public class WaifuImJson : IJsonToList<string>
     {
         public class Image
         {
