@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,6 +21,7 @@ public class Twitter : IImageSource
     private static readonly string URLSearch = "https://api.twitter.com/2/tweets/search/recent";
 
     private static readonly string[] URLSearchParams = {
+        "tweet.fields=id,text,attachments,created_at,possibly_sensitive",
         "media.fields=url,type",
         "user.fields=username",
         "expansions=attachments.media_keys,author_id",
@@ -70,8 +71,30 @@ public class Twitter : IImageSource
     }
 
 
+    private static readonly Regex removeTco = new(@"(\W*https:\/\/t.co\/\w+)+\W*$", RegexOptions.Compiled);
+
     public static string TweetDescription(TwitterSearchJson.Tweet tweet, TwitterSearchJson.User user)
-        => $"{user.name} (@{user.username}) tweeted:\n{tweet.text}";
+    {
+        // Remove t.co links from the tweet
+        var filterdText = removeTco.Replace(tweet.text, "");
+        // Convert time to local time
+        var localTime = DateTime.Parse(tweet.created_at).ToLocalTime();
+        var span = DateTime.Now - localTime;
+
+        var time = span.TotalSeconds < 5
+            ? $"now"
+            : span.TotalSeconds < 60
+            ? $"{span.Seconds} seconds ago"
+            : span.TotalMinutes < 60
+            ? $"{(int)span.TotalMinutes} minutes ago"
+            : span.TotalHours < 24
+            ? $"{(int)span.TotalHours} hours ago"
+            : span.TotalDays < 7
+            ? $"{(int)span.TotalDays} days ago"
+            : $"{localTime.Date.ToLongTimeString()}";
+
+        return $"{user.name} (@{user.username}) tweeted {time}:\n{filterdText}";
+    }
 
     private static string URLTweetID(TwitterSearchJson.Tweet tweet, TwitterSearchJson.User user)
         => $"https://twitter.com/{user.username}/status/{tweet.id}";
@@ -105,6 +128,10 @@ public class Twitter : IImageSource
             {
                 // that has media attached
                 if (tweet.attachments == null)
+                    continue;
+
+                // Only show sensitive tweets if NSFW mode
+                if (tweet.possibly_sensitive ?? false && !Neko.NSFW.AllowNSFW)
                     continue;
 
                 // Find the Author
@@ -172,6 +199,8 @@ public class Twitter : IImageSource
             public string author_id { get; set; }
             public string id { get; set; }
             public string text { get; set; }
+            public string created_at { get; set; }
+            public bool? possibly_sensitive { get; set; }
         }
 
     }
