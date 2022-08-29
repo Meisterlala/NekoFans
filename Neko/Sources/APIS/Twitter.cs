@@ -26,7 +26,7 @@ public class Twitter : IImageSource
         "user.fields=username",
         "expansions=attachments.media_keys,author_id",
         "max_results=10",
-        "query=has:media -is:retweet "
+        "query=has:media%20-is:retweet%20"
     };
 
     // This is a bad idea, but there really isnt a easy way to avoid doing this.
