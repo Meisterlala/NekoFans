@@ -38,7 +38,21 @@ public class CombinedSource : IImageSource
         sources.Add(source);
     }
 
-    public bool RemoveSource(IImageSource source) => sources.Remove(source);
+    public bool RemoveSource(IImageSource source)
+    {
+        if (sources.Remove(source))
+            return true;
+        foreach (var s in sources)
+        {
+            if (s is CombinedSource cs)
+            {
+                if (cs.RemoveSource(source))
+                    return true;
+            }
+        }
+        return false;
+    }
+
     public void RemoveAll(Type source)
     {
         sources.RemoveAll((e) =>
@@ -51,18 +65,48 @@ public class CombinedSource : IImageSource
         sources.RemoveAll((e) =>
             e.GetType() == typeof(CombinedSource) && ((CombinedSource)e).Count() == 0);
     }
-    public bool Contains(Type source) => sources.Find((e) => e.GetType() == source) != null;
-    public int Count() => sources.Count;
+    public bool Contains(Type source)
+    {
+        return sources.Exists((e) => e.GetType() == source)
+        || sources.Exists((e) => e.GetType() == typeof(CombinedSource)
+        && ((CombinedSource)e).Contains(source));
+    }
+
+    public List<T> GetAll<T>()
+    {
+        var list = new List<T>();
+        foreach (var s in sources)
+        {
+            if (s is T t)
+                list.Add(t);
+            if (s is CombinedSource c)
+                list.AddRange(c.GetAll<T>());
+        }
+        return list;
+    }
+
+    public int Count()
+    {
+        var count = sources.Count;
+        sources.ForEach((s) =>
+        {
+            if (s.GetType() == typeof(CombinedSource))
+                count += ((CombinedSource)s).Count() - 1;
+        });
+        return count;
+    }
 
     public override string ToString()
     {
-        var res = $"Loaded image sources: {sources.Count}\n";
+        var res = $"Loaded image sources: {Count()}\n";
         foreach (var s in sources)
         {
             if (s.GetType() == typeof(CombinedSource))
             {
                 var c = s.ToString() ?? "";
-                res += c[(c.IndexOf("\n") + 1)..];
+                c = c[(c.IndexOf("\n") + 1)..];
+                res += "|--- " + c.Replace("\n", "\n|--- ");
+                res = res[..^5];
             }
             else
             {

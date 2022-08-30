@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Dalamud.Logging;
 
 namespace Neko.Sources.APIS;
 
@@ -14,21 +15,40 @@ public class Twitter : IImageSource
     public class Config : IImageConfig
     {
         public bool enabled;
+        public List<Query> queries = new();
 
-        public List<string> queries = new();
+        public class Query
+        {
+            public string searchText = "";
+            public bool enabled;
 
-        public IImageSource? LoadConfig() => enabled ? new CombinedSource(queries.ConvertAll<Twitter>((query) => new(query)).ToArray()) : null;
+        }
+
+        public IImageSource? LoadConfig()
+        {
+            if (!enabled || queries.Count == 0)
+                return null;
+
+            var enabledQueries = queries.FindAll((q) => q.enabled);
+            if (enabledQueries.Count == 0)
+                return null;
+
+            var imageSources = enabledQueries.ConvertAll<Twitter>((q) => new(q));
+            return new CombinedSource(imageSources.ToArray());
+        }
+
     }
-    private static readonly string URLSearch = "https://api.twitter.com/2/tweets/search/recent";
 
+    private static readonly string URLSearch = "https://api.twitter.com/2/tweets/search/recent";
     private static readonly string[] URLSearchParams = {
         "tweet.fields=id,text,attachments,created_at,possibly_sensitive",
         "media.fields=url,type",
         "user.fields=username",
         "expansions=attachments.media_keys,author_id",
         "max_results=10",
-        "query=has:media%20-is:retweet%20"
     };
+    private static readonly string URLQueryBegin = "query=has:media -is:retweet ";
+
 
     // This is a bad idea, but there really isnt a easy way to avoid doing this.
     // The proper solution is to require user authentication to a server, which holds
@@ -40,15 +60,22 @@ public class Twitter : IImageSource
     private static readonly string uuuuuu = Encoding.UTF8.GetString(Convert.FromBase64String(fhaksdn + asasdjsaf));
 
     private readonly string URL;
+    private readonly string search;
     private readonly string query;
     private readonly TwitterMultiURLs URLs;
+    private int? tweetCount;
+    private Task<int>? tweetCountTask;
 
-    public override string ToString() => $"Twitter: \"{query}\"\t{URLs}";
+    public readonly Config.Query ConfigQuery;
 
-    public Twitter(string search)
+    public override string ToString() => $"Twitter: \"{search}\"\t{URLs}";
+
+    public Twitter(Config.Query query)
     {
-        query = search;
-        URL = $"{URLSearch}?{string.Join('&', URLSearchParams)}{Uri.EscapeDataString(search).Replace(" ", "%20")}";
+        ConfigQuery = query;
+        search = query.searchText;
+        this.query = URLQueryBegin + Uri.EscapeDataString(search);
+        URL = $"{URLSearch}?{string.Join('&', URLSearchParams)}&{this.query}";
 
         HttpRequestMessage request() =>
             new(HttpMethod.Get, URL)
@@ -72,14 +99,62 @@ public class Twitter : IImageSource
     }
 
 
-    public static Task<int> GetTweetCount()
+    public async Task<int> TweetCount(CancellationToken ct = default)
     {
+        // Wait for task to finish
+        if (tweetCountTask != null)
+            await tweetCountTask;
 
+        // Use cached result if available
+        if (tweetCount != null)
+            return tweetCount.Value;
+
+        var URL = $"https://api.twitter.com/2/tweets/counts/recent?granularity=day&{query}";
+        HttpRequestMessage request = new(HttpMethod.Get, URL)
+        {
+            Headers =
+              {
+                    Authorization = new("Bearer", uuuuuu),
+              }
+        };
+
+        tweetCountTask = Task.Run(async () =>
+        {
+            try
+            {
+                var response = await Common.ParseJson<CountJson>(request, ct);
+                tweetCount = response.Meta.TotalTweetCount;
+                return response.Meta.TotalTweetCount;
+            }
+            catch
+            {
+                tweetCount = 0;
+                return 0;
+            }
+        });
+
+        return await tweetCountTask;
+    }
+
+    public string TweetCountString()
+    {
+        // Use cached result if available
+        if (tweetCount != null)
+            return tweetCount.Value.ToString();
+
+        // Start TweetCount Task
+        if (tweetCountTask == null)
+        {
+            var _ = TweetCount();
+        }
+
+
+        return "?";
     }
 
     private static readonly Regex removeTco = new(@"(\W*https:\/\/t.co\/\w+)+\W*$", RegexOptions.Compiled);
 
-    public static string TweetDescription(TwitterSearchJson.Tweet tweet, TwitterSearchJson.User user)
+    public static string TweetDescription(SearchJson.Tweet tweet, SearchJson.User user)
     {
         // Remove t.co links from the tweet
         var filterdText = removeTco.Replace(tweet.Text ?? "", "");
@@ -102,16 +177,16 @@ public class Twitter : IImageSource
         return $"{user.Name} (@{user.Username}) tweeted {time}:\n{filterdText}";
     }
 
-    private static string URLTweetID(TwitterSearchJson.Tweet tweet, TwitterSearchJson.User user)
+    private static string URLTweetID(SearchJson.Tweet tweet, SearchJson.User user)
         => $"https://twitter.com/{user.Username}/status/{tweet.Id}";
 
     public struct SearchResult
     {
-        public TwitterSearchJson.Tweet Tweet;
-        public TwitterSearchJson.User Author;
-        public TwitterSearchJson.Medium Media;
+        public SearchJson.Tweet Tweet;
+        public SearchJson.User Author;
+        public SearchJson.Medium Media;
 
-        public SearchResult(TwitterSearchJson.Tweet tweet, TwitterSearchJson.User author, TwitterSearchJson.Medium media)
+        public SearchResult(SearchJson.Tweet tweet, SearchJson.User author, SearchJson.Medium media)
         {
             Tweet = tweet;
             Author = author;
@@ -122,7 +197,7 @@ public class Twitter : IImageSource
     #region JSON
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
 
-    public class TwitterSearchJson : IJsonToList<SearchResult>
+    public class SearchJson : IJsonToList<SearchResult>
     {
         public List<SearchResult> ToList()
         {
@@ -145,7 +220,10 @@ public class Twitter : IImageSource
 
                 // Only show sensitive tweets if NSFW mode
                 if (tweet.PossiblySensitive && !NSFW.AllowNSFW)
+                {
+                    PluginLog.LogDebug($"Skipping tweet {tweet.Id} because it is marked as sensitive");
                     continue;
+                }
 
                 // Find the Author
                 var author = Includes.Users.Find((user) => user.Id == tweet.AuthorId);
@@ -285,7 +363,7 @@ public class Twitter : IImageSource
 
 }
 
-internal class TwitterMultiURLs : MultiURLsGeneric<Twitter.TwitterSearchJson, Twitter.SearchResult>
+internal class TwitterMultiURLs : MultiURLsGeneric<Twitter.SearchJson, Twitter.SearchResult>
 {
     private string? next_token;
 
@@ -296,7 +374,7 @@ internal class TwitterMultiURLs : MultiURLsGeneric<Twitter.TwitterSearchJson, Tw
     { }
 
     // retrieve next_token from json response
-    protected override void OnTaskSuccessfull(Twitter.TwitterSearchJson result)
+    protected override void OnTaskSuccessfull(Twitter.SearchJson result)
     {
         next_token = result.Meta.NextToken;
         base.OnTaskSuccessfull(result);

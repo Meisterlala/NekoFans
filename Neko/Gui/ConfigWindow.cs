@@ -254,20 +254,22 @@ public class ConfigWindow
     private static void DrawDev()
     {
         if (ImGui.CollapsingHeader("Image Queue"))
-            ImGui.Text(Plugin.GuiMain?.Queue.ToString() ?? "GuiMain not loaded");
+            ImGui.TextWrapped(Plugin.GuiMain?.Queue.ToString() ?? "GuiMain not loaded");
         if (ImGui.CollapsingHeader("Image Sources"))
-            ImGui.Text(Plugin.ImageSource.ToString());
+            ImGui.TextWrapped(Plugin.ImageSource.ToString());
         if (ImGui.CollapsingHeader("Slideshow Status"))
-            ImGui.Text(Plugin.GuiMain?.Slideshow.ToString() ?? "GuiMain not loaded");
+            ImGui.TextWrapped(Plugin.GuiMain?.Slideshow.ToString() ?? "GuiMain not loaded");
+        if (ImGui.CollapsingHeader("Plugin Config"))
+            ImGui.TextWrapped(Plugin.Config.ToString());
     }
 
     private static void DrawKeybinds((string, string, bool)[] keybinds)
     {
         ImGui.BeginTable("Keybinds##ConfigWindow", 3);
 
-        ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed);
-        ImGui.TableSetupColumn("Arrow", ImGuiTableColumnFlags.WidthFixed, 20);
-        ImGui.TableSetupColumn("Description", ImGuiTableColumnFlags.WidthStretch);
+        ImGui.TableSetupColumn("Key##ConfigWindow", ImGuiTableColumnFlags.WidthFixed);
+        ImGui.TableSetupColumn("Arrow##ConfigWindow", ImGuiTableColumnFlags.WidthFixed, 20);
+        ImGui.TableSetupColumn("Description##ConfigWindowu", ImGuiTableColumnFlags.WidthStretch);
 
         foreach (var keybind in keybinds)
         {

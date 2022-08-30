@@ -16,7 +16,8 @@ public class JsonContext
         { typeof(NekosLife.NekosLifeJson), NekosLifeContext.Default },
         { typeof(ShibeOnline.ShibeOnlineJson), ShibeOnlineContext.Default },
         { typeof(TheCatAPI.TheCatAPIJson), TheCatAPIContext.Default },
-        { typeof(Twitter.TwitterSearchJson), TwitterSearchJsonContext.Default },
+        { typeof(Twitter.SearchJson), TwitterSearchJsonContext.Default },
+        { typeof(Twitter.CountJson), TwitterCountJsonContext.Default },
         { typeof(Waifuim.WaifuImJson), WaifuimContext.Default },
         { typeof(WaifuPics.WaifuPicsJson), WaifuPicsContext.Default }
     };
@@ -46,8 +47,11 @@ internal partial class NekosLifeContext : JsonSerializerContext { }
 [JsonSerializable(typeof(ShibeOnline.ShibeOnlineJson))]
 internal partial class ShibeOnlineContext : JsonSerializerContext { }
 
-[JsonSerializable(typeof(Twitter.TwitterSearchJson))]
+[JsonSerializable(typeof(Twitter.SearchJson))]
 internal partial class TwitterSearchJsonContext : JsonSerializerContext { }
+
+[JsonSerializable(typeof(Twitter.CountJson))]
+internal partial class TwitterCountJsonContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(TheCatAPI.TheCatAPIJson))]
 internal partial class TheCatAPIContext : JsonSerializerContext { }

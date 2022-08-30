@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Dalamud.Configuration;
 using Dalamud.Logging;
 using Neko.Sources;
@@ -73,6 +74,10 @@ public class Configuration : IPluginConfiguration
             return new Configuration();
         }
     }
+
+    public override string ToString() =>
+        JsonSerializer.Serialize(this, typeof(Configuration),
+            new JsonSerializerOptions() { WriteIndented = true, IncludeFields = true });
 }
 
 

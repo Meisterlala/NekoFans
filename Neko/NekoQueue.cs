@@ -36,9 +36,9 @@ public class NekoQueue
         LoadImages();
     }
 
-    private int TargetDownloadCount => StopQueue ? 0 : Plugin.Config.QueueDownloadCount;
+    private int TargetDownloadCount => StopQueue || Plugin.ImageSource.Count() == 0 ? 0 : Plugin.Config.QueueDownloadCount;
 
-    private int TargetPreloadCount => StopQueue ? 0 : Plugin.Config.QueuePreloadCount;
+    private int TargetPreloadCount => StopQueue || Plugin.ImageSource.Count() == 0 ? 0 : Plugin.Config.QueuePreloadCount;
 
     ~NekoQueue()
     {

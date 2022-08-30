@@ -37,7 +37,7 @@ public static class Common
         {
             var response = await client.SendAsync(request, ct).ConfigureAwait(false);
             if (response.RequestMessage != null)
-                PluginLog.LogDebug("Sent request to download image:\n" + response.RequestMessage?.ToString());
+                PluginLog.LogVerbose("Sent request to download image:\n" + response.RequestMessage?.ToString());
             response.EnsureSuccessStatusCode();
             bytes = await response.Content.ReadAsByteArrayAsync(ct).ConfigureAwait(false);
         }
@@ -82,7 +82,7 @@ public static class Common
         {
             response = await client.SendAsync(request, ct).ConfigureAwait(false);
             if (response.RequestMessage != null)
-                PluginLog.LogDebug("Sending request to get json:\n" + request.ToString());
+                PluginLog.LogVerbose("Sending request to get json:\n" + request.ToString());
             response.EnsureSuccessStatusCode();
             stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
         }

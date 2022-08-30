@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
+using Dalamud.Logging;
 using ImGuiNET;
 using Neko.Sources;
 using Neko.Sources.APIS;
@@ -83,7 +86,8 @@ public class ImageSourcesGUI
         //  ------------ Twitter --------------
         SourceCheckbox(SourceList[8], ref Plugin.Config.Sources.Twitter.enabled);
         if (Plugin.Config.Sources.Twitter.enabled)
-            DrawTwitter(SourceList[8]);
+            DrawTwitter();
+
         CheckIfNoSource();
     }
 
@@ -227,20 +231,122 @@ public class ImageSourcesGUI
         ImGui.Unindent(INDENT);
     }
 
-    private static string twitterin = "";
 
-    private static void DrawTwitter(ImageSourceConfig source)
+    private static List<TwitterTableEntry>? TwitterTableEntries;
+
+    private class TwitterTableEntry
     {
-        ImGui.Indent(INDENT);
+        public Twitter.Config.Query Query;
 
-        ImGui.InputText("Search text", ref twitterin, 999);
+        public Twitter? ImageSource;
+        public bool IsDirty;
 
-        if (ImGui.Button("Check"))
+        public TwitterTableEntry(Twitter.Config.Query query, Twitter? imageSource, bool isDirty)
         {
-            Plugin.Config.Sources.Twitter.queries = new(new string[] { twitterin });
+            Query = query;
+            ImageSource = imageSource;
+            IsDirty = isDirty;
+        }
+    }
+
+
+    private static void DrawTwitter()
+    {
+        // Create Table if there is none
+        if (TwitterTableEntries == null)
+        {
+            TwitterTableEntries = new();
+            var imageSources = Plugin.ImageSource.GetAll<Twitter>();
+            foreach (var query in Plugin.Config.Sources.Twitter.queries)
+            {
+                var source = imageSources.Find((s) => s.ConfigQuery == query);
+                TwitterTableEntries.Add(new(query, source, false));
+            }
+        }
+
+        static string TweetCount(TwitterTableEntry? entry) => entry?.ImageSource?.TweetCountString() ?? "?";
+
+        // Find max width needed of TweetCount Column or use default
+        var tweetCountColumWidth = TwitterTableEntries.Count > 0
+            ? TwitterTableEntries.Max((e) => ImGui.CalcTextSize(TweetCount(e)).X)
+            : ImGui.CalcTextSize(TweetCount(null)).X;
+
+        // It should be bigger than the header
+        if (tweetCountColumWidth < ImGui.CalcTextSize("Count").X)
+            tweetCountColumWidth = ImGui.CalcTextSize("Count").X;
+
+        ImGui.Indent(INDENT);
+        ImGui.BeginTable("TwitterConfig##Twitter", 3, ImGuiTableFlags.PadOuterX | ImGuiTableFlags.RowBg);
+
+        ImGui.TableSetupColumn("Enabled##Twitter", ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoResize | ImGuiTableColumnFlags.NoSort);
+        ImGui.TableSetupColumn("Search Text##Twitter", ImGuiTableColumnFlags.WidthStretch, 100f - ImGui.GetColumnWidth(0) - tweetCountColumWidth);
+        ImGui.TableSetupColumn("Count##Twitter", ImGuiTableColumnFlags.WidthFixed, tweetCountColumWidth);
+
+        ImGui.TableHeadersRow();
+
+        for (var i = 0; i < TwitterTableEntries.Count; i++)
+        {
+            var entry = TwitterTableEntries[i];
+
+            ImGui.TableNextColumn();
+            var checkboxSize = ImGui.GetFontSize() + (ImGui.GetStyle().FramePadding.X * 2);
+            var checkboxX = (ImGui.GetColumnWidth() / 2) - (checkboxSize / 2) + ImGui.GetCursorPosX();
+            ImGui.SetCursorPosX(checkboxX);
+            if (ImGui.Checkbox($"##TwitterTableEntryEnabled_{i}", ref entry.Query.enabled))
+                entry.IsDirty = true;
+
+            ImGui.TableNextColumn();
+            ImGui.PushItemWidth(-1);  // Remove Label
+            if (ImGui.InputText($"##TwitterTableEntry_{i}", ref entry.Query.searchText, 120))
+                entry.IsDirty = true;
+            ImGui.PopItemWidth();
+
+            ImGui.TableNextColumn();
+            ImGui.Text(TweetCount(entry));
+        }
+        ImGui.EndTable();
+
+        // Add Button
+        if (ImGui.Button("Add##Twitter"))
+        {
+            Twitter.Config.Query query = new();
+            Plugin.Config.Sources.Twitter.queries.Add(query);
+            TwitterTableEntries.Add(new(query, null, false));
             Plugin.Config.Save();
-            Plugin.ImageSource.RemoveAll(source.Type);
-            Plugin.ImageSource.AddSource(source.Config.LoadConfig());
+        }
+
+        // Save button only when there are changes to save
+        if (TwitterTableEntries.Find((e) => e.IsDirty) != null)
+        {
+            ImGui.SameLine();
+            if (ImGui.Button("Save Changes##Twitter"))
+            {
+                foreach (var entry in TwitterTableEntries)
+                {
+                    // Continue if nothing changed
+                    if (!entry.IsDirty)
+                        continue;
+
+                    // Remove the Image source
+                    if (entry.ImageSource != null)
+                    {
+                        Plugin.ImageSource.RemoveSource(entry.ImageSource);
+                        entry.ImageSource = null;
+                    }
+
+                    // Add the updated Image source
+                    if (entry.Query.enabled)
+                    {
+                        entry.ImageSource = new(entry.Query);
+                        Plugin.ImageSource.AddSource(entry.ImageSource);
+                    }
+
+                    // Reset the dirty flag
+                    entry.IsDirty = false;
+                }
+                // Save the config
+                Plugin.Config.Save();
+            }
         }
 
         ImGui.Unindent(INDENT);

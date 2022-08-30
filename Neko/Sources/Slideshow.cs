@@ -19,7 +19,6 @@ public class Slideshow
 
     ~Slideshow()
     {
-        Dalamud.Logging.PluginLog.Log("Dispose ");
         timer.Stop();
         timer.Dispose();
     }
@@ -31,7 +30,6 @@ public class Slideshow
             Plugin.Config.SlideshowIntervalSeconds = MININTERVAL;
         timer.Interval = Plugin.Config.SlideshowIntervalSeconds * 1000;
         timer.Enabled = Plugin.Config.SlideshowEnabled;
-        Dalamud.Logging.PluginLog.Log("Setting time to: " + timer.Enabled);
     }
 
     public void Start() => timer.Start();

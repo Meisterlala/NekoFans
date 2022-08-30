@@ -62,6 +62,8 @@ public class MultiURLsGeneric<TJson, TQueueElement>
 
     public virtual async Task<TQueueElement> GetURL()
     {
+        Interlocked.Decrement(ref _urlCount);
+
         // Load more
         if (_urlCount <= maxCount
             && getNewURLs.IsCompletedSuccessfully
@@ -71,7 +73,6 @@ public class MultiURLsGeneric<TJson, TQueueElement>
         }
 
         await getNewURLs;
-        Interlocked.Decrement(ref _urlCount);
         URLs.TryDequeue(out var res);
 
         return res == null || getNewURLs.IsFaulted ? throw new Exception("Could not get URLs to images") : res;
