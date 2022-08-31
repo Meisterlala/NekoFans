@@ -1,0 +1,56 @@
+using System;
+using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
+using Dalamud.Logging;
+
+namespace Neko.Sources;
+
+public class FaultCheck : IImageSource
+{
+    private int FaultCount;
+    private readonly IImageSource Source;
+    private const int MaxFaultCount = 5;
+    public bool HasFaulted => FaultCount >= MaxFaultCount;
+
+    private FaultCheck(IImageSource source) => Source = source;
+
+    public async Task<NekoImage> Next(CancellationToken ct = default)
+    {
+        if (HasFaulted)
+        {
+            PluginLog.LogWarning("Task Faulted and is disabled");
+            return await NekoImage.DefaultNeko();
+        }
+
+        try
+        {
+            return await Source.Next(ct);
+        }
+        catch (Exception ex)
+        {
+            Interlocked.Increment(ref FaultCount);
+            PluginLog.LogWarning("Image Task faulted");
+            return await NekoImage.DefaultNeko();
+            // throw new Exception("Image Task faulted", ex);
+        }
+    }
+
+    public override string ToString()
+    {
+        var status = HasFaulted
+            ? "ERROR"
+            : FaultCount > 0
+            ? FaultCount.ToString()
+            : "OK";
+
+        return $"({status}) {Source.ToString() ?? "Fault Check"}";
+    }
+    public bool IsFaulted() => FaultCount >= MaxFaultCount;
+
+    public static FaultCheck Wrap(IImageSource source)
+        => source is FaultCheck faultCheck
+            ? faultCheck
+            : new(source);
+    public IImageSource UnWrap() => Source;
+}

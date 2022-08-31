@@ -35,7 +35,14 @@ public class CombinedSource : IImageSource
     {
         if (source == null)
             return;
-        sources.Add(source);
+
+        if (source is CombinedSource combinedSource)
+            sources.Add(combinedSource);
+
+        if (source is FaultCheck faultCheck)
+            sources.Add(faultCheck);
+        else
+            sources.Add(FaultCheck.Wrap(source));
     }
 
     public bool RemoveSource(IImageSource source)
@@ -44,11 +51,10 @@ public class CombinedSource : IImageSource
             return true;
         foreach (var s in sources)
         {
-            if (s is CombinedSource cs)
-            {
-                if (cs.RemoveSource(source))
-                    return true;
-            }
+            if (s is CombinedSource cs && cs.RemoveSource(source))
+                return true;
+            if (s is FaultCheck fc && fc.UnWrap() == source)
+                return true;
         }
         return false;
     }
@@ -81,6 +87,8 @@ public class CombinedSource : IImageSource
                 list.Add(t);
             if (s is CombinedSource c)
                 list.AddRange(c.GetAll<T>());
+            if (s is FaultCheck f && f.UnWrap() is T unwrapped)
+                list.Add(unwrapped);
         }
         return list;
     }
@@ -117,4 +125,5 @@ public class CombinedSource : IImageSource
     }
 
     public IImageSource? LoadConfig(object _) => throw new NotImplementedException();
+
 }

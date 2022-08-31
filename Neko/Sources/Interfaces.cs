@@ -15,6 +15,20 @@ public interface IImageSource
     /// Load the next image form the web to ram, not to vram yet
     /// </summary>
     public Task<NekoImage> Next(CancellationToken ct = default);
+
+
+}
+
+/// <summary>
+/// A source for new Images from an API.
+/// Doesnt make more API calls, if there are to many errors
+/// </summary>
+public interface IImageSourceSafe : IImageSource
+{
+    /// <summary>
+    /// Check if the ImageURL has disabled itself
+    /// </summary>
+    public bool IsFaulted();
 }
 
 /// <summary>
