@@ -26,12 +26,12 @@ public class TheCatAPI : IImageSource
 
         if (breed == Breed.All)
         {
-            URLs = new(baseUrl);
+            URLs = new(baseUrl, this);
             return;
         }
 
         var info = GetBreedInfo(breed);
-        URLs = new(baseUrl + $"&breed_ids={info.ID}");
+        URLs = new(baseUrl + $"&breed_ids={info.ID}", this);
     }
 
     public async Task<NekoImage> Next(CancellationToken ct = default)

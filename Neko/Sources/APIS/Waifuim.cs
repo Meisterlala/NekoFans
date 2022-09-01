@@ -33,8 +33,8 @@ public class Waifuim : IImageSource
     {
         this.nsfw = nsfw && NSFW.AllowNSFW; // NSFW Check
         URLs = this.nsfw
-            ? (new("https://api.waifu.im/random/?is_nsfw=true&gif=false&many=true"))
-            : (new("https://api.waifu.im/random/?is_nsfw=false&gif=false&many=true"));
+            ? (new("https://api.waifu.im/random/?is_nsfw=true&gif=false&many=true", this))
+            : (new("https://api.waifu.im/random/?is_nsfw=false&gif=false&many=true", this));
     }
 
     public async Task<NekoImage> Next(CancellationToken ct = default)

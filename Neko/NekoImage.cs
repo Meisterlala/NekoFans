@@ -117,6 +117,10 @@ public class NekoImage
 
     public override string ToString()
     {
+        // Check if Default Neko
+        if (this == defaultNekoImage)
+            return "Default Neko";
+
         var name = "";
         if (_data != null)
             name += $"Data: {Helper.SizeSuffix(_data.Length)}\t";
@@ -124,6 +128,7 @@ public class NekoImage
             name += $"Texture: {Helper.SizeSuffix(_texture.Height * _texture.Width * 4)}\t";
         if (URLImage != null)
             name += $"URL: {URLImage}";
+
 
         return name == "" ? "Invalid Texture" : name;
     }

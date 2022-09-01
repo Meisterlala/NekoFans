@@ -10,7 +10,7 @@ public class FaultCheck : IImageSource
 {
     private int FaultCount;
     private readonly IImageSource Source;
-    private const int MaxFaultCount = 5;
+    private const int MaxFaultCount = 999;
     public bool HasFaulted => FaultCount >= MaxFaultCount;
 
     private FaultCheck(IImageSource source) => Source = source;
@@ -30,7 +30,7 @@ public class FaultCheck : IImageSource
         catch (Exception ex)
         {
             Interlocked.Increment(ref FaultCount);
-            PluginLog.LogWarning("Image Task faulted");
+            PluginLog.LogWarning(ex, "Image Task faulted");
             return await NekoImage.DefaultNeko();
             // throw new Exception("Image Task faulted", ex);
         }
@@ -53,4 +53,20 @@ public class FaultCheck : IImageSource
             ? faultCheck
             : new(source);
     public IImageSource UnWrap() => Source;
+
+    public static void IncreaseFaultCount(IImageSource source)
+    {
+        var fcs = Plugin.ImageSource.GetAll<FaultCheck>();
+        foreach (var fc in fcs)
+        {
+            if (fc.Source == source)
+            {
+                Interlocked.Increment(ref fc.FaultCount);
+                return;
+            }
+        }
+        PluginLog.LogDebug("Could not increase FaultCount for {0}", source);
+    }
+
+
 }

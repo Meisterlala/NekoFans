@@ -38,8 +38,7 @@ public class CombinedSource : IImageSource
 
         if (source is CombinedSource combinedSource)
             sources.Add(combinedSource);
-
-        if (source is FaultCheck faultCheck)
+        else if (source is FaultCheck faultCheck)
             sources.Add(faultCheck);
         else
             sources.Add(FaultCheck.Wrap(source));
@@ -59,18 +58,25 @@ public class CombinedSource : IImageSource
         return false;
     }
 
-    public void RemoveAll(Type source)
+    public void RemoveAll(Type type)
     {
+        if (type == typeof(FaultCheck))
+            throw new Exception("Cant remove FaultCheck type");
+        // Remove type from List
         sources.RemoveAll((e) =>
-            e.GetType() == source);
+            e.GetType() == type
+            || (e is FaultCheck fc && fc.UnWrap().GetType() == type));
+        // Remove Combindes Sources children recursivly
         sources.ForEach((e) =>
         {
-            if (e.GetType() == typeof(CombinedSource))
-                ((CombinedSource)e).RemoveAll(source);
+            if (e is CombinedSource cs)
+                cs.RemoveAll(type);
         });
+        // Remove empty Combined Sources
         sources.RemoveAll((e) =>
-            e.GetType() == typeof(CombinedSource) && ((CombinedSource)e).Count() == 0);
+            e is CombinedSource cs && cs.Count() == 0);
     }
+
     public bool Contains(Type source)
     {
         return sources.Exists((e) => e.GetType() == source)
@@ -85,9 +91,9 @@ public class CombinedSource : IImageSource
         {
             if (s is T t)
                 list.Add(t);
-            if (s is CombinedSource c)
+            else if (s is CombinedSource c)
                 list.AddRange(c.GetAll<T>());
-            if (s is FaultCheck f && f.UnWrap() is T unwrapped)
+            else if (s is FaultCheck f && f.UnWrap() is T unwrapped)
                 list.Add(unwrapped);
         }
         return list;

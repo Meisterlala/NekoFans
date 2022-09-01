@@ -24,8 +24,8 @@ public class DogCEO : IImageSource
     public DogCEO(Breed b)
     {
         URLs = b == Breed.all
-            ? (new($"https://dog.ceo/api/breeds/image/random/{URL_COUNT}"))
-            : (new($"https://dog.ceo/api/breed/{BreedPath(b)}/images/random/{URL_COUNT}"));
+            ? (new($"https://dog.ceo/api/breeds/image/random/{URL_COUNT}", this))
+            : (new($"https://dog.ceo/api/breed/{BreedPath(b)}/images/random/{URL_COUNT}", this));
     }
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {

@@ -17,11 +17,11 @@ namespace Neko.Sources;
 public class MultiURLs<T> : MultiURLsGeneric<T, string>
     where T : IJsonToList<string>
 {
-    public MultiURLs(string url, int maxCount = 25) : base(url, maxCount)
+    public MultiURLs(string url, IImageSource caller, int maxCount = 25) : base(url, caller, maxCount)
     {
     }
 
-    public MultiURLs(Func<HttpRequestMessage> requestGen, int maxCount = 25) : base(requestGen, maxCount)
+    public MultiURLs(Func<HttpRequestMessage> requestGen, IImageSource caller, int maxCount = 25) : base(requestGen, caller, maxCount)
     {
     }
 }
@@ -38,75 +38,77 @@ public class MultiURLsGeneric<TJson, TQueueElement>
 {
     public int URLCount => _urlCount;
     protected const int URLThreshold = 25;
-    protected Task<TJson> getNewURLs;
+    protected Task getNewURLs;
     protected readonly ConcurrentQueue<TQueueElement> URLs = new();
     protected readonly Func<Task<TJson>> parseJson;
     protected readonly int maxCount;
     protected int taskRunning;
     protected int _urlCount;
+    protected IImageSource caller;
 
+    private readonly CancellationTokenSource cts = new();
 
-    public MultiURLsGeneric(string url, int maxCount = URLThreshold)
+    public MultiURLsGeneric(string url, IImageSource caller, int maxCount = URLThreshold)
     {
         this.maxCount = maxCount;
-        parseJson = () => Common.ParseJson<TJson>(url);
+        this.caller = caller;
+        parseJson = () => Common.ParseJson<TJson>(url, cts.Token);
         getNewURLs = StartTask();
     }
 
-    public MultiURLsGeneric(Func<HttpRequestMessage> requestGen, int maxCount = URLThreshold)
+    public MultiURLsGeneric(Func<HttpRequestMessage> requestGen, IImageSource caller, int maxCount = URLThreshold)
     {
         this.maxCount = maxCount;
-        parseJson = () => Common.ParseJson<TJson>(ModifyRequest(requestGen()));
+        this.caller = caller;
+        parseJson = () => Common.ParseJson<TJson>(ModifyRequest(requestGen()), cts.Token);
         getNewURLs = StartTask();
+    }
+
+    ~MultiURLsGeneric()
+    {
+        cts.Cancel();
     }
 
     public virtual async Task<TQueueElement> GetURL()
     {
-        Interlocked.Decrement(ref _urlCount);
-
         // Load more
         if (_urlCount <= maxCount
-            && getNewURLs.IsCompletedSuccessfully
+            && getNewURLs.IsCompleted
             && 0 == Interlocked.Exchange(ref taskRunning, 1))
         {
             getNewURLs = StartTask();
         }
 
-        await getNewURLs;
-        URLs.TryDequeue(out var res);
+        // Try to get a URL from Queue
+        if (!URLs.TryDequeue(out var res))
+        {
+            await getNewURLs;
+            return await GetURL();
+        }
 
-        return res == null || getNewURLs.IsFaulted ? throw new Exception("Could not get URLs to images") : res;
+        Interlocked.Decrement(ref _urlCount);
+        return res;
     }
 
-    private async Task<TJson> StartTask()
-    {
-        var tsk = parseJson();
-        await tsk.ContinueWith(OnTaskComplete);
-        return await tsk;
-    }
+    private Task StartTask() => Task.Run(async () => await parseJson().ContinueWith(OnTaskComplete));
 
     private void OnTaskComplete(Task<TJson> task)
     {
-        foreach (var ex in task.Exception?.Flatten().InnerExceptions ?? new(Array.Empty<Exception>()))
+        try
         {
-            _ = ex;
+            Thread.Sleep(3000);
+            OnTaskSuccessfull(task.Result);
+        }
+        catch (AggregateException ex)
+        {
+            FaultCheck.IncreaseFaultCount(caller);
+            PluginLog.LogError(ex.InnerExceptions[0], "Could not get more URLs to images");
+        }
+        finally
+        {
+            Interlocked.Exchange(ref taskRunning, 0);
         }
 
-        if (task.IsCompletedSuccessfully)
-        {
-            try
-            {
-                OnTaskSuccessfull(task.Result);
-            }
-            catch (Exception ex)
-            {
-                PluginLog.LogError(ex, "Could not get more URLs to images");
-            }
-            finally
-            {
-                Interlocked.Exchange(ref taskRunning, 0);
-            }
-        }
     }
 
     protected virtual void OnTaskSuccessfull(TJson result)

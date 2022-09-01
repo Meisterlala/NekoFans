@@ -32,12 +32,14 @@ public static class Common
     /// </summary>
     public static async Task<NekoImage> DownloadImage(HttpRequestMessage request, CancellationToken ct = default)
     {
+        Helper.RandomThrow();
+
         byte[]? bytes;
         try
         {
             var response = await client.SendAsync(request, ct).ConfigureAwait(false);
             if (response.RequestMessage != null)
-                PluginLog.LogVerbose("Sent request to download image:\n" + response.RequestMessage?.ToString());
+                Helper.LogNetwork(() => "Sent request to download image:\n" + response.RequestMessage?.ToString());
             response.EnsureSuccessStatusCode();
             bytes = await response.Content.ReadAsByteArrayAsync(ct).ConfigureAwait(false);
         }
@@ -52,6 +54,7 @@ public static class Common
         NekoImage? image = new(bytes, request.RequestUri?.ToString() ?? "");
         return image;
     }
+
 
     public static async Task<NekoImage> DownloadImage(string url, CancellationToken ct = default)
     {
@@ -75,6 +78,8 @@ public static class Common
     /// </summary>
     public static async Task<T> ParseJson<T>(HttpRequestMessage request, CancellationToken ct = default)
     {
+        Helper.RandomThrow();
+
         // Download .json file to stream
         System.IO.Stream? stream;
         HttpResponseMessage response;
@@ -82,7 +87,7 @@ public static class Common
         {
             response = await client.SendAsync(request, ct).ConfigureAwait(false);
             if (response.RequestMessage != null)
-                PluginLog.LogVerbose("Sending request to get json:\n" + request.ToString());
+                Helper.LogNetwork(() => "Sending request to get json:\n" + request.ToString());
             response.EnsureSuccessStatusCode();
             stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
         }
@@ -114,9 +119,7 @@ public static class Common
             throw new Exception("Could not Parse .json File from: " + request.RequestUri, ex);
         }
 
-#if DEBUG   // Log Respone in DEBUG build (this is slow)
-        PluginLog.LogVerbose($"Response from {request.RequestUri} trying to get a json:\n{JsonSerializer.Serialize(result, new JsonSerializerOptions() { WriteIndented = true })}");
-#endif
+        Helper.LogNetwork(() => $"Response from {request.RequestUri} trying to get a json:\n{JsonSerializer.Serialize(result, new JsonSerializerOptions() { WriteIndented = true })}");
 
         ct.ThrowIfCancellationRequested();
         return result;
@@ -136,6 +139,4 @@ public static class Common
         };
         return await ParseJson<T>(request, ct).ConfigureAwait(false);
     }
-
-
 }

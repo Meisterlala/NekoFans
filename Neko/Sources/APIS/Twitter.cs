@@ -86,7 +86,7 @@ public class Twitter : IImageSource
                 }
             };
 
-        URLs = new(request, 5);
+        URLs = new(request, this, 5);
     }
 
     public async Task<NekoImage> Next(CancellationToken ct = default)
@@ -370,7 +370,7 @@ internal class TwitterMultiURLs : MultiURLsGeneric<Twitter.SearchJson, Twitter.S
     private static string URLNextToken(string token) => $"&next_token={token}";
 
     // Only allow construction with a request Generator
-    public TwitterMultiURLs(Func<HttpRequestMessage> requestGen, int maxCount = URLThreshold) : base(requestGen, maxCount)
+    public TwitterMultiURLs(Func<HttpRequestMessage> requestGen, IImageSource caller, int maxCount = URLThreshold) : base(requestGen, caller, maxCount)
     { }
 
     // retrieve next_token from json response

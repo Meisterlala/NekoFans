@@ -14,9 +14,11 @@ public class ShibeOnline : IImageSource
         public IImageSource? LoadConfig() => enabled ? new ShibeOnline() : null;
     }
 
-    private const int URL_COUNT = 100;
-    private static readonly MultiURLs<ShibeOnlineJson> URLs = new(
-            "http://shibe.online/api/shibes?count=" + URL_COUNT + "&urls=true&httpsUrls=true");
+    private const int URL_COUNT = 5;
+    private readonly MultiURLs<ShibeOnlineJson> URLs;
+
+    public ShibeOnline() =>
+        URLs = new("http://shibe.online/api/shibes?count=" + URL_COUNT + "&urls=true&httpsUrls=true", this);
 
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
@@ -32,5 +34,4 @@ public class ShibeOnline : IImageSource
         public List<string> ToList() => this;
     }
 #pragma warning restore
-
 }
