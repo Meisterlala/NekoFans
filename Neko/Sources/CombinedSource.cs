@@ -117,17 +117,26 @@ public class CombinedSource : IImageSource
         {
             if (s.GetType() == typeof(CombinedSource))
             {
-                var c = s.ToString() ?? "";
-                c = c[(c.IndexOf("\n") + 1)..];
-                res += "|--- " + c.Replace("\n", "\n|--- ");
-                res = res[..^5];
+                var c = s.ToString() ?? ""; // toString
+                var lines = c.Split('\n'); // Split by lines
+                for (var i = 1; i < lines.Length; i++) // Ignore first line
+                {
+                    // Draw box in front of lines
+                    if (i == 1)
+                        res += "┌─" + lines[i] + "\n";
+                    else if (i < lines.Length - 1)
+                        res += "├─" + lines[i] + "\n";
+                    else
+                        res += "└─" + lines[i] + "\n";
+                }
             }
             else
             {
                 res += s.ToString() + "\n";
             }
         }
-        return res;
+        // Remove last newline
+        return res[..^1];
     }
 
     public IImageSource? LoadConfig(object _) => throw new NotImplementedException();

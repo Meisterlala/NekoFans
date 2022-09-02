@@ -19,17 +19,6 @@ public interface IImageSource
 
 }
 
-/// <summary>
-/// A source for new Images from an API.
-/// Doesnt make more API calls, if there are to many errors
-/// </summary>
-public interface IImageSourceSafe : IImageSource
-{
-    /// <summary>
-    /// Check if the ImageURL has disabled itself
-    /// </summary>
-    public bool IsFaulted();
-}
 
 /// <summary>
 /// Describes how to load a config to generate a class

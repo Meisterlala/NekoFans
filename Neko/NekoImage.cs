@@ -78,6 +78,7 @@ public class NekoImage
     public string? URLImage { get; private set; }
     public string? URLClick { get; set; }
     public string? Description { get; set; }
+    public string? DebugInfo { get; set; }
 
     public NekoImage(byte[] data, string url)
     {
@@ -107,7 +108,8 @@ public class NekoImage
     public void Dispose()
     {
 #if DEBUG
-        PluginLog.LogVerbose("Disposing Image  " + ToString());
+        if (_texture != null || (_data != null && _data.Length > 0))
+            PluginLog.LogVerbose("Disposing Image  " + ToString());
 #endif
         _texture?.Dispose();
         _texture = null;
@@ -130,6 +132,8 @@ public class NekoImage
             name += $"Texture: {Helper.SizeSuffix(_texture.Height * _texture.Width * 4)}\t";
         if (URLImage != null)
             name += $"URL: {URLImage}";
+        if (DebugInfo != null)
+            name += $"\n└─DebugInfo: {DebugInfo}";
 
 
         return name == "" ? "Invalid Texture" : name;
@@ -209,7 +213,7 @@ public class NekoImage
             PluginLog.LogDebug(ex, "Ephemeral memory to small to load image");
         }
 
-        PluginLog.Debug("Decompressed {0} to {1} and loaded into GPU VRAM",
+        PluginLog.Verbose("Decompressed {0} to {1} and loaded into GPU VRAM",
                         _data != null ? Helper.SizeSuffix(_data.Length) : "???",
                         Helper.SizeSuffix(_texture.Width * _texture.Height * 4));
 
@@ -230,9 +234,8 @@ public class NekoImage
         public static readonly Embedded ImageError = new("error.jpg");
         public static readonly Embedded ImageLoading = new("loading.jpg");
 
-
-        public NekoImage? Image;
-        public TextureWrap Texture => Image?.Texture ?? throw new Exception("await LoadImage() before accessing the texture");
+        public volatile NekoImage? Image;
+        public TextureWrap Texture => Image?.Texture ?? throw new Exception("Load Embedded Image before accessing the texture");
         public bool Ready { get; private set; }
         private readonly string Filename;
 
@@ -265,6 +268,7 @@ public class NekoImage
                 throw;
             }
 
+            PluginLog.LogVerbose("Loaded embedded image: {0}", resourceName);
             Ready = true;
             return Image;
         }

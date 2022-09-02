@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Dalamud.Logging;
 using ImGuiNET;
 using Neko.Sources;
 using Neko.Sources.APIS;
@@ -59,6 +58,9 @@ public class ImageSourcesGUI
 
     public void Draw()
     {
+        // ------------ Mock Images for debugging --------------
+        if (Plugin.PluginInterface.IsDevMenuOpen)
+            DrawMock();
         //  ------------ nekos.life --------------
         SourceCheckbox(SourceList[0], ref Plugin.Config.Sources.NekosLife.enabled);
         //  ------------ shibe.online --------------
@@ -89,6 +91,19 @@ public class ImageSourcesGUI
             DrawTwitter();
 
         CheckIfNoSource();
+    }
+
+    private static void DrawMock()
+    {
+        if (ImGui.Checkbox("Mock Imagages", ref Mock.Enabled))
+        {
+            Plugin.ImageSource.RemoveAll(typeof(Mock));
+            Plugin.ImageSource.AddSource(Mock.CreateCombinedSource());
+        }
+
+        Mock.CheckedEnabled = true;
+        ImGui.SameLine();
+        ImGui.TextDisabled("This should only be visible in debug mode");
     }
 
     private static void DrawWaifuPics(ImageSourceConfig source)

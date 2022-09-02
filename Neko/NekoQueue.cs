@@ -75,43 +75,50 @@ public class NekoQueue
 
     public async Task<NekoImage> Pop()
     {
+        QueueItem popped;
         // If the Queue is empty load new images, unless the queue is stopped
-        if (queue.Count == 0)
+        lock (queue)
         {
-            if (StopQueue)
-                return new NekoImage();
-            FillQueue();
-            LoadImages();
-        }
-
-        // Check for NSFW mode (check for changes)
-        var _ = NSFW.AllowNSFW;
-
-        // Check if there are faulted images in the preloaded Queue
-        // If there are: just use the first image.
-        // If there are none:
-        //      If there are images in VRAM use the latest
-        //      else use the first
-        var index = 0;
-        for (var i = 0; i < TargetPreloadCount && i < queue.Count; i++)
-        {
-            var item = queue[i];
-            if ((item.downloadTask?.IsFaulted ?? true)
-                || (item.imageTask != null && item.imageTask.IsFaulted))
+            if (queue.Count == 0)
             {
-                break;
+                if (StopQueue)
+                    return new NekoImage();
+                // This happens when you restart the plugin with all ImageSources disabled
+                if (Plugin.ImageSource.Count() == 0)
+                    return new NekoImage();
+                FillQueue();
+                LoadImages();
             }
-            else if ((item.downloadTask?.IsCompletedSuccessfully ?? false)
-                       && (item.imageTask?.IsCompletedSuccessfully ?? false))
-            {
-                index = i;
-                break;
-            }
-        }
 
-        // Remove from queue
-        var popped = queue[index];
-        queue.RemoveAt(index);
+            // Check for NSFW mode (check for changes)
+            var _ = NSFW.AllowNSFW;
+
+            // Check if there are faulted images in the preloaded Queue
+            // If there are: just use the first image.
+            // If there are none:
+            //      If there are images in VRAM use the latest
+            //      else use the first
+            var index = 0;
+            for (var i = 0; i < TargetPreloadCount && i < queue.Count; i++)
+            {
+                var item = queue[i];
+                if ((item.downloadTask?.IsFaulted ?? true)
+                    || (item.imageTask != null && item.imageTask.IsFaulted))
+                {
+                    break;
+                }
+                else if ((item.downloadTask?.IsCompletedSuccessfully ?? false)
+                           && (item.imageTask?.IsCompletedSuccessfully ?? false))
+                {
+                    index = i;
+                    break;
+                }
+            }
+            PluginLog.Log("Index: " + index);
+            // Remove from queue
+            popped = queue[index];
+            queue.RemoveAt(index);
+        }
 
         // Refill Queue
         FillQueue();

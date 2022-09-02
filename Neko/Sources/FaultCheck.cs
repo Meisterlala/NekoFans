@@ -40,10 +40,10 @@ public class FaultCheck : IImageSource
         var status = HasFaulted
             ? "ERROR"
             : FaultCount > 0
-            ? FaultCount.ToString()
+            ? $" {FaultCount} "
             : "OK";
 
-        return $"({status}) {Source.ToString() ?? "Fault Check"}";
+        return $"<{status}> {Source.ToString() ?? "Fault Check"}";
     }
     public bool IsFaulted() => FaultCount >= MaxFaultCount;
 
