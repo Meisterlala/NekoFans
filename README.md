@@ -18,7 +18,6 @@ https://raw.githubusercontent.com/Meisterlala/NekoFans/master/repo.json
 ```
 
 You can also download a specific version on the [release page](https://github.com/Meisterlala/NekoFans/releases) and install it manually. Unzip the downloaded file and add the folder to "Dev Plugin Locations" in the experimantal settings.
-Please visit [this](https://github.com/LeonBlade/DalamudPlugins) for more instructions on how to install plugins.
 
 ## NSFW Images
 
