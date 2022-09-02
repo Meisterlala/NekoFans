@@ -40,7 +40,9 @@ public class Plugin : IDalamudPlugin
 
         Config = Configuration.Load(); // Load Configuration
         ImageSource = Config.LoadSources(); // Load ImageSources from config
-        _ = NekoImage.DefaultNeko(); // Load Default image to memory
+        // Load Embedded Images
+        var _imageError = NekoImage.Embedded.ImageError.Load();
+        var _ImageLoading = NekoImage.Embedded.ImageLoading.Load();
 
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigGui;
         PluginInterface.UiBuilder.Draw += DrawUI;

@@ -57,7 +57,7 @@ public class MainWindow
 
     public void DrawNeko()
     {
-        if (!NekoImage.DefaultNekoReady) return;
+        if (!NekoImage.Embedded.ImageLoading.Ready) return;
 
         var fontScale = ImGui.GetIO().FontGlobalScale;
         var size = new Vector2(100 * fontScale, 100 * fontScale);
@@ -89,12 +89,11 @@ public class MainWindow
             // Save visible State
             Visible = visible;
 
-            // Load Neko or fallback to default
+            // Load Neko or fallback to Error
             var currentNeko = nekoTaskCurrent != null
-                && nekoTaskCurrent.IsCompletedSuccessfully
-                && nekoTaskCurrent.Result.ImageStatus == ImageStatus.Successfull
+                && nekoTaskCurrent.IsCompleted
                 ? nekoTaskCurrent.Result.Texture
-                : NekoImage.DefaultNekoTexture;
+                : NekoImage.Embedded.ImageLoading.Texture;
 
             // Get Window Size
             var windowSize = ImGui.GetWindowSize();

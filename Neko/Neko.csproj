@@ -79,6 +79,7 @@
   <!-- Embedded Resources -->
   <ItemGroup>
     <EmbeddedResource Include="resources/error.jpg" />
+    <EmbeddedResource Include="resources/loading.jpg" />
   </ItemGroup>
 
   <!-- Used to manipulate Clipboard -->

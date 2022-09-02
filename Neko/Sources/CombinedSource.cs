@@ -25,7 +25,7 @@ public class CombinedSource : IImageSource
     public Task<NekoImage> Next(CancellationToken ct = default)
     {
         if (sources.Count <= 0)
-            return NekoImage.DefaultNeko();
+            return NekoImage.Embedded.ImageError;
 
         var i = random.Next(0, sources.Count);
         return sources[i].Next(ct);

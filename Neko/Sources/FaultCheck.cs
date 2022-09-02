@@ -20,7 +20,7 @@ public class FaultCheck : IImageSource
         if (HasFaulted)
         {
             PluginLog.LogWarning("Task Faulted and is disabled");
-            return await NekoImage.DefaultNeko();
+            return await NekoImage.Embedded.ImageError.Load();
         }
 
         try
@@ -31,8 +31,7 @@ public class FaultCheck : IImageSource
         {
             Interlocked.Increment(ref FaultCount);
             PluginLog.LogWarning(ex, "Image Task faulted");
-            return await NekoImage.DefaultNeko();
-            // throw new Exception("Image Task faulted", ex);
+            return await NekoImage.Embedded.ImageError.Load();
         }
     }
 
