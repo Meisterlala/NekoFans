@@ -71,6 +71,8 @@ public class MultiURLsGeneric<TJson, TQueueElement>
 
     public virtual async Task<TQueueElement> GetURL()
     {
+        DebugHelper.RandomThrow(DebugHelper.Throw.GetURL);
+
         // Load more
         if (_urlCount <= maxCount
             && getNewURLs.IsCompleted
@@ -82,6 +84,7 @@ public class MultiURLsGeneric<TJson, TQueueElement>
         // Try to get a URL from Queue
         if (!URLs.TryDequeue(out var res))
         {
+            await DebugHelper.RandomDelay(DebugHelper.Delay.GetURL);
             await getNewURLs;
             return await GetURL();
         }
