@@ -3,6 +3,7 @@
 [![Build](https://github.com/Meisterlala/NekoFans/actions/workflows/build.yml/badge.svg)](https://github.com/Meisterlala/NekoFans/actions/workflows/build.yml)
 
 **Displays a random Neko cat girl.**
+(or an image from a different source)
 
 This is a plugin to be used with the [FFXIVQuickLauncher](https://github.com/goatcorp/FFXIVQuickLauncher) and [Dalamud](https://github.com/goatcorp/Dalamud).
 
