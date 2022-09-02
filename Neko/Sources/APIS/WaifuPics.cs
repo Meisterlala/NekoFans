@@ -6,7 +6,6 @@ namespace Neko.Sources.APIS;
 
 public class WaifuPics : IImageSource
 {
-
     [Flags]
     public enum CategoriesSFW
     {
@@ -54,6 +53,8 @@ public class WaifuPics : IImageSource
                 : null;
         }
     }
+
+    public bool Faulted { get; set; }
 
     private readonly string url;
     private readonly string type;

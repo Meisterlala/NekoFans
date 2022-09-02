@@ -16,7 +16,10 @@ public interface IImageSource
     /// </summary>
     public Task<NekoImage> Next(CancellationToken ct = default);
 
-
+    /// <summary>
+    /// Indicates if the source is faulted and should not be used anymore
+    /// </summary>
+    public bool Faulted { get; set; }
 }
 
 
@@ -26,7 +29,6 @@ public interface IImageSource
 public interface IImageConfig
 {
     public IImageSource? LoadConfig();
-
 }
 
 /// <summary>

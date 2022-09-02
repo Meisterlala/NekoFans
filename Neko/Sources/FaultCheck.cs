@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
@@ -8,32 +7,50 @@ namespace Neko.Sources;
 
 public class FaultCheck : IImageSource
 {
+    public bool Faulted
+    {
+        get => HasFaulted;
+        set
+        {
+            PluginLog.LogWarning("Trying to set a FaultCheck to Faulted");
+            FaultCount = MaxFaultCount;
+        }
+    }
+
     private int FaultCount;
     private readonly IImageSource Source;
-    private const int MaxFaultCount = 999;
+    private const int MaxFaultCount = 5;
     public bool HasFaulted => FaultCount >= MaxFaultCount;
 
     private FaultCheck(IImageSource source) => Source = source;
 
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
-        if (HasFaulted)
+        if (HasFaulted || Source.Faulted)
         {
-            PluginLog.LogWarning("Task Faulted and is disabled");
+            PluginLog.LogWarning("Image Task faulted to many times and is disabled");
             return await NekoImage.Embedded.ImageError.Load();
         }
 
         try
         {
-            return await Source.Next(ct);
+            return await Source.Next(ct); ;
         }
         catch (Exception ex)
         {
             Interlocked.Increment(ref FaultCount);
-            PluginLog.LogWarning(ex, "Image Task faulted");
-            return await NekoImage.Embedded.ImageError.Load();
+            throw new Exception($"Image Task faulted. Fault Count increased to {FaultCount}", ex);
         }
     }
+
+    public void FaultLimitReached()
+    {
+        PluginLog.LogWarning("Fault limit reached for " + Source.ToString());
+        Plugin.ImageSource.RemoveSource(Source);
+        Source.Faulted = true;
+    }
+
+    public void ResetFaultCount() => Interlocked.Exchange(ref FaultCount, 0);
 
     public override string ToString()
     {
@@ -45,7 +62,6 @@ public class FaultCheck : IImageSource
 
         return $"<{status}> {Source.ToString() ?? "Fault Check"}";
     }
-    public bool IsFaulted() => FaultCount >= MaxFaultCount;
 
     public static FaultCheck Wrap(IImageSource source)
         => source is FaultCheck faultCheck
@@ -61,6 +77,8 @@ public class FaultCheck : IImageSource
             if (fc.Source == source)
             {
                 Interlocked.Increment(ref fc.FaultCount);
+                if (fc.HasFaulted)
+                    fc.FaultLimitReached();
                 return;
             }
         }

@@ -36,9 +36,9 @@ public class NekoQueue
         LoadImages();
     }
 
-    private int TargetDownloadCount => StopQueue || Plugin.ImageSource.Count() == 0 ? 0 : Plugin.Config.QueueDownloadCount;
+    private int TargetDownloadCount => StopQueue || !Plugin.ImageSource.ContainsNonFaulted() ? 0 : Plugin.Config.QueueDownloadCount;
 
-    private int TargetPreloadCount => StopQueue || Plugin.ImageSource.Count() == 0 ? 0 : Plugin.Config.QueuePreloadCount;
+    private int TargetPreloadCount => StopQueue || !Plugin.ImageSource.ContainsNonFaulted() ? 0 : Plugin.Config.QueuePreloadCount;
 
     ~NekoQueue()
     {
@@ -84,10 +84,15 @@ public class NekoQueue
                 if (StopQueue)
                     return new NekoImage();
                 // This happens when you restart the plugin with all ImageSources disabled
-                if (Plugin.ImageSource.Count() == 0)
+                if (!Plugin.ImageSource.ContainsNonFaulted())
                     return new NekoImage();
                 FillQueue();
                 LoadImages();
+
+                // If after trying to fill the queue there are no new images
+                // This happens when all ImageSources are faulted 
+                if (queue.Count == 0)
+                    return new NekoImage();
             }
 
             // Check for NSFW mode (check for changes)
@@ -114,7 +119,6 @@ public class NekoQueue
                     break;
                 }
             }
-            PluginLog.Log("Index: " + index);
             // Remove from queue
             popped = queue[index];
             queue.RemoveAt(index);
@@ -163,21 +167,33 @@ public class NekoQueue
     {
         if (queue.Count >= TargetDownloadCount) return; // Base case
 
-        var item = new QueueItem();
+        Task<NekoImage>? downloadTask;
+        try
+        {
+            downloadTask = Plugin.ImageSource.Next(tokenSource.Token);
+        }
+        catch (Exception ex)
+        {
+            PluginLog.LogError(ex, "Error getting next image");
+            return;
+        }
 
-        var download = Plugin.ImageSource.Next(tokenSource.Token);
+        var item = new QueueItem
+        {
+            downloadTask = downloadTask,
+        };
 
-        download.ContinueWith((task) =>
+        lock (queue)
+        {
+            queue.Add(item);
+        }
+
+        downloadTask.ContinueWith((task) =>
         {
             if (task.IsFaulted)
-                HandleTaskExceptions(task);
+                HandleTaskExceptions(task, item);
             else
                 LoadImages();
-        });
-
-        queue.Add(new QueueItem
-        {
-            downloadTask = download,
         });
 
         FillQueue(); // Recursivly fill
@@ -192,11 +208,21 @@ public class NekoQueue
         LoadImages();
     }
 
-    private static void HandleTaskExceptions<T>(Task<T> task)
+    private void HandleTaskExceptions<T>(Task<T> task, QueueItem item)
     {
         foreach (var ex in task.Exception?.Flatten().InnerExceptions ?? new(Array.Empty<Exception>()))
         {
-            PluginLog.LogError(ex, "Loading of a image failed");
+            PluginLog.LogWarning(ex, "Loading of a image failed");
+        }
+
+        // Remove from queue
+        lock (queue)
+        {
+            if (!queue.Remove(item))
+                PluginLog.LogWarning("Could not remove item from queue");
+            // Refill Queue
+            FillQueue();
+            LoadImages();
         }
     }
 
@@ -209,7 +235,7 @@ public class NekoQueue
         }
     }
 
-    private static void LoadImage(QueueItem item)
+    private void LoadImage(QueueItem item)
     {
         if (item.imageTask != null                          // If already loading
             || !item.imageShouldLoad                        // If it should not load
@@ -221,6 +247,6 @@ public class NekoQueue
 
         var img = item.downloadTask.Result;
         item.imageTask = img.LoadImage();
-        item.imageTask.ContinueWith(HandleTaskExceptions, TaskContinuationOptions.OnlyOnFaulted);
+        item.imageTask.ContinueWith((task) => HandleTaskExceptions(task, item), TaskContinuationOptions.OnlyOnFaulted);
     }
 }

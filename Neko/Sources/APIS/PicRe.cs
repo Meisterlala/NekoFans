@@ -13,6 +13,8 @@ public class PicRe : IImageSource
         public IImageSource? LoadConfig() => enabled ? new PicRe() : null;
     }
 
+    public bool Faulted { get; set; }
+
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
         var url = "https://pic.re/images";

@@ -8,7 +8,6 @@ namespace Neko.Sources.APIS;
 
 public class Waifuim : IImageSource
 {
-
     public class Config : IImageConfig
     {
         public bool enabled;
@@ -25,6 +24,8 @@ public class Waifuim : IImageSource
             : new Waifuim(nsfw);
         }
     }
+
+    public bool Faulted { get; set; }
 
     private readonly MultiURLs<WaifuImJson> URLs;
     private readonly bool nsfw;

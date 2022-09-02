@@ -49,7 +49,6 @@ public class Twitter : IImageSource
     };
     private static readonly string URLQueryBegin = "query=has:media -is:retweet ";
 
-
     // This is a bad idea, but there really isnt a easy way to avoid doing this.
     // The proper solution is to require user authentication to a server, which holds
     // the text below. The name of the variables is a lie, so it wont be found by 
@@ -67,6 +66,7 @@ public class Twitter : IImageSource
     private Task<int>? tweetCountTask;
 
     public readonly Config.Query ConfigQuery;
+    public bool Faulted { get; set; }
 
     public override string ToString() => $"Twitter: \"{search}\"\t{URLs}";
 
@@ -370,8 +370,8 @@ internal class TwitterMultiURLs : MultiURLsGeneric<Twitter.SearchJson, Twitter.S
     private static string URLNextToken(string token) => $"&next_token={token}";
 
     // Only allow construction with a request Generator
-    public TwitterMultiURLs(Func<HttpRequestMessage> requestGen, IImageSource caller, int maxCount = URLThreshold) : base(requestGen, caller, maxCount)
-    { }
+    public TwitterMultiURLs(Func<HttpRequestMessage> requestGen, IImageSource caller, int maxCount = URLThreshold)
+        : base(requestGen, caller, maxCount) { }
 
     // retrieve next_token from json response
     protected override void OnTaskSuccessfull(Twitter.SearchJson result)

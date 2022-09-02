@@ -17,6 +17,7 @@ public class DogCEO : IImageSource
         public IImageSource? LoadConfig() => enabled ? new DogCEO(breed) : null;
     }
 
+    public bool Faulted { get; set; }
 
     private const int URL_COUNT = 10; // max 50
     private readonly MultiURLs<DogCEOJson> URLs;

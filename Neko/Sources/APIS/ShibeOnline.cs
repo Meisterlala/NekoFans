@@ -14,6 +14,8 @@ public class ShibeOnline : IImageSource
         public IImageSource? LoadConfig() => enabled ? new ShibeOnline() : null;
     }
 
+    public bool Faulted { get; set; }
+
     private const int URL_COUNT = 5;
     private readonly MultiURLs<ShibeOnlineJson> URLs;
 

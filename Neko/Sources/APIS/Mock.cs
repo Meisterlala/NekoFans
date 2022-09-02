@@ -27,32 +27,32 @@ public class Mock : IImageSource
     public static bool CheckedEnabled;
 #pragma warning restore CA2211
 
+    public bool Faulted { get; set; }
+
     private readonly byte[] Data;
-    private readonly string Name;
+    private readonly string FileName;
 
     private static volatile int Index;
     private static readonly object IndexLock = new();
 
-    public Mock(byte[] data, string name)
+    public Mock(byte[] data, string fileName)
     {
         Data = data;
-        Name = name;
+        FileName = fileName;
     }
 
-    public async Task<NekoImage> Next(CancellationToken ct = default)
+    public Task<NekoImage> Next(CancellationToken ct = default)
     {
-        var image = new NekoImage(Data);
-        await image.LoadImage();
-
+        var image = new NekoImage(Data, FileName);
         lock (IndexLock)
         {
             Index++;
             if (Index >= 5)
-                Helper.RandomThrow(message: $"Mock Image {Index}");
+                DebugHelper.RandomThrow(message: $"Mock Image {Index}");
             image.DebugInfo = $"Mock Image {Index}";
-            image.Description = $"Mock Image\nFile: {Name}\nImage Index {Index}";
-            return image;
+            image.Description = $"Mock Image\nFile: {FileName}\nImage Index {Index}";
         }
+        return Task.FromResult(image);
     }
 
     public static IImageSource? CreateCombinedSource()
@@ -68,7 +68,7 @@ public class Mock : IImageSource
         return cs;
     }
 
-    public override string ToString() => $"Mock from {Name}";
+    public override string ToString() => $"Mock from {FileName}";
 
     public class MockImage
     {

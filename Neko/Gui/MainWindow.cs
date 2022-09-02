@@ -93,8 +93,12 @@ public class MainWindow
             var currentNeko = nekoTaskCurrent != null
                 && nekoTaskCurrent.IsCompleted
                 && nekoTaskCurrent.Result.ImageStatus == ImageStatus.Successfull
-                ? nekoTaskCurrent.Result.Texture
-                : NekoImage.Embedded.ImageLoading.Texture;
+                 ? nekoTaskCurrent.Result.Texture
+                 : nekoTaskCurrent != null
+                && nekoTaskCurrent.IsCompleted
+                && nekoTaskCurrent.Result.ImageStatus == ImageStatus.Faulty
+                 ? NekoImage.Embedded.ImageError.Texture
+                 : NekoImage.Embedded.ImageLoading.Texture;
 
             // Get Window Size
             var windowSize = ImGui.GetWindowSize();

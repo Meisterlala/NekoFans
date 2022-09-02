@@ -17,6 +17,8 @@ public class TheCatAPI : IImageSource
         public IImageSource? LoadConfig() => enabled ? new TheCatAPI(breed) : null;
     }
 
+    public bool Faulted { get; set; }
+
     private const int URL_COUNT = 10;
     private readonly MultiURLs<TheCatAPIJson> URLs;
 
@@ -72,8 +74,6 @@ public class TheCatAPI : IImageSource
             return res;
         }
     }
-
-
 
     public enum Breed
     {

@@ -12,6 +12,7 @@ public class Catboys : IImageSource
         public IImageSource? LoadConfig() => enabled ? new Catboys() : null;
     }
 
+    public bool Faulted { get; set; }
 
 #pragma warning disable
     public class CatboysJson

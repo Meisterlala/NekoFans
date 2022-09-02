@@ -11,8 +11,10 @@ namespace Neko.Sources;
 /// </summary>
 public class CombinedSource : IImageSource
 {
+    public bool Faulted { get; set; }
     private readonly List<IImageSource> sources = new();
     private readonly Random random = new();
+
 
     public CombinedSource(params IImageSource[] source)
     {
@@ -24,11 +26,19 @@ public class CombinedSource : IImageSource
 
     public Task<NekoImage> Next(CancellationToken ct = default)
     {
-        if (sources.Count <= 0)
-            return NekoImage.Embedded.ImageError;
+        var nonFaulted = sources.FindAll(s => !s.Faulted);
 
-        var i = random.Next(0, sources.Count);
-        return sources[i].Next(ct);
+        if (nonFaulted.Count == 0)
+        {
+            Faulted = true;
+            if (sources.Count > 0)
+                throw new Exception("All Image sources are faulted");
+            else
+                throw new Exception("No Image sources are available");
+        }
+
+        var i = random.Next(0, nonFaulted.Count);
+        return nonFaulted[i].Next(ct);
     }
 
     public void AddSource(IImageSource? source)
@@ -84,6 +94,14 @@ public class CombinedSource : IImageSource
         && ((CombinedSource)e).Contains(source));
     }
 
+    public bool Contains(Predicate<IImageSource> predicate)
+    {
+        return sources.Exists(predicate)
+        || sources.Exists((e) => e is CombinedSource cs && cs.Contains(predicate));
+    }
+
+    public bool ContainsNonFaulted() => Contains((e) => !e.Faulted);
+
     public List<T> GetAll<T>()
     {
         var list = new List<T>();
@@ -99,6 +117,23 @@ public class CombinedSource : IImageSource
         return list;
     }
 
+    public List<IImageSource> GetAll(Predicate<IImageSource> predicate)
+    {
+        var list = new List<IImageSource>();
+        foreach (var s in sources)
+        {
+            if (predicate(s))
+                list.Add(s);
+            else if (s is CombinedSource c)
+                list.AddRange(c.GetAll(predicate));
+            else if (s is FaultCheck f && predicate(f.UnWrap()))
+                list.Add(s);
+        }
+        return list;
+    }
+
+    public List<IImageSource> GetAll(Type t) => GetAll((e) => e.GetType() == t);
+
     public int Count()
     {
         var count = sources.Count;
@@ -109,6 +144,7 @@ public class CombinedSource : IImageSource
         });
         return count;
     }
+
 
     public override string ToString()
     {

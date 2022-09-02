@@ -12,6 +12,8 @@ public class NekosLife : IImageSource
         public IImageSource? LoadConfig() => enabled ? new NekosLife() : null;
     }
 
+    public bool Faulted { get; set; }
+
 #pragma warning disable
     public class NekosLifeJson
     {
