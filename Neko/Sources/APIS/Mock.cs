@@ -43,12 +43,13 @@ public class Mock : IImageSource
 
     public Task<NekoImage> Next(CancellationToken ct = default)
     {
+        DebugHelper.RandomDelay(DebugHelper.Delay.Mock, ct);
         var image = new NekoImage(Data, FileName);
         lock (IndexLock)
         {
             Index++;
             if (Index >= 5)
-                DebugHelper.RandomThrow(message: $"Mock Image {Index}");
+                DebugHelper.RandomThrow(DebugHelper.ThrowChance.Mock);
             image.DebugInfo = $"Mock Image {Index}";
             image.Description = $"Mock Image\nFile: {FileName}\nImage Index {Index}";
         }

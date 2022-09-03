@@ -32,7 +32,7 @@ public static class Common
     /// </summary>
     public static async Task<NekoImage> DownloadImage(HttpRequestMessage request, CancellationToken ct = default)
     {
-        DebugHelper.RandomThrow(DebugHelper.Throw.DownloadImage);
+        DebugHelper.RandomThrow(DebugHelper.ThrowChance.DownloadImage);
         await DebugHelper.RandomDelay(DebugHelper.Delay.DownloadImage, ct);
 
         byte[]? bytes;
@@ -79,7 +79,7 @@ public static class Common
     /// </summary>
     public static async Task<T> ParseJson<T>(HttpRequestMessage request, CancellationToken ct = default)
     {
-        DebugHelper.RandomThrow(DebugHelper.Throw.ParseJson);
+        DebugHelper.RandomThrow(DebugHelper.ThrowChance.ParseJson);
         await DebugHelper.RandomDelay(DebugHelper.Delay.ParseJson, ct);
 
         // Download .json file to stream

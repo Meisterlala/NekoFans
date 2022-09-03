@@ -71,7 +71,7 @@ public class MultiURLsGeneric<TJson, TQueueElement>
 
     public virtual async Task<TQueueElement> GetURL()
     {
-        DebugHelper.RandomThrow(DebugHelper.Throw.GetURL);
+        DebugHelper.RandomThrow(DebugHelper.ThrowChance.GetURL);
 
         // Load more
         if (_urlCount <= maxCount

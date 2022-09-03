@@ -20,11 +20,12 @@ public static class DebugHelper
 #pragma warning restore IDE0052
 
 
-    public class Throw
+    public class ThrowChance
     {
         public const double DownloadImage = 0.3;
         public const double ParseJson = 0.3;
         public const double GetURL = 0.3;
+        public const double Mock = 0.3;
     }
 
     public static void RandomThrow(double chance = 0.3)
@@ -33,11 +34,10 @@ public static class DebugHelper
 #if RANDOM_THROW
         if (ThrowRandom.NextDouble() <= chance) {
              throw new Exception("\n"
-                +  "--------------------------------\n"
-                +  "|         Random Throw          \n"
-                + $"|         Chance: " + chance * 100 + "%\n"
-                +  "--------------------------------";
-             );
+                +  "┌───────────────────┐\n"
+                +  "│         Random Throw\n"
+                + $"│        Chance: {chance:P}\n"
+                +  "└───────────────────┘");
         }
 #endif
     }
@@ -48,6 +48,7 @@ public static class DebugHelper
         public const int DownloadImage = 1000 * 1;
         public const int ParseJson = 1000 * 2;
         public const int GetURL = 1000 * 1;
+        public const int Mock = 150;
 
         public const double mean = 1.0;
         public const double stdDev = 0.4;
