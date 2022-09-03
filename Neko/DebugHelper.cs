@@ -61,11 +61,11 @@ public static class DebugHelper
 
     public static Task RandomDelay(int delayMS, CancellationToken ct = default)
     {
-        double u1 = 1.0 - DelayRandom.NextDouble(); //uniform(0,1] random doubles
-        double u2 = 1.0 - DelayRandom.NextDouble();
-        double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
+        var u1 = 1.0 - DelayRandom.NextDouble(); //uniform(0,1] random doubles
+        var u2 = 1.0 - DelayRandom.NextDouble();
+        var randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
                      Math.Sin(2.0 * Math.PI * u2); //random normal(0,1)
-        double randNormal = Delay.mean + Delay.stdDev * randStdNormal; //random normal(mean,stdDev^2)
+        var randNormal = Delay.mean + (Delay.stdDev * randStdNormal); //random normal(mean,stdDev^2)
 
         return Task.Delay((int)(randNormal * delayMS), ct);
     }
