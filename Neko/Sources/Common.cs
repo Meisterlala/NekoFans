@@ -90,20 +90,27 @@ public static class Common
             response = await client.SendAsync(request, ct).ConfigureAwait(false);
             if (response.RequestMessage != null)
                 DebugHelper.LogNetwork(() => "Sending request to get json:\n" + request.ToString());
-            response.EnsureSuccessStatusCode();
             stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
-        }
-        catch (HttpRequestException ex)
-        {
-            if (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-                throw new Exception("Exceded Limits of the API. Please try again later.", ex);
-
-            throw new Exception("Could not Download .json from: " + request.RequestUri, ex);
         }
         catch (Exception ex)
         {
             throw new Exception("Error occured when trying to donwload: " + request.RequestUri, ex);
         }
+
+        // Ensure Success
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                throw new Exception("Exceded Limits of the API. Please try again later.", ex);
+
+            DebugHelper.LogNetwork(() => $"Error Downloading Json from {request.RequestUri}:\n{JsonSerializer.Serialize(response.Content.ReadAsStringAsync(ct).Result, new JsonSerializerOptions() { WriteIndented = true })}");
+            throw new Exception("Could not Download .json from: " + request.RequestUri);
+        }
+
 
         // Parse Json
         T? result;

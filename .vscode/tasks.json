@@ -66,6 +66,22 @@
       }
     },
     {
+      "label": "Neko: Build Random Delay",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/Neko/Neko.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary",
+        "/p:DefineConstants=\"RANDOM_DELAY;DEBUG\"",
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
       "label": "NekoLewd: Build Release",
       "command": "dotnet",
       "type": "process",

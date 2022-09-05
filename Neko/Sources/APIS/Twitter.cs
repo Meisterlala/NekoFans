@@ -21,6 +21,7 @@ public abstract class Twitter : IImageSource
     private static readonly string asasdjsaf = "lM0RNQ3lsbWdFOURwcHdCTmlyTnJOeFFXNEF1WjdoZjYyWkFISG1uUTh5OTdsSllrcWg5Yg==";
     private static readonly string uuuuuu = Encoding.UTF8.GetString(Convert.FromBase64String(fhaksdn + asasdjsaf));
 
+    private const int URLThreshold = 5;
     private readonly string search;
 
     private int? tweetCount;
@@ -85,12 +86,10 @@ public abstract class Twitter : IImageSource
             if (enabledQueries.Count == 0)
                 return null;
 
-            static bool isUsernameQuery(Query query) => query.searchText.TrimStart().StartsWith("@");
-
             var imageSources = new List<IImageSource>();
             foreach (var q in enabledQueries)
             {
-                if (isUsernameQuery(q))
+                if (UserTimeline.ValidUsername(q.searchText))
                     imageSources.Add(new UserTimeline(q));
                 else
                     imageSources.Add(new Search(q));
@@ -99,6 +98,70 @@ public abstract class Twitter : IImageSource
             return new CombinedSource(imageSources.ToArray());
         }
     }
+
+    public struct ImageResponse
+    {
+        private static readonly Regex removeTco = new(@"(\W*https:\/\/t.co\/\w+)+\W*$", RegexOptions.Compiled);
+
+        public string Text;
+        public string TweetID;
+        public DateTime CreatedAt;
+        public string? AuthorName;
+        public string? AuthorUsername;
+        public Medium Media;
+
+        public ImageResponse(string text, string tweetID, DateTime createdAt, Medium media, string? authorName, string? authorUsername)
+        {
+            Text = text;
+            TweetID = tweetID;
+            CreatedAt = createdAt;
+            AuthorName = authorName;
+            AuthorUsername = authorUsername;
+            Media = media;
+        }
+
+        public string TweetDescription()
+        {
+            if (AuthorName == null || AuthorUsername == null)
+                throw new Exception("AuthorName or AuthorUsername is null");
+
+            // Remove t.co links from the tweet
+            var filterdText = removeTco.Replace(Text ?? "", "");
+            // Convert time to local time
+            var localTime = CreatedAt.ToLocalTime();
+            var span = DateTime.Now - localTime;
+
+            var time = span.TotalSeconds < 5
+                ? $"now"
+                : span.TotalSeconds < 60
+                ? $"{span.Seconds} seconds ago"
+                : span.TotalMinutes < 60
+                ? $"{(int)span.TotalMinutes} minutes ago"
+                : span.TotalHours < 24
+                ? $"{(int)span.TotalHours} hours ago"
+                : span.TotalDays < 7
+                ? $"{(int)span.TotalDays} days ago"
+                : $"{localTime.ToLongDateString()}";
+
+            return $"{AuthorName} (@{AuthorUsername}) tweeted {time}:\n{filterdText}";
+        }
+
+        public string TweetDescription(string authorName, string authorUsername)
+        {
+            AuthorName = authorName;
+            AuthorUsername = authorUsername;
+            return TweetDescription();
+        }
+
+        public string URLTweetID()
+            => $"https://twitter.com/{AuthorUsername}/status/{TweetID}";
+
+        public string URLTweetID(string authorUsername)
+            => $"https://twitter.com/{authorUsername}/status/{TweetID}";
+
+    }
+
+
 
     public class Search : Twitter
     {
@@ -112,14 +175,14 @@ public abstract class Twitter : IImageSource
         };
         private static readonly string URLQueryBegin = "query=has:media -is:retweet ";
 
-        private readonly TwitterMultiURLs<SearchJson, SearchResult> URLs;
+        private readonly TwitterMultiURLs<SearchJson, ImageResponse> URLs;
         private readonly string searchQuery;
 
         public Search(Config.Query query) : base(query)
         {
             searchQuery = URLQueryBegin + Uri.EscapeDataString(search);
             var URL = $"{URLSearch}?{string.Join('&', URLSearchParams)}&{searchQuery}";
-            URLs = new(() => AuthorizedRequest(URL), this, 5);
+            URLs = new((string token) => $"&next_token={token}", () => AuthorizedRequest(URL), this, URLThreshold);
         }
 
         public override string ToString() => $"Twitter Search: \"{search}\"\t{URLs}";
@@ -162,59 +225,16 @@ public abstract class Twitter : IImageSource
             return await tweetCountTask;
         }
 
-        public struct SearchResult
-        {
-            private static readonly Regex removeTco = new(@"(\W*https:\/\/t.co\/\w+)+\W*$", RegexOptions.Compiled);
-
-            public SearchJson.Tweet Tweet;
-            public SearchJson.User Author;
-            public SearchJson.Medium Media;
-
-            public SearchResult(SearchJson.Tweet tweet, SearchJson.User author, SearchJson.Medium media)
-            {
-                Tweet = tweet;
-                Author = author;
-                Media = media;
-            }
-
-            public string TweetDescription()
-            {
-                // Remove t.co links from the tweet
-                var filterdText = removeTco.Replace(Tweet.Text ?? "", "");
-                // Convert time to local time
-                var localTime = Tweet.CreatedAt.ToLocalTime();
-                var span = DateTime.Now - localTime;
-
-                var time = span.TotalSeconds < 5
-                    ? $"now"
-                    : span.TotalSeconds < 60
-                    ? $"{span.Seconds} seconds ago"
-                    : span.TotalMinutes < 60
-                    ? $"{(int)span.TotalMinutes} minutes ago"
-                    : span.TotalHours < 24
-                    ? $"{(int)span.TotalHours} hours ago"
-                    : span.TotalDays < 7
-                    ? $"{(int)span.TotalDays} days ago"
-                    : $"{localTime.Date.ToLongTimeString()}";
-
-                return $"{Author.Name} (@{Author.Username}) tweeted {time}:\n{filterdText}";
-            }
-
-            public string URLTweetID()
-                => $"https://twitter.com/{Author.Username}/status/{Tweet.Id}";
-
-        }
-
         #region JSON
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
-        public class SearchJson : IJsonToList<SearchResult>, INextToken
+        public class SearchJson : IJsonToList<ImageResponse>, INextToken
         {
-            public List<SearchResult> ToList()
+            public List<ImageResponse> ToList()
             {
                 if (Includes == null || Includes.Media == null || Data == null)
-                    return new List<SearchResult>();
+                    return new List<ImageResponse>();
 
-                List<SearchResult> results = new();
+                List<ImageResponse> results = new();
 
                 // Check for metadata
                 if (Includes.Users == null)
@@ -249,7 +269,7 @@ public abstract class Twitter : IImageSource
                         if (media == null || media.Type != "photo")
                             continue;
                         // Add the image to the results
-                        results.Add(new SearchResult(tweet, author, media));
+                        results.Add(new(tweet.Text, tweet.Id, tweet.CreatedAt, media, author.Name, author.Username));
                     }
                 }
 
@@ -301,18 +321,6 @@ public abstract class Twitter : IImageSource
 
                 [JsonPropertyName("users")]
                 public List<User> Users { get; set; }
-            }
-
-            public class Medium
-            {
-                [JsonPropertyName("media_key")]
-                public string MediaKey { get; set; }
-
-                [JsonPropertyName("type")]
-                public string Type { get; set; }
-
-                [JsonPropertyName("url")]
-                public string Url { get; set; }
             }
 
             public class Metadata
@@ -375,15 +383,58 @@ public abstract class Twitter : IImageSource
 
     public class UserTimeline : Twitter
     {
-        private string userID;
-        private string username;
+        private static readonly Regex extractUsername = new(@"^\s*@(\w+)\s*$", RegexOptions.Compiled);
+        private static string TimelineURL(string ID) => $"https://api.twitter.com/2/users/{ID}/tweets?expansions=attachments.media_keys&tweet.fields=created_at,possibly_sensitive&user.fields=username&media.fields=url,media_key";
+
+        private string userID = "";
+        private string? usernameReadable;
+        private readonly string username;
+        private readonly object userIDTaskLock = new();
+        private Task? userIDTask;
+        private readonly CancellationTokenSource cts = new();
+        private readonly object URLsLock = new();
+        private TwitterMultiURLs<TweetTimelineJson, ImageResponse>? URLs;
 
         public UserTimeline(Config.Query query) : base(query)
         {
-            //TODO: parse username from query
+            if (!ValidUsername(query.searchText))
+                throw new ArgumentException("Invalid username");
+            username = extractUsername.Match(query.searchText).Groups[1].Value;
         }
 
-        public override string ToString() => $"Twitter Timeline @{username} ";
+        ~UserTimeline()
+        {
+            cts.Cancel();
+        }
+
+        public override string ToString() => $"Twitter Timeline: @{username}\t{URLs?.ToString() ?? "No URLs yet"}";
+
+        public override async Task<NekoImage> Next(CancellationToken ct = default)
+        {
+            lock (userIDTaskLock)
+            {
+                if (userID == null || userIDTask == null || usernameReadable == null)
+                    userIDTask = GetUserID(ct);
+            }
+            await userIDTask;
+
+            if (string.IsNullOrEmpty(userID) || usernameReadable == null)
+                throw new Exception("Failed to get user ID");
+
+            lock (URLsLock)
+            {
+                if (URLs == null)
+                    URLs = new((string token) => $"&pagination_token={token}", () => AuthorizedRequest(TimelineURL(userID)), this, URLThreshold);
+            }
+
+            var nextTweet = await URLs.GetURL();
+            var image = await Common.DownloadImage(nextTweet.Media.Url, ct);
+            image.Description = nextTweet.TweetDescription(usernameReadable, username);
+            image.URLClick = nextTweet.URLTweetID(username);
+            return image;
+        }
+
+        public override Task<int> TweetCount(CancellationToken ct = default) => Task.FromResult(69);
 
         public static async Task<UserLookupJson.SuccessRespone> GetIDFromUsername(string username, CancellationToken ct = default)
         {
@@ -395,8 +446,15 @@ public abstract class Twitter : IImageSource
                 : response.Data ?? throw new Exception("Could not find Username");
         }
 
-        public override Task<NekoImage> Next(CancellationToken ct = default) => throw new NotImplementedException();
-        public override Task<int> TweetCount(CancellationToken ct = default) => throw new NotImplementedException();
+        public static bool ValidUsername(string username) => extractUsername.Match(username).Success;
+
+        private async Task GetUserID(CancellationToken ct = default)
+        {
+            var response = await GetIDFromUsername(username, ct);
+            userID = response.Id;
+            usernameReadable = response.Name;
+        }
+
 
         #region JSON
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
@@ -444,9 +502,120 @@ public abstract class Twitter : IImageSource
                 public string Type { get; set; }
             }
         }
+
+        public class TweetTimelineJson : IJsonToList<ImageResponse>, INextToken
+        {
+            [JsonPropertyName("data")]
+            public List<Tweet> Data { get; set; }
+
+            [JsonPropertyName("includes")]
+            public Attatchments? Includes { get; set; }
+
+            [JsonPropertyName("meta")]
+            public Metadata? Meta { get; set; }
+
+            public List<ImageResponse> ToList()
+            {
+                if (Includes == null || Includes.Media == null || Data == null)
+                    return new List<ImageResponse>();
+
+                List<ImageResponse> results = new();
+
+                // For each tweet
+                foreach (var tweet in Data)
+                {
+                    // that has media attached
+                    if (tweet.Attachments == null)
+                        continue;
+
+                    // Only show sensitive tweets if NSFW mode
+                    if (tweet.PossiblySensitive && !NSFW.AllowNSFW)
+                    {
+                        PluginLog.LogDebug($"Skipping tweet {tweet.Id} because it is marked as sensitive");
+                        continue;
+                    }
+
+                    // Search all attatched media_keys
+                    foreach (var media_key in tweet.Attachments.MediaKeys ?? new())
+                    {
+                        // Find the media with the matching media_key
+                        var media = Includes.Media.Find((m) => m.MediaKey == media_key);
+                        // That is an image
+                        if (media == null || media.Type != "photo")
+                            continue;
+                        // Add the image to the results
+                        results.Add(new ImageResponse(tweet.Text, tweet.Id, tweet.CreatedAt, media, null, null));
+                    }
+                }
+
+                return results;
+            }
+
+            public string? NextToken() => Meta?.NextToken;
+
+            public class Attachments
+            {
+                [JsonPropertyName("media_keys")]
+                public List<string> MediaKeys { get; set; }
+            }
+
+            public class Tweet
+            {
+                [JsonPropertyName("text")]
+                public string Text { get; set; }
+
+                [JsonPropertyName("attachments")]
+                public Attachments? Attachments { get; set; }
+
+                [JsonPropertyName("id")]
+                public string Id { get; set; }
+
+                [JsonPropertyName("created_at")]
+                public DateTime CreatedAt { get; set; }
+
+                [JsonPropertyName("possibly_sensitive")]
+                public bool PossiblySensitive { get; set; }
+            }
+
+            public class Attatchments
+            {
+                [JsonPropertyName("media")]
+                public List<Medium>? Media { get; set; }
+            }
+
+            public class Metadata
+            {
+                [JsonPropertyName("next_token")]
+                public string? NextToken { get; set; }
+
+                [JsonPropertyName("result_count")]
+                public int ResultCount { get; set; }
+
+                [JsonPropertyName("newest_id")]
+                public string NewestId { get; set; }
+
+                [JsonPropertyName("oldest_id")]
+                public string OldestId { get; set; }
+            }
+        }
+
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
         #endregion
     }
+    #region JSON
+#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
+    public class Medium
+    {
+        [JsonPropertyName("media_key")]
+        public string MediaKey { get; set; }
+
+        [JsonPropertyName("type")]
+        public string Type { get; set; }
+
+        [JsonPropertyName("url")]
+        public string Url { get; set; }
+    }
+    #endregion JSON
 
     internal interface INextToken
     {
@@ -458,11 +627,11 @@ public abstract class Twitter : IImageSource
     {
         private string? next_token;
 
-        private static string URLNextToken(string token) => $"&next_token={token}";
+        private readonly Func<string, string> NextTokenCreator;
 
         // Only allow construction with a request Generator
-        public TwitterMultiURLs(Func<HttpRequestMessage> requestGen, IImageSource caller, int maxCount = URLThreshold)
-            : base(requestGen, caller, maxCount) { }
+        public TwitterMultiURLs(Func<string, string> nextTokenCreator, Func<HttpRequestMessage> requestGen, IImageSource caller, int maxCount = URLThreshold)
+            : base(requestGen, caller, maxCount) => NextTokenCreator = nextTokenCreator;
 
         // retrieve next_token from json response
         protected override void OnTaskSuccessfull(TJson result)
@@ -475,7 +644,7 @@ public abstract class Twitter : IImageSource
         protected override HttpRequestMessage ModifyRequest(HttpRequestMessage request)
         {
             if (next_token != null && request.RequestUri != null)
-                request.RequestUri = new(request.RequestUri.AbsoluteUri + URLNextToken(next_token));
+                request.RequestUri = new(request.RequestUri.AbsoluteUri + NextTokenCreator(next_token));
             return request;
         }
     }

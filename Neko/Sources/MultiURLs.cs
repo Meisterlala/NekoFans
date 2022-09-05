@@ -76,6 +76,7 @@ public class MultiURLsGeneric<TJson, TQueueElement>
         // Load more
         if (_urlCount <= maxCount
             && getNewURLs.IsCompleted
+            && !cts.IsCancellationRequested
             && 0 == Interlocked.Exchange(ref taskRunning, 1))
         {
             getNewURLs = StartTask();
@@ -99,7 +100,7 @@ public class MultiURLsGeneric<TJson, TQueueElement>
     {
         try
         {
-            Thread.Sleep(3000);
+            DebugHelper.RandomDelay(DebugHelper.Delay.MultiURL);
             OnTaskSuccessfull(task.Result);
         }
         catch (AggregateException ex)

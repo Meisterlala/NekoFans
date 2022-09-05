@@ -352,7 +352,10 @@ public class ImageSourcesGUI
                     // Add the updated Image source
                     if (entry.Query.enabled)
                     {
-                        entry.ImageSource = new(entry.Query);
+                        entry.ImageSource = Twitter.UserTimeline.ValidUsername(entry.Query.searchText)
+                            ? new Twitter.UserTimeline(entry.Query)
+                            : new Twitter.Search(entry.Query);
+
                         Plugin.ImageSource.AddSource(entry.ImageSource);
                     }
 
