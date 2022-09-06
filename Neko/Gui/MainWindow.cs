@@ -91,12 +91,11 @@ public class MainWindow
 
             // Load Neko or fallback to Error
             var currentNeko = nekoTaskCurrent != null
-                && nekoTaskCurrent.IsCompleted
+                && nekoTaskCurrent.IsCompletedSuccessfully
                 && nekoTaskCurrent.Result.ImageStatus == ImageStatus.Successfull
                  ? nekoTaskCurrent.Result.Texture
                  : nekoTaskCurrent != null
-                && nekoTaskCurrent.IsCompleted
-                && nekoTaskCurrent.Result.ImageStatus == ImageStatus.Faulty
+                && (nekoTaskCurrent.IsFaulted || nekoTaskCurrent.IsCanceled)
                  ? NekoImage.Embedded.ImageError.Texture
                  : NekoImage.Embedded.ImageLoading.Texture;
 

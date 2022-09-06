@@ -201,6 +201,11 @@ public class NekoQueue
         {
             downloadTask = Plugin.ImageSource.Next(tokenSource.Token);
         }
+        catch (OperationCanceledException)
+        {
+            PluginLog.LogDebug("Image task cancelled");
+            return;
+        }
         catch (Exception ex)
         {
             PluginLog.LogError(ex, "Error getting next image");
@@ -219,7 +224,7 @@ public class NekoQueue
 
         downloadTask.ContinueWith((task) =>
         {
-            if (task.IsFaulted)
+            if (task.IsFaulted || task.IsCanceled)
                 HandleTaskExceptions(task, item);
             else
                 LoadImages();

@@ -38,6 +38,10 @@ public class FaultCheck : IImageSource
         {
             return await Source.Next(ct); ;
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             Interlocked.Increment(ref FaultCount);

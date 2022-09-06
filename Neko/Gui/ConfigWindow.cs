@@ -14,7 +14,7 @@ public class ConfigWindow
     private int QueueDonwloadCount;
     private int QueuePreloadCount;
 
-    public readonly static Vector4 RedColor = new(0.38f, 0.1f, 0.1f, 0.55f);
+    public static readonly Vector4 RedColor = new(0.38f, 0.1f, 0.1f, 0.55f);
     private readonly ImageSourcesGUI imageSourcesGUI = new();
 
 

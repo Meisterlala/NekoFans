@@ -57,13 +57,10 @@ public class CombinedSource : IImageSource
 
         if (source is CombinedSource cs)
         {
-            exisiting = combined.Find(c => c.sources.Exists(s =>
-            {
-                if (s is FaultCheck fc)
-                    return cs.Contains(a => fc.UnWrap().GetType() == a.GetType());
-                else
-                    return cs.Contains((a) => s.GetType() == a.GetType());
-            }));
+            exisiting = combined.Find(c => c.sources.Exists(
+                s => s is FaultCheck fc
+                ? cs.Contains(a => fc.UnWrap().GetType() == a.GetType())
+                : cs.Contains((a) => s.GetType() == a.GetType())));
             if (exisiting != null)
                 exisiting.sources.AddRange(cs.sources);
             else
@@ -71,17 +68,14 @@ public class CombinedSource : IImageSource
         }
         else
         {
-            FaultCheck wrapped = source is FaultCheck faultCheck
+            var wrapped = source is FaultCheck faultCheck
               ? faultCheck
               : FaultCheck.Wrap(source);
 
-            exisiting = combined.Find(c => c.sources.Exists(s =>
-                        {
-                            if (s is FaultCheck fc)
-                                return fc.UnWrap().GetType() == wrapped.UnWrap().GetType();
-                            else
-                                return s.GetType() == wrapped.UnWrap().GetType();
-                        }));
+            exisiting = combined.Find(c => c.sources.Exists(
+                s => s is FaultCheck fc
+                ? fc.UnWrap().GetType() == wrapped.UnWrap().GetType()
+                : s.GetType() == wrapped.UnWrap().GetType()));
             // Chek if there is a source, which contains the same type
             if (exisiting != null)
                 exisiting.sources.Add(wrapped);
@@ -219,11 +213,17 @@ public class CombinedSource : IImageSource
         }
         // Add all sources that are not in this
         foreach (var s in other.sources)
+        {
             if (s is CombinedSource cs)
+            {
                 foreach (var child in cs.sources)
                     AddIfDoesntContain(child);
+            }
             else if (!Contains(s))
+            {
                 AddIfDoesntContain(s);
+            }
+        }
     }
 
     public override string ToString()
