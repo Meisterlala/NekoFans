@@ -22,6 +22,8 @@ public class FaultCheck : IImageSource
     private const int MaxFaultCount = 5;
     public bool HasFaulted => FaultCount >= MaxFaultCount;
 
+    public string Name => Source.Name;
+
     private FaultCheck(IImageSource source) => Source = source;
 
     public async Task<NekoImage> Next(CancellationToken ct = default)
@@ -46,7 +48,6 @@ public class FaultCheck : IImageSource
     public void FaultLimitReached()
     {
         PluginLog.LogWarning("Fault limit reached for " + Source.ToString());
-        Plugin.ImageSource.RemoveSource(Source);
         Source.Faulted = true;
     }
 
@@ -85,5 +86,5 @@ public class FaultCheck : IImageSource
         PluginLog.LogDebug("Could not increase FaultCount for {0}", source);
     }
 
-    public bool Equals(IImageSource? other) => other != null && Source.Equals(other);
+    public bool Equals(IImageSource? other) => other != null && other.Equals(Source);
 }

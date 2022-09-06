@@ -14,6 +14,8 @@ public class NekosLife : IImageSource
 
     public bool Faulted { get; set; }
 
+    public string Name => "Nekos.life";
+
 #pragma warning disable
     public class NekosLifeJson
     {

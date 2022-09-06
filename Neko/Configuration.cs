@@ -60,7 +60,7 @@ public class Configuration : IPluginConfiguration
         combined.AddSource(Sources.Waifuim.LoadConfig());
         combined.AddSource(Sources.WaifuPics.LoadConfig());
 #if DEBUG // Load the test source in debug mode
-        combined.AddSource(Mock.CreateCombinedSource());
+        combined.AddSource(Mock.LoadSources());
 #endif
         return combined;
     }

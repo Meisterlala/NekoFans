@@ -25,6 +25,11 @@ public interface IImageSource : IEquatable<IImageSource>
     /// <summary>
     /// A string representation of the source
     /// </summary>
+    public string Name { get; }
+
+    /// <summary>
+    /// A string representation of the source
+    /// </summary>
     public string ToString();
 }
 

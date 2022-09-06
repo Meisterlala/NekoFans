@@ -14,6 +14,7 @@ public class Catboys : IImageSource
 
     public bool Faulted { get; set; }
 
+
 #pragma warning disable
     public class CatboysJson
     {
@@ -33,6 +34,8 @@ public class Catboys : IImageSource
     }
 
     public override string ToString() => "Catboys";
+    public string Name => "Catboys";
+
 
     public bool Equals(IImageSource? other) => other != null && other.GetType() == typeof(Catboys);
 }

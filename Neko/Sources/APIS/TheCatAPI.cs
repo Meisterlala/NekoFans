@@ -19,6 +19,8 @@ public class TheCatAPI : IImageSource
 
     public bool Faulted { get; set; }
 
+    public string Name => "TheCatAPI";
+
     private const int URL_COUNT = 10;
     private readonly MultiURLs<TheCatAPIJson> URLs;
     private readonly Breed breed;
@@ -40,7 +42,7 @@ public class TheCatAPI : IImageSource
 
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
-        var url = await URLs.GetURL();
+        var url = await URLs.GetURL(ct);
         return await Common.DownloadImage(url, ct);
     }
 

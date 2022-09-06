@@ -56,6 +56,7 @@ public class WaifuPics : IImageSource
 
     public bool Faulted { get; set; }
 
+
     private readonly string url;
     private readonly string type;
     private readonly string category;
@@ -74,6 +75,8 @@ public class WaifuPics : IImageSource
     }
 
     public override string ToString() => $"Waifu Pics ({type.ToUpper()}) {category}";
+
+    public string Name => "Waifu Pics";
 
     public bool Equals(IImageSource? other) => other != null && other is WaifuPics w && w.type == type && w.category == category;
 

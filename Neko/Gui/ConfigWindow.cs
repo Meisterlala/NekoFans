@@ -14,7 +14,9 @@ public class ConfigWindow
     private int QueueDonwloadCount;
     private int QueuePreloadCount;
 
+    public readonly static Vector4 RedColor = new(0.38f, 0.1f, 0.1f, 0.55f);
     private readonly ImageSourcesGUI imageSourcesGUI = new();
+
 
     public ConfigWindow()
     {
@@ -211,7 +213,7 @@ public class ConfigWindow
         var childSize = new Vector2(180, 175);
         ImGui.SetCursorPosX((windowWidth - childSize.X) / 2);
 
-        ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.38f, 0.1f, 0.1f, 0.55f));
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, RedColor);
         ImGui.BeginChild("Align", childSize, true);
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0);
 

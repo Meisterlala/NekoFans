@@ -12,6 +12,9 @@ namespace Neko.Sources;
 public class CombinedSource : IImageSource
 {
     public bool Faulted { get; set; }
+
+    public string Name => "Combined Source";
+
     private readonly List<IImageSource> sources = new();
     private readonly Random random = new();
 
@@ -46,12 +49,45 @@ public class CombinedSource : IImageSource
         if (source == null)
             return;
 
-        if (source is CombinedSource combinedSource)
-            sources.Add(combinedSource);
-        else if (source is FaultCheck faultCheck)
-            sources.Add(faultCheck);
+        if (source is CombinedSource comb && comb.sources.Count <= 0)
+            return;
+
+        var combined = GetAll<CombinedSource>();
+        CombinedSource? exisiting = null;
+
+        if (source is CombinedSource cs)
+        {
+            exisiting = combined.Find(c => c.sources.Exists(s =>
+            {
+                if (s is FaultCheck fc)
+                    return cs.Contains(a => fc.UnWrap().GetType() == a.GetType());
+                else
+                    return cs.Contains((a) => s.GetType() == a.GetType());
+            }));
+            if (exisiting != null)
+                exisiting.sources.AddRange(cs.sources);
+            else
+                sources.Add(cs);
+        }
         else
-            sources.Add(FaultCheck.Wrap(source));
+        {
+            FaultCheck wrapped = source is FaultCheck faultCheck
+              ? faultCheck
+              : FaultCheck.Wrap(source);
+
+            exisiting = combined.Find(c => c.sources.Exists(s =>
+                        {
+                            if (s is FaultCheck fc)
+                                return fc.UnWrap().GetType() == wrapped.UnWrap().GetType();
+                            else
+                                return s.GetType() == wrapped.UnWrap().GetType();
+                        }));
+            // Chek if there is a source, which contains the same type
+            if (exisiting != null)
+                exisiting.sources.Add(wrapped);
+            else
+                sources.Add(wrapped);
+        }
     }
 
     public bool RemoveSource(IImageSource source)
@@ -87,6 +123,18 @@ public class CombinedSource : IImageSource
             e is CombinedSource cs && cs.Count() == 0);
     }
 
+    public void RemoveAll(Predicate<IImageSource> match)
+    {
+        sources.RemoveAll(match);
+        sources.ForEach((e) =>
+        {
+            if (e is CombinedSource cs)
+                cs.RemoveAll(match);
+        });
+        sources.RemoveAll((e) =>
+            e is CombinedSource cs && cs.Count() == 0);
+    }
+
     public bool Contains(Type source)
     {
         return sources.Exists((e) => e.GetType() == source)
@@ -96,7 +144,7 @@ public class CombinedSource : IImageSource
 
     public bool Contains(Predicate<IImageSource> predicate)
     {
-        return sources.Exists(predicate)
+        return sources.Exists((e) => (e is FaultCheck fc && predicate(fc.UnWrap())) || predicate(e))
         || sources.Exists((e) => e is CombinedSource cs && cs.Contains(predicate));
     }
 
@@ -149,14 +197,33 @@ public class CombinedSource : IImageSource
 
     public void UpdateFrom(CombinedSource other)
     {
-        // Remove all sources that are not in source
-        sources.RemoveAll((e) => !other.Contains(e));
+        // Remove all sources that are not in other
+        RemoveAll((e) =>
+        {
+            if (e.GetType() != typeof(CombinedSource) && !other.Contains(e))
+            {
+                Dalamud.Logging.PluginLog.LogDebug($"Removing {e.Name} from ImageSource");
+                return true;
+            }
+            return false;
+        });
+
+        // Add source and print log
+        void AddIfDoesntContain(IImageSource source)
+        {
+            if (!Contains(source))
+            {
+                Dalamud.Logging.PluginLog.LogDebug($"Added {source.Name} as ImageSource");
+                AddSource(source);
+            }
+        }
         // Add all sources that are not in this
         foreach (var s in other.sources)
-        {
-            if (!Contains(s))
-                AddSource(s);
-        }
+            if (s is CombinedSource cs)
+                foreach (var child in cs.sources)
+                    AddIfDoesntContain(child);
+            else if (!Contains(s))
+                AddIfDoesntContain(s);
     }
 
     public override string ToString()

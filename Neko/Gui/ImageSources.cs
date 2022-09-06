@@ -95,15 +95,19 @@ public class ImageSourcesGUI
 
     private static void DrawMock()
     {
-        if (ImGui.Checkbox("Mock Imagages", ref Mock.Enabled))
-        {
-            Plugin.ImageSource.RemoveAll(typeof(Mock));
-            Plugin.ImageSource.AddSource(Mock.CreateCombinedSource());
-        }
+#if DEBUG
+        if (ImGui.Checkbox("Mock Imagages##Mock", ref Mock.Enabled))
+            Plugin.UpdateImageSource();
 
-        Mock.CheckedEnabled = true;
         ImGui.SameLine();
         ImGui.TextDisabled("This should only be visible in debug mode");
+
+        if (Mock.Enabled && ImGui.Button("Update Mock Images##Mock"))
+        {
+            Mock.UpdateImages();
+            Plugin.UpdateImageSource();
+        }
+#endif
     }
 
     private static void DrawWaifuPics(ImageSourceConfig source)
@@ -188,9 +192,8 @@ public class ImageSourcesGUI
                 {
                     Plugin.Config.Sources.DogCEO.selected = i;
                     Plugin.Config.Sources.DogCEO.breed = breeds[i];
-                    Plugin.ImageSource.RemoveAll(source.Type);
-                    Plugin.ImageSource.AddSource(source.Config.LoadConfig());
                     Plugin.Config.Save();
+                    Plugin.UpdateImageSource();
                 }
                 if (ImGui.IsItemHovered()
                     && breeds[i] != DogCEO.Breed.all
@@ -230,9 +233,8 @@ public class ImageSourcesGUI
                 {
                     Plugin.Config.Sources.TheCatAPI.selected = i;
                     Plugin.Config.Sources.TheCatAPI.breed = breeds[i];
-                    Plugin.ImageSource.RemoveAll(source.Type);
-                    Plugin.ImageSource.AddSource(source.Config.LoadConfig());
                     Plugin.Config.Save();
+                    Plugin.UpdateImageSource();
                 }
                 if (ImGui.IsItemHovered()
                     && breeds[i] != TheCatAPI.Breed.All
@@ -279,12 +281,26 @@ public class ImageSourcesGUI
             }
         }
 
-        static (string, string?) TweetCount(TwitterTableEntry? entry) => entry?.ImageSource?.TweetStatus() ?? ("?", null);
+        // Add a default entry if the Table is empty
+        if (TwitterTableEntries.Count == 0)
+            TwitterTableEntries.Add(new(new(), null, false));
+
+        // Status of the Tweet (message, helptext?)
+        static (string, string?) TweetStatus(TwitterTableEntry? entry)
+        {
+            if (entry == null)
+                return (" ", null);
+            if (entry.ImageSource == null)
+                return ("?", null);
+            if (entry.ImageSource.Faulted)
+                return ("ERROR", null);
+            return entry?.ImageSource?.TweetStatus() ?? ("?", null);
+        }
 
         // Find max width needed of TweetCount Column or use default
         var tweetCountColumWidth = TwitterTableEntries.Count > 0
-            ? TwitterTableEntries.Max((e) => ImGui.CalcTextSize(TweetCount(e).Item1).X)
-            : ImGui.CalcTextSize(TweetCount(null).Item1).X;
+            ? TwitterTableEntries.Max((e) => ImGui.CalcTextSize(TweetStatus(e).Item1).X)
+            : ImGui.CalcTextSize(TweetStatus(null).Item1).X;
 
         // It should be bigger than the header
         if (tweetCountColumWidth < ImGui.CalcTextSize("Count").X)
@@ -296,13 +312,13 @@ public class ImageSourcesGUI
         ImGui.TableSetupColumn("Enabled##Twitter", ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoResize | ImGuiTableColumnFlags.NoSort);
         ImGui.TableSetupColumn("Search Text##Twitter", ImGuiTableColumnFlags.WidthStretch, 100f - ImGui.GetColumnWidth(0) - tweetCountColumWidth);
         ImGui.TableSetupColumn("Status##Twitter", ImGuiTableColumnFlags.WidthFixed, tweetCountColumWidth);
-
         ImGui.TableHeadersRow();
 
         for (var i = 0; i < TwitterTableEntries.Count; i++)
         {
             var entry = TwitterTableEntries[i];
 
+            // Enabled Checkbox
             ImGui.TableNextColumn();
             var checkboxSize = ImGui.GetFontSize() + (ImGui.GetStyle().FramePadding.X * 2);
             var checkboxX = (ImGui.GetColumnWidth() / 2) - (checkboxSize / 2) + ImGui.GetCursorPosX();
@@ -310,16 +326,22 @@ public class ImageSourcesGUI
             if (ImGui.Checkbox($"##TwitterTableEntryEnabled_{i}", ref entry.Query.enabled))
                 entry.IsDirty = true;
 
+            // Search Text
             ImGui.TableNextColumn();
             ImGui.PushItemWidth(-1);  // Remove Label
-            if (ImGui.InputText($"##TwitterTableEntry_{i}", ref entry.Query.searchText, 120))
+            if (entry.ImageSource?.Faulted ?? false)
+                ImGui.PushStyleColor(ImGuiCol.FrameBg, ConfigWindow.RedColor);
+            if (ImGui.InputText($"##TwitterTableEntrySearchText_{i}", ref entry.Query.searchText, 256))
                 entry.IsDirty = true;
+            if (entry.ImageSource?.Faulted ?? false)
+                ImGui.PopStyleColor();
             ImGui.PopItemWidth();
 
+            // Status
             ImGui.TableNextColumn();
-            var (count, tooltip) = TweetCount(entry);
-            ImGui.Text(count);
-            if (tooltip != null)
+            var (text, tooltip) = TweetStatus(entry);
+            ImGui.Text(text);
+            if (!string.IsNullOrEmpty(tooltip))
                 Common.ToolTip(tooltip);
         }
         ImGui.EndTable();
@@ -339,35 +361,25 @@ public class ImageSourcesGUI
             ImGui.SameLine();
             if (ImGui.Button("Save Changes##Twitter"))
             {
+                // Remove all changed entries
                 foreach (var entry in TwitterTableEntries)
                 {
-                    // Continue if nothing changed
-                    if (!entry.IsDirty)
-                        continue;
-
-                    // Remove the Image source
-                    if (entry.ImageSource != null)
-                    {
-                        if (!Plugin.ImageSource.RemoveSource(entry.ImageSource))
-                            Dalamud.Logging.PluginLog.Verbose("Failed to remove Twitter Image Source");
+                    if (entry.IsDirty)
                         entry.ImageSource = null;
-                    }
-
-                    // Add the updated Image source
-                    if (entry.Query.enabled)
-                    {
-                        entry.ImageSource = Twitter.UserTimeline.ValidUsername(entry.Query.searchText)
-                            ? new Twitter.UserTimeline(entry.Query)
-                            : new Twitter.Search(entry.Query);
-
-                        Plugin.ImageSource.AddSource(entry.ImageSource);
-                    }
-
-                    // Reset the dirty flag
-                    entry.IsDirty = false;
                 }
-                // Save the config
+
                 Plugin.Config.Save();
+                Plugin.UpdateImageSource();
+
+                // Update ImageSource references and reset dirty flag
+                foreach (var entry in TwitterTableEntries)
+                {
+                    if (entry.IsDirty || entry.ImageSource == null)
+                    {
+                        entry.ImageSource = Plugin.ImageSource.GetAll<Twitter>().Find((s) => s.ConfigQuery.Equals(entry.Query));
+                        entry.IsDirty = false;
+                    }
+                }
             }
         }
 
@@ -403,16 +415,18 @@ public class ImageSourcesGUI
             else
                 comb |= sing;
             combined = (T)Enum.ToObject(typeof(T), comb);
-            Plugin.ImageSource.RemoveAll(source.Type);
-            Plugin.ImageSource.AddSource(source.Config.LoadConfig());
             Plugin.Config.Save();
+            Plugin.UpdateImageSource();
         }
     }
 
     private static void SourceCheckbox(ImageSourceConfig source, ref bool enabled)
     {
         if (ImGui.Checkbox(source.Name, ref enabled))
+        {
+            Plugin.Config.Save();
             Plugin.UpdateImageSource();
+        }
         ImGui.SameLine();
         ImGui.TextDisabled(source.Description);
         ImGui.SameLine();

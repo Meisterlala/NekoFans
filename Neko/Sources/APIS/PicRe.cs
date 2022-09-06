@@ -15,6 +15,8 @@ public class PicRe : IImageSource
 
     public bool Faulted { get; set; }
 
+    public string Name => "PicRe";
+
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
         var url = "https://pic.re/images";

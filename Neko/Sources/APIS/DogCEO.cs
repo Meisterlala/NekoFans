@@ -19,6 +19,7 @@ public class DogCEO : IImageSource
 
     public bool Faulted { get; set; }
 
+
     private const int URL_COUNT = 10; // max 50
     private readonly MultiURLs<DogCEOJson> URLs;
     private readonly Breed breed;
@@ -32,9 +33,11 @@ public class DogCEO : IImageSource
     }
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
-        var url = await URLs.GetURL();
+        var url = await URLs.GetURL(ct);
         return await Common.DownloadImage(url, ct);
     }
+
+    public string Name => "Dog CEO";
 
     public override string ToString()
     {

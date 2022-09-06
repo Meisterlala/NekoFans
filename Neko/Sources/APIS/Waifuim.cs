@@ -19,13 +19,15 @@ public class Waifuim : IImageSource
         {
             return !enabled
             ? null
-            : sfw && nsfw
+            : sfw && (nsfw & NSFW.AllowNSFW)
             ? new CombinedSource(new Waifuim(false), new Waifuim(true))
-            : new Waifuim(nsfw);
+            : new Waifuim(nsfw & NSFW.AllowNSFW);
         }
     }
 
     public bool Faulted { get; set; }
+
+    public string Name => "waifu.im";
 
     private readonly MultiURLs<WaifuImJson> URLs;
     private readonly bool nsfw;
@@ -40,7 +42,7 @@ public class Waifuim : IImageSource
 
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
-        var url = await URLs.GetURL();
+        var url = await URLs.GetURL(ct);
         return await Common.DownloadImage(url, ct);
     }
 

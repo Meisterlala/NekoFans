@@ -23,11 +23,11 @@ public class Mock : IImageSource
 #else
     public static bool Enabled;
 #endif
-
-    public static bool CheckedEnabled;
 #pragma warning restore CA2211
 
     public bool Faulted { get; set; }
+
+    public string Name => "Mock";
 
     private readonly byte[] Data;
     private readonly string FileName;
@@ -35,14 +35,22 @@ public class Mock : IImageSource
     private static volatile int Index;
     private static readonly object IndexLock = new();
 
+    private static bool SourcesUpdated;
+    private static List<(byte[], string)> MockSources = MockImage.LoadList(MockImages);
+
     public Mock(byte[] data, string fileName)
     {
         Data = data;
         FileName = fileName;
     }
 
+
     public Task<NekoImage> Next(CancellationToken ct = default)
     {
+#if !DEBUG
+        throw new Exception("Mock is only available in debug builds");
+#pragma warning disable CS0162
+#endif
         DebugHelper.RandomDelay(DebugHelper.Delay.Mock, ct);
         var image = new NekoImage(Data, FileName);
         lock (IndexLock)
@@ -56,22 +64,27 @@ public class Mock : IImageSource
         return Task.FromResult(image);
     }
 
-    public static IImageSource? CreateCombinedSource()
+    public static CombinedSource LoadSources()
     {
-        if (!Enabled) return null;
+        if (!Enabled) return new();
 
-        var images = MockImage.LoadList(MockImages);
-        var cs = new CombinedSource();
-        foreach (var (imageData, name) in images)
+        CombinedSource res = new();
+        foreach (var (imageData, name) in MockSources)
         {
-            cs.AddSource(new Mock(imageData, name));
+            res.AddSource(new Mock(imageData, name));
         }
-        return cs;
+        return res;
+    }
+
+    public static void UpdateImages()
+    {
+        MockSources = MockImage.LoadList(MockImages);
+        SourcesUpdated = true;
     }
 
     public override string ToString() => $"Mock from {FileName}";
 
-    public bool Equals(IImageSource? other) => other != null && other.GetType() == typeof(Mock);
+    public bool Equals(IImageSource? other) => other != null && other.GetType() == typeof(Mock) && !SourcesUpdated;
 
     public class MockImage
     {

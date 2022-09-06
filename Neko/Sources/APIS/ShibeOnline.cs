@@ -16,6 +16,8 @@ public class ShibeOnline : IImageSource
 
     public bool Faulted { get; set; }
 
+    public string Name => "Shibe.online";
+
     private const int URL_COUNT = 5;
     private readonly MultiURLs<ShibeOnlineJson> URLs;
 
@@ -24,7 +26,7 @@ public class ShibeOnline : IImageSource
 
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
-        var url = await URLs.GetURL();
+        var url = await URLs.GetURL(ct);
         return await Common.DownloadImage(url, ct);
     }
 

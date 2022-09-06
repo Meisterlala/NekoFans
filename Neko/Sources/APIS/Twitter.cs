@@ -32,6 +32,8 @@ public abstract class Twitter : IImageSource
     public readonly Config.Query ConfigQuery;
     public bool Faulted { get; set; }
 
+    public virtual string Name => "Twitter";
+
     public Twitter(Config.Query query)
     {
         ConfigQuery = query;
@@ -82,6 +84,12 @@ public abstract class Twitter : IImageSource
         {
             public string searchText = "";
             public bool enabled;
+
+            public static bool operator ==(Query q1, Query q2) => q1.searchText == q2.searchText && q1.enabled == q2.enabled;
+            public static bool operator !=(Query q1, Query q2) => q1.searchText != q2.searchText || q1.enabled != q2.enabled;
+
+            public override bool Equals(object? obj) => obj is Query q && q == this;
+            public override int GetHashCode() => searchText.GetHashCode() ^ enabled.GetHashCode();
         }
 
         public IImageSource? LoadConfig()
@@ -93,16 +101,23 @@ public abstract class Twitter : IImageSource
             if (enabledQueries.Count == 0)
                 return null;
 
-            var imageSources = new List<IImageSource>();
+            var imageSources = new CombinedSource();
             foreach (var q in enabledQueries)
             {
                 if (UserTimeline.ValidUsername(q.searchText))
-                    imageSources.Add(new UserTimeline(q));
+                {
+                    Twitter t = new UserTimeline(q);
+                    imageSources.AddSource(t);
+                }
                 else
-                    imageSources.Add(new Search(q));
+                {
+                    Twitter t = new Search(q);
+                    imageSources.AddSource(t);
+                }
             }
 
-            return new CombinedSource(imageSources.ToArray());
+
+            return imageSources;
         }
     }
 
@@ -194,9 +209,11 @@ public abstract class Twitter : IImageSource
 
         public override string ToString() => $"Twitter Search: \"{search}\"\t{URLs}";
 
+        public override string Name => $"Twitter Search: \"{search}\"";
+
         public override async Task<NekoImage> Next(CancellationToken ct = default)
         {
-            var searchResult = await URLs.GetURL();
+            var searchResult = await URLs.GetURL(ct);
             var image = await Common.DownloadImage(searchResult.Media.Url, ct);
             image.Description = searchResult.TweetDescription();
             image.URLClick = searchResult.URLTweetID();
@@ -258,6 +275,13 @@ public abstract class Twitter : IImageSource
                     if (tweet.PossiblySensitive && !NSFW.AllowNSFW)
                     {
                         PluginLog.LogDebug($"Skipping tweet {tweet.Id} because it is marked as sensitive");
+                        continue;
+                    }
+
+                    // Filter out tweets that match the blacklist
+                    if (NSFW.NotAllowed(tweet.Text))
+                    {
+                        PluginLog.LogDebug($"Skipping tweet {tweet.Id} because it matches the blacklist");
                         continue;
                     }
 
@@ -388,6 +412,8 @@ public abstract class Twitter : IImageSource
 
         public override string ToString() => $"Twitter Timeline: @{username}\t{URLs}";
 
+        public override string Name => $"Twitter Timeline: @{username}";
+
         public override async Task<NekoImage> Next(CancellationToken ct = default)
         {
             lock (userIDTaskLock)
@@ -400,7 +426,7 @@ public abstract class Twitter : IImageSource
             if (string.IsNullOrEmpty(userID) || usernameReadable == null)
                 throw new Exception("Failed to get user ID");
 
-            var nextTweet = await URLs.GetURL();
+            var nextTweet = await URLs.GetURL(ct);
             var image = await Common.DownloadImage(nextTweet.Media.Url, ct);
             image.Description = nextTweet.TweetDescription(usernameReadable, username);
             image.URLClick = nextTweet.URLTweetID(username);
@@ -669,11 +695,13 @@ public abstract class Twitter : IImageSource
     {
         private string? next_token;
 
-        private readonly Func<string, string> NextTokenCreator;
+        private readonly Func<string, string> NextTokenAppend;
 
         // Only allow construction with a request Generator
-        public TwitterMultiURLs(Func<string, string> nextTokenCreator, Func<HttpRequestMessage> requestGen, IImageSource caller, int maxCount = URLThreshold)
-            : base(requestGen, caller, maxCount) => NextTokenCreator = nextTokenCreator;
+        public TwitterMultiURLs(Func<string, string> nextTokenAppend, Func<HttpRequestMessage> requestGen, IImageSource caller, int maxCount = URLThreshold)
+            : base(requestGen, caller, maxCount) => NextTokenAppend = nextTokenAppend;
+
+        ~TwitterMultiURLs() => cts.Cancel();
 
         // retrieve next_token from json response
         protected override void OnTaskSuccessfull(TJson result)
@@ -688,7 +716,7 @@ public abstract class Twitter : IImageSource
         protected override HttpRequestMessage ModifyRequest(HttpRequestMessage request)
         {
             if (next_token != null && request.RequestUri != null)
-                request.RequestUri = new(request.RequestUri.AbsoluteUri + NextTokenCreator(next_token));
+                request.RequestUri = new(request.RequestUri.AbsoluteUri + NextTokenAppend(next_token));
             return request;
         }
     }

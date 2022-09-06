@@ -47,7 +47,7 @@ public class MultiURLsGeneric<TJson, TQueueElement>
     protected bool initilized;
     protected IImageSource caller;
 
-    private readonly CancellationTokenSource cts = new();
+    protected readonly CancellationTokenSource cts = new();
 
     public MultiURLsGeneric(string url, IImageSource caller, int maxCount = URLThreshold)
     {
@@ -68,36 +68,37 @@ public class MultiURLsGeneric<TJson, TQueueElement>
         cts.Cancel();
     }
 
-    public virtual async Task<TQueueElement> GetURL()
+    public virtual async Task<TQueueElement> GetURL(CancellationToken ct = default)
     {
         DebugHelper.RandomThrow(DebugHelper.ThrowChance.GetURL);
-        await DebugHelper.RandomDelay(DebugHelper.Delay.GetURL);
+        await DebugHelper.RandomDelay(DebugHelper.Delay.GetURL, ct);
 
-        // Try to get a URL from Queue
         TQueueElement? element;
-        while (!URLs.TryDequeue(out element))
+        do
         {
+            // Cancel if needed
+            if (caller.Faulted || ct.IsCancellationRequested)
+                throw new OperationCanceledException();
+
             // Load more if needed
             if (_urlCount <= maxCount
-                && (getNewURLs == null || getNewURLs.IsCompleted)
-                && !cts.IsCancellationRequested
                 && 0 == Interlocked.Exchange(ref taskRunning, 1))
             {
                 getNewURLs = StartTask();
             }
 
             // Wait for more
-            if (getNewURLs != null)
-            {
+            if (getNewURLs != null && _urlCount <= 0)
                 await getNewURLs;
-            }
-        }
+
+            // Try to get a URL from Queue
+        } while (!URLs.TryDequeue(out element));
 
         Interlocked.Decrement(ref _urlCount);
         return element;
     }
 
-    private Task StartTask() => Task.Run(async () => await parseJson().ContinueWith(OnTaskComplete));
+    private Task StartTask() => Task.Run(async () => await parseJson().ContinueWith(OnTaskComplete, cts.Token), cts.Token);
 
     private void OnTaskComplete(Task<TJson> task)
     {
@@ -122,6 +123,9 @@ public class MultiURLsGeneric<TJson, TQueueElement>
     {
         initilized = true;
         var list = result.ToList();
+        if (list.Count == 0)
+            FaultCheck.IncreaseFaultCount(caller);
+
         foreach (var item in list)
         {
             Interlocked.Increment(ref _urlCount);
@@ -133,5 +137,6 @@ public class MultiURLsGeneric<TJson, TQueueElement>
 
     protected virtual HttpRequestMessage ModifyRequest(HttpRequestMessage response) => response;
 
-    public override string ToString() => initilized ? $"URLs: {_urlCount}{(maxCount != URLThreshold ? $" TargetUrlCount: {maxCount}" : "")}" : "URLs not initialized";
+    public override string ToString()
+    => initilized ? $"URLs: {_urlCount}{(maxCount != URLThreshold ? $" TargetUrlCount: {maxCount}" : "")}{(taskRunning == 1 ? "\tLoading more ..." : "")}" : "URLs not initialized";
 }
