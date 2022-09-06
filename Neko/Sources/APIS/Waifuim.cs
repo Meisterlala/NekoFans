@@ -46,6 +46,8 @@ public class Waifuim : IImageSource
 
     public override string ToString() => $"waifu.im ({(nsfw ? "NSFW" : "SFW")})\t{URLs}";
 
+    public bool Equals(IImageSource? other) => other != null && other is Waifuim w && w.nsfw == nsfw;
+
 #pragma warning disable
     public class WaifuImJson : IJsonToList<string>
     {

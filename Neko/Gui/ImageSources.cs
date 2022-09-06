@@ -70,7 +70,7 @@ public class ImageSourcesGUI
         //  ------------ waifu.im --------------
         SourceCheckbox(SourceList[3], ref Plugin.Config.Sources.Waifuim.enabled);
         if (Plugin.Config.Sources.Waifuim.enabled && NSFW.AllowNSFW) // NSFW Check
-            DrawWaifuim(SourceList[3]);
+            DrawWaifuim();
         //  ------------ Waifu.pics --------------
         SourceCheckbox(SourceList[4], ref Plugin.Config.Sources.WaifuPics.enabled);
         if (Plugin.Config.Sources.WaifuPics.enabled)
@@ -151,14 +151,14 @@ public class ImageSourcesGUI
         ImGui.Unindent(INDENT);
     }
 
-    private static void DrawWaifuim(ImageSourceConfig source)
+    private static void DrawWaifuim()
     {
         ImGui.Indent(INDENT);
         if (ImGui.Combo("Content##Waifuim", ref Plugin.Config.Sources.Waifuim.ContentComboboxIndex, new string[] { "SFW", "NSFW", "Both" }, 3))
         {
             Plugin.Config.Sources.Waifuim.sfw = Plugin.Config.Sources.Waifuim.ContentComboboxIndex is 0 or 2;
             Plugin.Config.Sources.Waifuim.nsfw = Plugin.Config.Sources.Waifuim.ContentComboboxIndex is 1 or 2;
-            UpdateImageSource(source, true);
+            Plugin.UpdateImageSource();
         }
         ImGui.Unindent(INDENT);
     }
@@ -279,12 +279,12 @@ public class ImageSourcesGUI
             }
         }
 
-        static string TweetCount(TwitterTableEntry? entry) => entry?.ImageSource?.TweetCountString() ?? "?";
+        static (string, string?) TweetCount(TwitterTableEntry? entry) => entry?.ImageSource?.TweetStatus() ?? ("?", null);
 
         // Find max width needed of TweetCount Column or use default
         var tweetCountColumWidth = TwitterTableEntries.Count > 0
-            ? TwitterTableEntries.Max((e) => ImGui.CalcTextSize(TweetCount(e)).X)
-            : ImGui.CalcTextSize(TweetCount(null)).X;
+            ? TwitterTableEntries.Max((e) => ImGui.CalcTextSize(TweetCount(e).Item1).X)
+            : ImGui.CalcTextSize(TweetCount(null).Item1).X;
 
         // It should be bigger than the header
         if (tweetCountColumWidth < ImGui.CalcTextSize("Count").X)
@@ -295,7 +295,7 @@ public class ImageSourcesGUI
 
         ImGui.TableSetupColumn("Enabled##Twitter", ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoResize | ImGuiTableColumnFlags.NoSort);
         ImGui.TableSetupColumn("Search Text##Twitter", ImGuiTableColumnFlags.WidthStretch, 100f - ImGui.GetColumnWidth(0) - tweetCountColumWidth);
-        ImGui.TableSetupColumn("Count##Twitter", ImGuiTableColumnFlags.WidthFixed, tweetCountColumWidth);
+        ImGui.TableSetupColumn("Status##Twitter", ImGuiTableColumnFlags.WidthFixed, tweetCountColumWidth);
 
         ImGui.TableHeadersRow();
 
@@ -317,7 +317,10 @@ public class ImageSourcesGUI
             ImGui.PopItemWidth();
 
             ImGui.TableNextColumn();
-            ImGui.Text(TweetCount(entry));
+            var (count, tooltip) = TweetCount(entry);
+            ImGui.Text(count);
+            if (tooltip != null)
+                Common.ToolTip(tooltip);
         }
         ImGui.EndTable();
 
@@ -345,7 +348,8 @@ public class ImageSourcesGUI
                     // Remove the Image source
                     if (entry.ImageSource != null)
                     {
-                        Plugin.ImageSource.RemoveSource(entry.ImageSource);
+                        if (!Plugin.ImageSource.RemoveSource(entry.ImageSource))
+                            Dalamud.Logging.PluginLog.Verbose("Failed to remove Twitter Image Source");
                         entry.ImageSource = null;
                     }
 
@@ -408,19 +412,11 @@ public class ImageSourcesGUI
     private static void SourceCheckbox(ImageSourceConfig source, ref bool enabled)
     {
         if (ImGui.Checkbox(source.Name, ref enabled))
-            UpdateImageSource(source, enabled);
+            Plugin.UpdateImageSource();
         ImGui.SameLine();
         ImGui.TextDisabled(source.Description);
         ImGui.SameLine();
         Common.HelpMarker(source.Help);
-    }
-
-    private static void UpdateImageSource(ImageSourceConfig source, bool enabled)
-    {
-        Plugin.ImageSource.RemoveAll(source.Type);
-        if (enabled)
-            Plugin.ImageSource.AddSource(source.Config.LoadConfig());
-        Plugin.Config.Save();
     }
 
 }

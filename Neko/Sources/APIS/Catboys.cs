@@ -34,4 +34,5 @@ public class Catboys : IImageSource
 
     public override string ToString() => "Catboys";
 
+    public bool Equals(IImageSource? other) => other != null && other.GetType() == typeof(Catboys);
 }

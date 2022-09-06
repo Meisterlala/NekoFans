@@ -23,4 +23,5 @@ public class PicRe : IImageSource
 
     public override string ToString() => "PicRe";
 
+    public bool Equals(IImageSource? other) => other != null && other.GetType() == typeof(PicRe);
 }

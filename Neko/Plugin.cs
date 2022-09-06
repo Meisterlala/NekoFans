@@ -64,7 +64,7 @@ public class Plugin : IDalamudPlugin
         CommandManager.RemoveHandler(CommandMain);
     }
 
-    public static void ReloadImageSources() => ImageSource = Config.LoadSources();
+    public static void UpdateImageSource() => ImageSource.UpdateFrom(Config.LoadSources());
 
     private void OnCommand(string command, string args)
     {

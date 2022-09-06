@@ -21,11 +21,13 @@ public class TheCatAPI : IImageSource
 
     private const int URL_COUNT = 10;
     private readonly MultiURLs<TheCatAPIJson> URLs;
+    private readonly Breed breed;
 
     public TheCatAPI(Breed breed = Breed.All)
     {
         var baseUrl = $"https://api.thecatapi.com/v1/images/search?limit={URL_COUNT}";
 
+        this.breed = breed;
         if (breed == Breed.All)
         {
             URLs = new(baseUrl, this);
@@ -52,6 +54,8 @@ public class TheCatAPI : IImageSource
     }
 
     public override string ToString() => $"TheCatAPI\tBreed: {Plugin.Config.Sources.TheCatAPI.breed}\t{URLs}";
+
+    public bool Equals(IImageSource? other) => other != null && other is TheCatAPI cat && cat.breed == breed;
 
 #pragma warning disable
 

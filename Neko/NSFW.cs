@@ -64,7 +64,7 @@ public static class NSFW
             PluginLog.Log("NSFW Plugin was disabled. NSFW Images are unavalible");
 
         // Reload Config
-        Plugin.ReloadImageSources();
+        Plugin.UpdateImageSource();
         // Refresh Image Queue
         Plugin.GuiMain?.Queue.Refresh();
     }

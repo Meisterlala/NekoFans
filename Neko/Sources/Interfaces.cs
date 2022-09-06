@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,7 +10,7 @@ namespace Neko.Sources;
 /// <summary>
 /// A source for new Images from an API
 /// </summary>
-public interface IImageSource
+public interface IImageSource : IEquatable<IImageSource>
 {
     /// <summary>
     /// Load the next image form the web to ram, not to vram yet
@@ -20,6 +21,11 @@ public interface IImageSource
     /// Indicates if the source is faulted and should not be used anymore
     /// </summary>
     public bool Faulted { get; set; }
+
+    /// <summary>
+    /// A string representation of the source
+    /// </summary>
+    public string ToString();
 }
 
 

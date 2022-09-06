@@ -71,6 +71,8 @@ public class Mock : IImageSource
 
     public override string ToString() => $"Mock from {FileName}";
 
+    public bool Equals(IImageSource? other) => other != null && other.GetType() == typeof(Mock);
+
     public class MockImage
     {
         public string Path;

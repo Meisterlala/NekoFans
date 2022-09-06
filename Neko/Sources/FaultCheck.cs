@@ -74,7 +74,7 @@ public class FaultCheck : IImageSource
         var fcs = Plugin.ImageSource.GetAll<FaultCheck>();
         foreach (var fc in fcs)
         {
-            if (fc.Source == source)
+            if (fc.Source.Equals(source))
             {
                 Interlocked.Increment(ref fc.FaultCount);
                 if (fc.HasFaulted)
@@ -85,5 +85,5 @@ public class FaultCheck : IImageSource
         PluginLog.LogDebug("Could not increase FaultCount for {0}", source);
     }
 
-
+    public bool Equals(IImageSource? other) => other != null && Source.Equals(other);
 }

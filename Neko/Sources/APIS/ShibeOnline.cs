@@ -30,6 +30,8 @@ public class ShibeOnline : IImageSource
 
     public override string ToString() => $"Shibe.online\t{URLs}";
 
+    public bool Equals(IImageSource? other) => other != null && other.GetType() == typeof(ShibeOnline);
+
 #pragma warning disable
     public class ShibeOnlineJson : List<string>, IJsonToList<string>
     {

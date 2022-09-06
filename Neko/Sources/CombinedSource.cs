@@ -100,6 +100,8 @@ public class CombinedSource : IImageSource
         || sources.Exists((e) => e is CombinedSource cs && cs.Contains(predicate));
     }
 
+    public bool Contains(IImageSource source) => Contains((e) => e.Equals(source));
+
     public bool ContainsNonFaulted() => Contains((e) => !e.Faulted);
 
     public List<T> GetAll<T>()
@@ -145,6 +147,17 @@ public class CombinedSource : IImageSource
         return count;
     }
 
+    public void UpdateFrom(CombinedSource other)
+    {
+        // Remove all sources that are not in source
+        sources.RemoveAll((e) => !other.Contains(e));
+        // Add all sources that are not in this
+        foreach (var s in other.sources)
+        {
+            if (!Contains(s))
+                AddSource(s);
+        }
+    }
 
     public override string ToString()
     {
@@ -177,4 +190,9 @@ public class CombinedSource : IImageSource
 
     public IImageSource? LoadConfig(object _) => throw new NotImplementedException();
 
+    public bool Equals(IImageSource? other) =>
+        other != null
+        && other is CombinedSource cs
+        && cs.sources.TrueForAll((e) => Contains(e))
+        && sources.TrueForAll((e) => cs.Contains(e));
 }

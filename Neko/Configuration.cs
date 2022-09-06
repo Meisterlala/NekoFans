@@ -65,6 +65,7 @@ public class Configuration : IPluginConfiguration
         return combined;
     }
 
+
     public static Configuration Load()
     {
         try

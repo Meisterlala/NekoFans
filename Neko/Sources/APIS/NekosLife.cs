@@ -32,5 +32,6 @@ public class NekosLife : IImageSource
 
     public override string ToString() => "Nekos.life";
 
+    public bool Equals(IImageSource? other) => other != null && other.GetType() == typeof(NekosLife);
 }
 

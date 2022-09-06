@@ -203,7 +203,7 @@ public class NekoQueue
         }
         catch (Exception ex)
         {
-            PluginLog.LogError(ex, "Error getting next image");
+            PluginLog.LogDebug(ex, "Error getting next image");
             return;
         }
 

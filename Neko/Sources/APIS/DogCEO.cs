@@ -21,9 +21,11 @@ public class DogCEO : IImageSource
 
     private const int URL_COUNT = 10; // max 50
     private readonly MultiURLs<DogCEOJson> URLs;
+    private readonly Breed breed;
 
     public DogCEO(Breed b)
     {
+        breed = b;
         URLs = b == Breed.all
             ? (new($"https://dog.ceo/api/breeds/image/random/{URL_COUNT}", this))
             : (new($"https://dog.ceo/api/breed/{BreedPath(b)}/images/random/{URL_COUNT}", this));
@@ -55,6 +57,8 @@ public class DogCEO : IImageSource
         var name = Enum.GetName(typeof(Breed), b)?.Trim() ?? "Unknown";
         return name.Replace("_", "/");
     }
+
+    public bool Equals(IImageSource? other) => other != null && other is DogCEO d && d.breed == breed;
 
 #pragma warning disable
     public class DogCEOJson : IJsonToList<string>

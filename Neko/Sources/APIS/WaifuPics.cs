@@ -75,6 +75,8 @@ public class WaifuPics : IImageSource
 
     public override string ToString() => $"Waifu Pics ({type.ToUpper()}) {category}";
 
+    public bool Equals(IImageSource? other) => other != null && other is WaifuPics w && w.type == type && w.category == category;
+
 #pragma warning disable
     public class WaifuPicsJson
     {

@@ -24,8 +24,10 @@ public abstract class Twitter : IImageSource
     private const int URLThreshold = 5;
     private readonly string search;
 
-    private int? tweetCount;
-    private Task<int>? tweetCountTask;
+    // The Status is a touple of a string that is always displayed, and a optional help message
+    private (string, string?)? status;
+    private Task<(string, string?)>? statusTask;
+    private readonly CancellationTokenSource cts = new();
 
     public readonly Config.Query ConfigQuery;
     public bool Faulted { get; set; }
@@ -34,6 +36,11 @@ public abstract class Twitter : IImageSource
     {
         ConfigQuery = query;
         search = query.searchText;
+    }
+
+    ~Twitter()
+    {
+        cts.Cancel();
     }
 
     private static HttpRequestMessage AuthorizedRequest(string url) =>
@@ -47,24 +54,24 @@ public abstract class Twitter : IImageSource
 
     public abstract Task<NekoImage> Next(CancellationToken ct = default);
 
-    public abstract Task<int> TweetCount(CancellationToken ct = default);
+    public abstract Task<(string, string?)> Status(CancellationToken ct = default);
 
     public abstract override string ToString();
 
-    public string TweetCountString()
+    public (string, string?) TweetStatus()
     {
         // Use cached result if available
-        if (tweetCount != null)
-            return tweetCount.Value.ToString();
+        if (status.HasValue)
+            return status.Value;
 
         // Start TweetCount Task
-        if (tweetCountTask == null)
-        {
-            var _ = TweetCount();
-        }
+        if (statusTask == null)
+            statusTask = Status(cts.Token);
 
-        return "?";
+        return ("?", null);
     }
+
+    public bool Equals(IImageSource? other) => other != null && other is Twitter t && t.ConfigQuery == ConfigQuery;
 
     public class Config : IImageConfig
     {
@@ -196,33 +203,32 @@ public abstract class Twitter : IImageSource
             return image;
         }
 
-        public override async Task<int> TweetCount(CancellationToken ct = default)
+        public override async Task<(string, string?)> Status(CancellationToken ct = default)
         {
             // Wait for task to finish
-            if (tweetCountTask != null)
-                await tweetCountTask;
+            if (statusTask != null)
+                await statusTask;
 
             // Use cached result if available
-            if (tweetCount != null)
-                return tweetCount.Value;
+            if (status.HasValue)
+                return status.Value;
 
             var URL = $"https://api.twitter.com/2/tweets/counts/recent?granularity=day&{searchQuery}";
-            tweetCountTask = Task.Run(async () =>
+            var task = Task.Run(async () =>
             {
                 try
                 {
                     var response = await Common.ParseJson<CountJson>(AuthorizedRequest(URL), ct);
-                    tweetCount = response.Meta.TotalTweetCount;
-                    return response.Meta.TotalTweetCount;
+                    status = (response.Meta.TotalTweetCount.ToString(), $"Found {response.Meta.TotalTweetCount} tweets matching \"{search}\"");
+                    return status.Value;
                 }
                 catch
                 {
-                    tweetCount = 0;
-                    return 0;
+                    return ("?", null!);
                 }
             });
 
-            return await tweetCountTask;
+            return await task;
         }
 
         #region JSON
@@ -351,32 +357,6 @@ public abstract class Twitter : IImageSource
             }
         }
 
-        public class CountJson
-        {
-            [JsonPropertyName("data")]
-            public List<Datum> Data { get; set; }
-
-            [JsonPropertyName("meta")]
-            public Metadata Meta { get; set; }
-
-            public class Metadata
-            {
-                [JsonPropertyName("total_tweet_count")]
-                public int TotalTweetCount { get; set; }
-            }
-
-            public class Datum
-            {
-                [JsonPropertyName("end")]
-                public DateTime End { get; set; }
-
-                [JsonPropertyName("start")]
-                public DateTime Start { get; set; }
-
-                [JsonPropertyName("tweet_count")]
-                public int TweetCount { get; set; }
-            }
-        }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
         #endregion
     }
@@ -391,15 +371,14 @@ public abstract class Twitter : IImageSource
         private readonly string username;
         private readonly object userIDTaskLock = new();
         private Task? userIDTask;
-        private readonly CancellationTokenSource cts = new();
-        private readonly object URLsLock = new();
-        private TwitterMultiURLs<TweetTimelineJson, ImageResponse>? URLs;
+        private readonly TwitterMultiURLs<TweetTimelineJson, ImageResponse> URLs;
 
         public UserTimeline(Config.Query query) : base(query)
         {
             if (!ValidUsername(query.searchText))
                 throw new ArgumentException("Invalid username");
             username = extractUsername.Match(query.searchText).Groups[1].Value;
+            URLs = new((string token) => $"&pagination_token={token}", () => AuthorizedRequest(TimelineURL(userID)), this, URLThreshold);
         }
 
         ~UserTimeline()
@@ -407,7 +386,7 @@ public abstract class Twitter : IImageSource
             cts.Cancel();
         }
 
-        public override string ToString() => $"Twitter Timeline: @{username}\t{URLs?.ToString() ?? "No URLs yet"}";
+        public override string ToString() => $"Twitter Timeline: @{username}\t{URLs}";
 
         public override async Task<NekoImage> Next(CancellationToken ct = default)
         {
@@ -421,12 +400,6 @@ public abstract class Twitter : IImageSource
             if (string.IsNullOrEmpty(userID) || usernameReadable == null)
                 throw new Exception("Failed to get user ID");
 
-            lock (URLsLock)
-            {
-                if (URLs == null)
-                    URLs = new((string token) => $"&pagination_token={token}", () => AuthorizedRequest(TimelineURL(userID)), this, URLThreshold);
-            }
-
             var nextTweet = await URLs.GetURL();
             var image = await Common.DownloadImage(nextTweet.Media.Url, ct);
             image.Description = nextTweet.TweetDescription(usernameReadable, username);
@@ -434,7 +407,47 @@ public abstract class Twitter : IImageSource
             return image;
         }
 
-        public override Task<int> TweetCount(CancellationToken ct = default) => Task.FromResult(69);
+
+        public override async Task<(string, string?)> Status(CancellationToken ct = default)
+        {
+            // Wait for task to finish
+            if (statusTask != null && statusTask.Status == TaskStatus.Running)
+                await statusTask;
+
+            // Use cached result if available
+            if (status.HasValue)
+                return status.Value;
+
+            if (!ValidUsername(ConfigQuery.searchText))
+            {
+                status = ("ERROR", "Invalid username");
+                return status.Value;
+            }
+
+            if (userIDTask != null && userIDTask.Status == TaskStatus.Running)
+            {
+                await userIDTask;
+                if (string.IsNullOrEmpty(userID))
+                {
+                    status = ("ERROR", "Failed to get user ID. The user may not exist");
+                    return status.Value;
+                }
+            }
+            else
+            {
+                userIDTask = GetUserID(ct);
+
+                try { await userIDTask; }
+                catch (Exception)
+                {
+                    status = ("ERROR", $"Failed to get user ID. The user may not exist");
+                    return status.Value;
+                }
+            }
+
+            status = ("OK", $"@{username} was found  with the name \"{usernameReadable}\"");
+            return status.Value;
+        }
 
         public static async Task<UserLookupJson.SuccessRespone> GetIDFromUsername(string username, CancellationToken ct = default)
         {
@@ -603,6 +616,7 @@ public abstract class Twitter : IImageSource
         #endregion
     }
     #region JSON
+
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
     public class Medium
     {
@@ -615,6 +629,34 @@ public abstract class Twitter : IImageSource
         [JsonPropertyName("url")]
         public string Url { get; set; }
     }
+
+    public class CountJson
+    {
+        [JsonPropertyName("data")]
+        public List<Datum> Data { get; set; }
+
+        [JsonPropertyName("meta")]
+        public Metadata Meta { get; set; }
+
+        public class Metadata
+        {
+            [JsonPropertyName("total_tweet_count")]
+            public int TotalTweetCount { get; set; }
+        }
+
+        public class Datum
+        {
+            [JsonPropertyName("end")]
+            public DateTime End { get; set; }
+
+            [JsonPropertyName("start")]
+            public DateTime Start { get; set; }
+
+            [JsonPropertyName("tweet_count")]
+            public int TweetCount { get; set; }
+        }
+    }
+#pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
     #endregion JSON
 
     internal interface INextToken
@@ -637,6 +679,8 @@ public abstract class Twitter : IImageSource
         protected override void OnTaskSuccessfull(TJson result)
         {
             next_token = result.NextToken();
+            if (next_token == null)
+                PluginLog.LogDebug("No next_token found. There are no more tweets to load. Starting over from the beginning.");
             base.OnTaskSuccessfull(result);
         }
 
