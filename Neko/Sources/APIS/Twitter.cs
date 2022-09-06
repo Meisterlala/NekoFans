@@ -90,6 +90,8 @@ public abstract class Twitter : IImageSource
 
             public override bool Equals(object? obj) => obj is Query q && q == this;
             public override int GetHashCode() => searchText.GetHashCode() ^ enabled.GetHashCode();
+
+            public Query Clone() => new() { searchText = new(searchText), enabled = enabled };
         }
 
         public IImageSource? LoadConfig()

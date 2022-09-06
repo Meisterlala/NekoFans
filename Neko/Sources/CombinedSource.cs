@@ -86,16 +86,29 @@ public class CombinedSource : IImageSource
 
     public bool RemoveSource(IImageSource source)
     {
-        if (sources.Remove(source))
-            return true;
-        foreach (var s in sources)
+        bool HasBeenRemoved()
         {
-            if (s is CombinedSource cs && cs.RemoveSource(source))
+            if (sources.Remove(source))
                 return true;
-            if (s is FaultCheck fc && fc.UnWrap() == source)
-                return true;
+            foreach (var s in sources)
+            {
+                if (s is CombinedSource cs && cs.RemoveSource(source))
+                    return true;
+                if (s is FaultCheck fc && fc.UnWrap() == source)
+                    return true;
+            }
+            return false;
         }
-        return false;
+        if (HasBeenRemoved())
+        {
+            sources.RemoveAll((e) =>
+            e is CombinedSource cs && cs.Count() == 0);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public void RemoveAll(Type type)

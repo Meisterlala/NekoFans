@@ -64,12 +64,7 @@ public class Plugin : IDalamudPlugin
         CommandManager.RemoveHandler(CommandMain);
     }
 
-    public static void UpdateImageSource()
-    {
-        var x = Config.LoadSources();
-        Dalamud.Logging.PluginLog.LogWarning("Updating ImageSource");
-        ImageSource.UpdateFrom(x);
-    }
+    public static void UpdateImageSource() => ImageSource.UpdateFrom(Config.LoadSources());
 
     private void OnCommand(string command, string args)
     {
