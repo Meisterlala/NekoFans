@@ -153,7 +153,7 @@ public class ConfigWindow
             ImGui.SameLine(); Common.HelpMarker("How long to wait before displaying a new image.");
         }
 
-
+        ImGui.PushItemWidth(100);
         // Image Queue System
         ImGui.Text("Image preloading system");
         ImGui.SameLine(); Common.HelpMarker("Images are loaded in the background, to make displaying the next image faster.");
@@ -170,6 +170,10 @@ public class ConfigWindow
         }
         ImGui.SameLine(); Common.HelpMarker("The amount of images which are downloaded from the internet.\n" +
                                             "Increasing this will result in higher RAM usage. Recomended: 5");
+        if (Plugin.GuiMain != null)
+        {
+            ImGui.SameLine(); ImGui.TextDisabled(Helper.SizeSuffix(Plugin.GuiMain.Queue.RAMUsage()));
+        }
 
         // Int in VRAM
         if (ImGui.InputInt("in VRAM", ref QueuePreloadCount, 1))
@@ -183,6 +187,12 @@ public class ConfigWindow
         }
         ImGui.SameLine(); Common.HelpMarker("The amount of images which are decoded and loaded into the GPU.\n" +
                                             "Increasing this will result in higher VRAM usage. Recomended: 2");
+        if (Plugin.GuiMain != null)
+        {
+            ImGui.SameLine(); ImGui.TextDisabled(Helper.SizeSuffix(Plugin.GuiMain.Queue.VRAMUsage()));
+        }
+        ImGui.PopItemWidth();
+
 
         // Clear Image queue
         if (ImGui.Button("Clear all downloaded images"))

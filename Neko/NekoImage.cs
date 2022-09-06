@@ -80,6 +80,9 @@ public class NekoImage
     public string? Description { get; set; }
     public string? DebugInfo { get; set; }
 
+    public long RAMUsage => _data != null ? _data.Length : 0;
+    public long VRAMUsage => _texture != null ? _texture.Height * _texture.Width * 4 : 0;
+
     public NekoImage(byte[] data, string url)
     {
         _data = data;
@@ -138,6 +141,7 @@ public class NekoImage
 
         return name == "" ? "Invalid Texture" : name;
     }
+
 
     /// <summary>
     /// Load image from RAM to GPU VRAM

@@ -73,6 +73,35 @@ public class NekoQueue
         return res;
     }
 
+    public long RAMUsage()
+    {
+        var res = 0L;
+        lock (queue)
+        {
+            foreach (var item in queue)
+            {
+                if (item.downloadTask?.IsCompletedSuccessfully ?? false)
+                    res += item.downloadTask.Result.RAMUsage;
+            }
+        }
+        return res;
+    }
+
+    public long VRAMUsage()
+    {
+        var res = 0;
+        lock (queue)
+        {
+            foreach (var item in queue)
+            {
+                if (item.imageTask?.IsCompletedSuccessfully ?? false)
+                    res += item.imageTask.Result.Width * item.imageTask.Result.Height * 4;
+            }
+        }
+        return res;
+    }
+
+
     public async Task<NekoImage> Pop()
     {
         QueueItem popped;
