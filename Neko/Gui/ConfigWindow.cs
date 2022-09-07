@@ -107,6 +107,29 @@ public class ConfigWindow
                                             "Hold down the right mouse button to move the window.\n" +
                                             "Press the middle mouse button to close the window when no title bar is displayed.");
 
+        // Slideshow Enable / Disable
+        if (ImGui.Checkbox("Slideshow", ref Plugin.Config.SlideshowEnabled))
+        {
+            Plugin.Config.Save();
+            Plugin.GuiMain?.Slideshow.UpdateFromConfig();
+        }
+        ImGui.SameLine(); Common.HelpMarker("Automatically display a new image after the specified interval.");
+
+        // Slideshow Interval
+        if (Plugin.Config.SlideshowEnabled)
+        {
+            if (ImGui.InputDouble("Interval", ref Plugin.Config.SlideshowIntervalSeconds, 1, 60, Helper.SecondsToString(Plugin.Config.SlideshowIntervalSeconds)))
+            {
+                // Check for miminimum interval
+                if (Plugin.Config.SlideshowIntervalSeconds < Sources.Slideshow.MININTERVAL)
+                    Plugin.Config.SlideshowIntervalSeconds = Sources.Slideshow.MININTERVAL;
+                Plugin.Config.Save();
+                Plugin.GuiMain?.Slideshow.UpdateFromConfig();
+            }
+            Common.ToolTip("Input the interval length in seconds.\nHolding Control while pressing the + or - button changes the inverval by 1 minute.");
+            ImGui.SameLine(); Common.HelpMarker("How long to wait before displaying a new image.");
+        }
+
         // Image Alignment Submenu
         if (ImGui.CollapsingHeader("Image alignment"))
             DrawAlign();
@@ -132,36 +155,13 @@ public class ConfigWindow
     {
         ImGui.PushItemWidth(-200);
 
-        // Slideshow Enable / Disable
-        if (ImGui.Checkbox("Slideshow", ref Plugin.Config.SlideshowEnabled))
-        {
-            Plugin.Config.Save();
-            Plugin.GuiMain?.Slideshow.UpdateFromConfig();
-        }
-        ImGui.SameLine(); Common.HelpMarker("Automatically display a new image after the specified interval.");
-
-        // Slideshow Interval
-        if (Plugin.Config.SlideshowEnabled)
-        {
-            if (ImGui.InputDouble("Interval", ref Plugin.Config.SlideshowIntervalSeconds, 1, 60, Helper.SecondsToString(Plugin.Config.SlideshowIntervalSeconds)))
-            {
-                // Check for miminimum interval
-                if (Plugin.Config.SlideshowIntervalSeconds < Sources.Slideshow.MININTERVAL)
-                    Plugin.Config.SlideshowIntervalSeconds = Sources.Slideshow.MININTERVAL;
-                Plugin.Config.Save();
-                Plugin.GuiMain?.Slideshow.UpdateFromConfig();
-            }
-            Common.ToolTip("Input the interval length in seconds.\nHolding Control while pressing the + or - button changes the inverval by 1 minute.");
-            ImGui.SameLine(); Common.HelpMarker("How long to wait before displaying a new image.");
-        }
-
         ImGui.PushItemWidth(100);
         // Image Queue System
         ImGui.Text("Image preloading system");
         ImGui.SameLine(); Common.HelpMarker("Images are loaded in the background, to make displaying the next image faster.");
 
         // Int Downloaded
-        if (ImGui.InputInt("Downloaded", ref QueueDonwloadCount, 1))
+        if (ImGui.InputInt("Downloaded##Advanced", ref QueueDonwloadCount, 1))
         {
             if (QueueDonwloadCount < 1 || QueueDonwloadCount > 50 || QueuePreloadCount > QueueDonwloadCount)
                 QueueDonwloadCount = Plugin.Config.QueueDownloadCount;
@@ -178,7 +178,7 @@ public class ConfigWindow
         }
 
         // Int in VRAM
-        if (ImGui.InputInt("in VRAM", ref QueuePreloadCount, 1))
+        if (ImGui.InputInt("in VRAM##Advanced", ref QueuePreloadCount, 1))
         {
             if (QueuePreloadCount < 1 || QueuePreloadCount > 25 || QueuePreloadCount > QueueDonwloadCount)
                 QueuePreloadCount = Plugin.Config.QueuePreloadCount;
@@ -197,12 +197,20 @@ public class ConfigWindow
 
 
         // Clear Image queue
-        if (ImGui.Button("Clear all downloaded images"))
+        if (ImGui.Button("Clear all downloaded images##Advanced"))
         {
             if (Plugin.GuiMain != null)
                 Plugin.GuiMain.Queue.Refresh();
         }
         ImGui.SameLine(); Common.HelpMarker("This will force all images to be downloaded again.");
+        ImGui.PopItemWidth();
+
+        // Clear Image queue
+        if (ImGui.Button("Rest all faulty Image Sources##Advanced"))
+        {
+            Plugin.ImageSource.ResetFaultySources();
+        }
+        ImGui.SameLine(); Common.HelpMarker("If an API has a problem, it will be disabled.\n Clicking this Button will reset all disabled APIs.\n You can also disable and enable APIs in the 'Image sources' menu to reset them.");
         ImGui.PopItemWidth();
     }
 

@@ -35,7 +35,7 @@ public class CombinedSource : IImageSource
         {
             Faulted = true;
             if (sources.Count > 0)
-                throw new Exception("All Image sources are faulted");
+                throw new Exception("All Image sources of one Type are faulted");
             else
                 throw new Exception("No Image sources are available");
         }
@@ -265,7 +265,7 @@ public class CombinedSource : IImageSource
             }
         }
         // Remove last newline
-        return res[..^1];
+        return res[..^1] + (Faulted ? " (Faulted)" : "");
     }
 
     public IImageSource? LoadConfig(object _) => throw new NotImplementedException();
@@ -275,4 +275,20 @@ public class CombinedSource : IImageSource
         && other is CombinedSource cs
         && cs.sources.TrueForAll((e) => Contains(e))
         && sources.TrueForAll((e) => cs.Contains(e));
+
+    public void ResetFaultySources()
+    {
+        sources.ForEach((e) =>
+        {
+            if (e is FaultCheck fc)
+            {
+                fc.ResetFaultCount();
+            }
+            else if (e is CombinedSource cs)
+            {
+                cs.Faulted = false;
+                cs.ResetFaultySources();
+            }
+        });
+    }
 }

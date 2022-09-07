@@ -55,7 +55,11 @@ public class FaultCheck : IImageSource
         Source.Faulted = true;
     }
 
-    public void ResetFaultCount() => Interlocked.Exchange(ref FaultCount, 0);
+    public void ResetFaultCount()
+    {
+        Interlocked.Exchange(ref FaultCount, 0);
+        Source.Faulted = false;
+    }
 
     public override string ToString()
     {

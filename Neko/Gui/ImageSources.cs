@@ -354,8 +354,12 @@ public class ImageSourcesGUI
                 ImGui.PushStyleColor(ImGuiCol.FrameBg, TableTextRed);
             if (ImGui.InputText($"##TwitterTableEntrySearchText_{i}", ref entry.QueryDirty.searchText, 256))
                 entry.IsDirty = true;
+
+            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+                selectedTwitterEntry = i;
             if (entry.ImageSource?.Faulted ?? false)
                 ImGui.PopStyleColor();
+
             ImGui.PopItemWidth();
 
             // Status
