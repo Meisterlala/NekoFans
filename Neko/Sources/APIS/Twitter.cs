@@ -281,9 +281,10 @@ public abstract class Twitter : IImageSource
                     }
 
                     // Filter out tweets that match the blacklist
-                    if (NSFW.NotAllowed(tweet.Text))
+                    var x = NSFW.MatchesBadWord(tweet.Text);
+                    if (x != null)
                     {
-                        PluginLog.LogDebug($"Skipping tweet {tweet.Id} because it matches the blacklist");
+                        PluginLog.LogDebug($"Skipping tweet {tweet.Id} because it matches the blacklist entry \"{x}\"");
                         continue;
                     }
 

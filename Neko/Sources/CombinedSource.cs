@@ -62,9 +62,14 @@ public class CombinedSource : IImageSource
                 ? cs.Contains(a => fc.UnWrap().GetType() == a.GetType())
                 : cs.Contains((a) => s.GetType() == a.GetType())));
             if (exisiting != null)
+            {
                 exisiting.sources.AddRange(cs.sources);
+                exisiting.Faulted = false;
+            }
             else
+            {
                 sources.Add(cs);
+            }
         }
         else
         {
@@ -78,9 +83,14 @@ public class CombinedSource : IImageSource
                 : s.GetType() == wrapped.UnWrap().GetType()));
             // Chek if there is a source, which contains the same type
             if (exisiting != null)
+            {
                 exisiting.sources.Add(wrapped);
+                exisiting.Faulted = false;
+            }
             else
+            {
                 sources.Add(wrapped);
+            }
         }
     }
 
@@ -241,7 +251,7 @@ public class CombinedSource : IImageSource
 
     public override string ToString()
     {
-        var res = $"Loaded image sources: {Count()}\n";
+        var res = $"Loaded image sources: {Count()} {(Faulted ? " (Faulted)" : "")}\n";
         foreach (var s in sources)
         {
             if (s.GetType() == typeof(CombinedSource))
@@ -265,7 +275,7 @@ public class CombinedSource : IImageSource
             }
         }
         // Remove last newline
-        return res[..^1] + (Faulted ? " (Faulted)" : "");
+        return res[..^1];
     }
 
     public IImageSource? LoadConfig(object _) => throw new NotImplementedException();
