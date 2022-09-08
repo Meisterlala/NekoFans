@@ -8,7 +8,6 @@ namespace Neko.Sources.APIS;
 
 public class Waifuim : IImageSource
 {
-
     public class Config : IImageConfig
     {
         public bool enabled;
@@ -20,11 +19,15 @@ public class Waifuim : IImageSource
         {
             return !enabled
             ? null
-            : sfw && nsfw
+            : sfw && (nsfw & NSFW.AllowNSFW)
             ? new CombinedSource(new Waifuim(false), new Waifuim(true))
-            : new Waifuim(nsfw);
+            : new Waifuim(nsfw & NSFW.AllowNSFW);
         }
     }
+
+    public bool Faulted { get; set; }
+
+    public string Name => "waifu.im";
 
     private readonly MultiURLs<WaifuImJson> URLs;
     private readonly bool nsfw;
@@ -33,20 +36,22 @@ public class Waifuim : IImageSource
     {
         this.nsfw = nsfw && NSFW.AllowNSFW; // NSFW Check
         URLs = this.nsfw
-            ? (new("https://api.waifu.im/random/?is_nsfw=true&gif=false&many=true"))
-            : (new("https://api.waifu.im/random/?is_nsfw=false&gif=false&many=true"));
+            ? (new("https://api.waifu.im/random/?is_nsfw=true&gif=false&many=true", this))
+            : (new("https://api.waifu.im/random/?is_nsfw=false&gif=false&many=true", this));
     }
 
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
-        var url = await URLs.GetURL();
+        var url = await URLs.GetURL(ct);
         return await Common.DownloadImage(url, ct);
     }
 
-    public override string ToString() => $"waifu.im ({(nsfw ? "NSFW" : "SFW")})\tURLs: {URLs.URLCount}";
+    public override string ToString() => $"waifu.im ({(nsfw ? "NSFW" : "SFW")})\t{URLs}";
+
+    public bool Equals(IImageSource? other) => other != null && other is Waifuim w && w.nsfw == nsfw;
 
 #pragma warning disable
-    public class WaifuImJson : IJsonToList
+    public class WaifuImJson : IJsonToList<string>
     {
         public class Image
         {

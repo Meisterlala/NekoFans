@@ -36,10 +36,10 @@ public class NekoImage
     {
         return arch switch
         {
-            Architecture.Workstation32Bit => 1024 * 1024 * 15,  //  15 MB
-            Architecture.Workstation64Bit => 1024 * 1024 * 243, // 243 MB
-            Architecture.Server32Bit => 1024 * 1024 * 255,      // 255 MB
-            Architecture.Server64Bit => 1024 * 1024 * 1024,     //   1 GB
+            Architecture.Workstation32Bit => 1000 * 1000 * 15,  //  15 MB
+            Architecture.Workstation64Bit => 1000 * 1000 * 243, // 243 MB
+            Architecture.Server32Bit => 1000 * 1000 * 255,      // 255 MB
+            Architecture.Server64Bit => 1000 * 1000 * 1000,     //   1 GB
             _ => throw new ArgumentOutOfRangeException(nameof(arch)),
         };
     }
@@ -75,12 +75,19 @@ public class NekoImage
 
     public TextureWrap Texture => _texture ?? throw new Exception("await LoadImage() before accessing the texture");
 
-    public string? URL { get; private set; }
+    public string? URLImage { get; private set; }
+    public string? URLClick { get; set; }
+    public string? Description { get; set; }
+    public string? DebugInfo { get; set; }
+
+    public long RAMUsage => _data != null ? _data.Length : 0;
+    public long VRAMUsage => _texture != null ? _texture.Height * _texture.Width * 4 : 0;
 
     public NekoImage(byte[] data, string url)
     {
         _data = data;
-        URL = url;
+        URLImage = url;
+        URLClick = url;
         ImageStatus = ImageStatus.HasData;
     }
 
@@ -104,7 +111,8 @@ public class NekoImage
     public void Dispose()
     {
 #if DEBUG
-        PluginLog.LogDebug("Disposing Image  " + ToString());
+        if (_texture != null || (_data != null && _data.Length > 0))
+            PluginLog.LogVerbose("Disposing Image  " + ToString());
 #endif
         _texture?.Dispose();
         _texture = null;
@@ -114,16 +122,26 @@ public class NekoImage
 
     public override string ToString()
     {
+        // Check if Embedded Resource
+        if (this == Embedded.ImageError.Image)
+            return Embedded.ImageError.ToString();
+        else if (this == Embedded.ImageLoading.Image)
+            return Embedded.ImageLoading.ToString();
+
         var name = "";
         if (_data != null)
             name += $"Data: {Helper.SizeSuffix(_data.Length)}\t";
         if (_texture != null)
             name += $"Texture: {Helper.SizeSuffix(_texture.Height * _texture.Width * 4)}\t";
-        if (URL != null)
-            name += $"URL: {URL}";
+        if (URLImage != null)
+            name += $"URL: {URLImage}";
+        if (DebugInfo != null)
+            name += $"\n└─DebugInfo: {DebugInfo}";
+
 
         return name == "" ? "Invalid Texture" : name;
     }
+
 
     /// <summary>
     /// Load image from RAM to GPU VRAM
@@ -199,7 +217,7 @@ public class NekoImage
             PluginLog.LogDebug(ex, "Ephemeral memory to small to load image");
         }
 
-        PluginLog.Debug("Decompressed {0} to {1} and loaded into GPU VRAM",
+        PluginLog.Verbose("Decompressed {0} to {1} and loaded into GPU VRAM",
                         _data != null ? Helper.SizeSuffix(_data.Length) : "???",
                         Helper.SizeSuffix(_texture.Width * _texture.Height * 4));
 
@@ -213,39 +231,56 @@ public class NekoImage
         return _texture;
     }
 
-    private static NekoImage? defaultNekoImage; // uses 7.3 MB vram
-    public static TextureWrap DefaultNekoTexture => defaultNekoImage != null ? defaultNekoImage.Texture : throw new Exception("Default image not yet loaded");
 
-    public static bool DefaultNekoReady { get; private set; }
 
-    public static async Task<NekoImage> DefaultNeko()
+    public class Embedded
     {
-        // Only load texture if it was never loaded. 
-        if (defaultNekoImage != null) return defaultNekoImage;
+        public static readonly Embedded ImageError = new("error.jpg");
+        public static readonly Embedded ImageLoading = new("loading.jpg");
 
-        // Load embedded error icon
-        if (DefaultNekoReady)
-            PluginLog.LogWarning("Reloading default Neko image");
-        var assembly = Assembly.GetExecutingAssembly();
-        var resourceName = "Neko.resources.error.jpg";
+        public volatile NekoImage? Image;
+        public TextureWrap Texture => Image?.Texture ?? throw new Exception("Load Embedded Image before accessing the texture");
+        public bool Ready { get; private set; }
+        private readonly string Filename;
 
-        try
+        public Embedded(string filename) => Filename = filename;
+
+        public async Task<NekoImage> Load()
         {
-            using var stream = assembly.GetManifestResourceStream(resourceName);
-            using var memoryStream = new MemoryStream();
-            stream?.CopyTo(memoryStream);
-            var bytes = memoryStream.ToArray();
-            var img = new NekoImage(bytes);
-            await img.LoadImage();
-            defaultNekoImage = img;
-        }
-        catch (Exception)
-        {
-            PluginLog.LogFatal("Could not load default image");
-            throw;
+            // Only load texture if it was never loaded. 
+            if (Image != null) return Image;
+
+            // Load embedded error icon
+            if (Ready)
+                PluginLog.LogWarning("Reloading exsisting embedded image");
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = $"Neko.resources.{Filename}";
+
+            try
+            {
+                using var stream = assembly.GetManifestResourceStream(resourceName);
+                using var memoryStream = new MemoryStream();
+                stream?.CopyTo(memoryStream);
+                var bytes = memoryStream.ToArray();
+                var img = new NekoImage(bytes);
+                await img.LoadImage();
+                Image = img;
+            }
+            catch (Exception)
+            {
+                PluginLog.LogFatal("Could not load embedded image: {0}", resourceName);
+                throw;
+            }
+
+            PluginLog.LogVerbose("Loaded embedded image: {0}", resourceName);
+            Ready = true;
+            return Image;
         }
 
-        DefaultNekoReady = true;
-        return defaultNekoImage;
+        public override string ToString() => $"Embedded Image: {Filename}";
+
+        public static implicit operator NekoImage(Embedded embedded) => embedded.Image ?? throw new Exception("await Load() before accessing the texture");
+        public static implicit operator Task<NekoImage>(Embedded embedded) => embedded.Load();
+
     }
 }

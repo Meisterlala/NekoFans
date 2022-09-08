@@ -12,6 +12,10 @@ public class NekosLife : IImageSource
         public IImageSource? LoadConfig() => enabled ? new NekosLife() : null;
     }
 
+    public bool Faulted { get; set; }
+
+    public string Name => "Nekos.life";
+
 #pragma warning disable
     public class NekosLifeJson
     {
@@ -30,5 +34,6 @@ public class NekosLife : IImageSource
 
     public override string ToString() => "Nekos.life";
 
+    public bool Equals(IImageSource? other) => other != null && other.GetType() == typeof(NekosLife);
 }
 

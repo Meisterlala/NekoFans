@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Neko Build Debug",
+      "label": "Neko: Build Debug",
       "command": "dotnet",
       "type": "process",
       "args": [
@@ -17,7 +17,7 @@
       }
     },
     {
-      "label": "Neko Build Release",
+      "label": "Neko: Build Release",
       "command": "dotnet",
       "type": "process",
       "args": [
@@ -34,7 +34,55 @@
       }
     },
     {
-      "label": "NekoLewd Build Release",
+      "label": "Neko: Build Network",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/Neko/Neko.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary",
+        "/p:DefineConstants=\"NETWORK;DEBUG\"",
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "Neko: Build Random Throw",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/Neko/Neko.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary",
+        "/p:DefineConstants=\"RANDOM_THROW;DEBUG\"",
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "Neko: Build Random Delay",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/Neko/Neko.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary",
+        "/p:DefineConstants=\"RANDOM_DELAY;DEBUG\"",
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "NekoLewd: Build Release",
       "command": "dotnet",
       "type": "process",
       "args": [

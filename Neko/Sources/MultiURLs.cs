@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
@@ -7,77 +8,134 @@ using Dalamud.Logging;
 
 namespace Neko.Sources;
 
+
 /// <summary>
 /// Stores a List of URLs, which are provided from an API.
 /// This is used when the API returns a list of many URLs to images
 /// </summary>
-/// <typeparam name="T">Json to parse into</typeparam>
-public class MultiURLs<T>
-    where T : IJsonToList
+/// <typeparam name="TJson">Json to parse into</typeparam>
+public class MultiURLs<T> : MultiURLsGeneric<T, string>
+    where T : IJsonToList<string>
 {
-    public int URLCount => urlCount;
-
-    private const int URLThreshold = 25;
-    private Task<T> getNewURLs;
-    private readonly string url;
-    private readonly ConcurrentQueue<string> URLs = new();
-    private int taskRunning;
-    private int urlCount;
-
-    public MultiURLs(string url)
+    public MultiURLs(string url, IImageSource caller, int maxCount = 25) : base(url, caller, maxCount)
     {
-        this.url = url;
-        getNewURLs = StartTask();
     }
 
-    public async Task<string> GetURL()
+    public MultiURLs(Func<HttpRequestMessage> requestGen, IImageSource caller, int maxCount = 25) : base(requestGen, caller, maxCount)
     {
-        // Load more
-        if (urlCount <= URLThreshold
-            && getNewURLs.IsCompletedSuccessfully
-            && 0 == Interlocked.Exchange(ref taskRunning, 1))
+    }
+}
+
+
+/// <summary>
+/// Stores a List of <typeparamref name="TQueueElement"/>, which are provided from an API.
+/// This is used when the API returns a list of many <typeparamref name="TQueueElement"/>s
+/// </summary>
+/// <typeparam name="TJson">Json to parse into</typeparam>
+/// <typeparam name="TQueueElement">Result of the API</typeparam>
+public class MultiURLsGeneric<TJson, TQueueElement>
+    where TJson : IJsonToList<TQueueElement>
+{
+    public int URLCount => _urlCount;
+    protected const int URLThreshold = 25;
+    protected Task? getNewURLs;
+    protected readonly ConcurrentQueue<TQueueElement> URLs = new();
+    protected readonly Func<Task<TJson>> parseJson;
+    protected readonly int maxCount;
+    protected int taskRunning;
+    protected int _urlCount;
+    protected bool initilized;
+    protected IImageSource caller;
+
+    protected readonly CancellationTokenSource cts = new();
+
+    public MultiURLsGeneric(string url, IImageSource caller, int maxCount = URLThreshold)
+    {
+        this.maxCount = maxCount;
+        this.caller = caller;
+        parseJson = () => Common.ParseJson<TJson>(url, cts.Token);
+    }
+
+    public MultiURLsGeneric(Func<HttpRequestMessage> requestGen, IImageSource caller, int maxCount = URLThreshold)
+    {
+        this.maxCount = maxCount;
+        this.caller = caller;
+        parseJson = () => Common.ParseJson<TJson>(ModifyRequest(requestGen()), cts.Token);
+    }
+
+    ~MultiURLsGeneric()
+    {
+        cts.Cancel();
+    }
+
+    public virtual async Task<TQueueElement> GetURL(CancellationToken ct = default)
+    {
+        DebugHelper.RandomThrow(DebugHelper.ThrowChance.GetURL);
+        await DebugHelper.RandomDelay(DebugHelper.Delay.GetURL, ct);
+
+        TQueueElement? element;
+        do
         {
-            getNewURLs = StartTask();
+            // Cancel if needed
+            if (caller.Faulted || ct.IsCancellationRequested)
+                throw new OperationCanceledException();
+
+            // Load more if needed
+            if (_urlCount <= maxCount
+                && 0 == Interlocked.Exchange(ref taskRunning, 1))
+            {
+                getNewURLs = StartTask();
+            }
+
+            // Wait for more
+            if (getNewURLs != null && _urlCount <= 0)
+                await getNewURLs;
+
+            // Try to get a URL from Queue
+        } while (!URLs.TryDequeue(out element));
+
+        Interlocked.Decrement(ref _urlCount);
+        return element;
+    }
+
+    private Task StartTask() => Task.Run(async () => await parseJson().ContinueWith(OnTaskComplete, cts.Token), cts.Token);
+
+    private void OnTaskComplete(Task<TJson> task)
+    {
+        try
+        {
+            DebugHelper.RandomDelay(DebugHelper.Delay.MultiURL);
+            OnTaskSuccessfull(task.Result);
+        }
+        catch (AggregateException ex)
+        {
+            FaultCheck.IncreaseFaultCount(caller);
+            PluginLog.LogWarning(ex.InnerExceptions[0], "Could not get more URLs to images");
+        }
+        finally
+        {
+            Interlocked.Exchange(ref taskRunning, 0);
         }
 
-        await getNewURLs;
-        Interlocked.Decrement(ref urlCount);
-        URLs.TryDequeue(out var res);
-
-        return res == null || getNewURLs.IsFaulted ? throw new Exception("Could not get URLs to images") : res;
     }
 
-    private async Task<T> StartTask()
+    protected virtual void OnTaskSuccessfull(TJson result)
     {
-        var tsk = Common.ParseJson<T>(url);
-        await tsk.ContinueWith((task) =>
-        {
-            foreach (var ex in task.Exception?.Flatten().InnerExceptions ?? new(Array.Empty<Exception>()))
-            {
-                _ = ex;
-            }
+        initilized = true;
+        var list = result.ToList();
+        if (list.Count == 0)
+            FaultCheck.IncreaseFaultCount(caller);
 
-            if (task.IsCompletedSuccessfully)
-            {
-                try
-                {
-                    var list = task.Result.ToList();
-                    foreach (var item in list)
-                    {
-                        Interlocked.Increment(ref urlCount);
-                        URLs.Enqueue(item);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    PluginLog.LogError(ex, "Could not get more URLs to images");
-                }
-                finally
-                {
-                    Interlocked.Exchange(ref taskRunning, 0);
-                }
-            }
-        });
-        return await tsk;
+        foreach (var item in list)
+        {
+            Interlocked.Increment(ref _urlCount);
+            URLs.Enqueue(item);
+        }
     }
+
+
+    protected virtual HttpRequestMessage ModifyRequest(HttpRequestMessage response) => response;
+
+    public override string ToString()
+    => initilized ? $"URLs: {_urlCount}{(maxCount != URLThreshold ? $" TargetUrlCount: {maxCount}" : "")}{(taskRunning == 1 ? "\tLoading more ..." : "")}" : "URLs not initialized";
 }

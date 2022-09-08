@@ -40,7 +40,9 @@ public class Plugin : IDalamudPlugin
 
         Config = Configuration.Load(); // Load Configuration
         ImageSource = Config.LoadSources(); // Load ImageSources from config
-        _ = NekoImage.DefaultNeko(); // Load Default image to memory
+        // Load Embedded Images
+        var _imageError = NekoImage.Embedded.ImageError.Load();
+        var _ImageLoading = NekoImage.Embedded.ImageLoading.Load();
 
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigGui;
         PluginInterface.UiBuilder.Draw += DrawUI;
@@ -62,7 +64,12 @@ public class Plugin : IDalamudPlugin
         CommandManager.RemoveHandler(CommandMain);
     }
 
-    public static void ReloadImageSources() => ImageSource = Config.LoadSources();
+    public static void UpdateImageSource() => ImageSource.UpdateFrom(Config.LoadSources());
+
+    /// <summary>
+    ///  This will clear all downloaded images and start downloading new ones.
+    /// </summary>
+    public static void ReloadSources() => ImageSource = Config.LoadSources();
 
     private void OnCommand(string command, string args)
     {

@@ -127,5 +127,20 @@ public static class Helper
         }
         return false;
     }
-}
 
+    public static string SecondsToString(double seconds)
+    {
+        var span = TimeSpan.FromSeconds(seconds);
+        var interval = "";
+        if (span.Hours > 0)
+            interval += $"{span.Hours}h ";
+        if (span.Minutes > 0)
+            interval += $"{span.Minutes}m ";
+        if (span.Seconds > 0)
+            interval += $"{span.Seconds}s ";
+        if (span.Milliseconds > 0)
+            interval += $"{span.Milliseconds}ms";
+        return interval;
+    }
+
+}

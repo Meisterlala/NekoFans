@@ -14,23 +14,30 @@ public class ShibeOnline : IImageSource
         public IImageSource? LoadConfig() => enabled ? new ShibeOnline() : null;
     }
 
-    private const int URL_COUNT = 100;
-    private static readonly MultiURLs<ShibeOnlineJson> URLs = new(
-            "http://shibe.online/api/shibes?count=" + URL_COUNT + "&urls=true&httpsUrls=true");
+    public bool Faulted { get; set; }
+
+    public string Name => "Shibe.online";
+
+    private const int URL_COUNT = 5;
+    private readonly MultiURLs<ShibeOnlineJson> URLs;
+
+    public ShibeOnline() =>
+        URLs = new("http://shibe.online/api/shibes?count=" + URL_COUNT + "&urls=true&httpsUrls=true", this);
 
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
-        var url = await URLs.GetURL();
+        var url = await URLs.GetURL(ct);
         return await Common.DownloadImage(url, ct);
     }
 
-    public override string ToString() => "Shibe.online\tURLs: " + URLs.URLCount;
+    public override string ToString() => $"Shibe.online\t{URLs}";
+
+    public bool Equals(IImageSource? other) => other != null && other.GetType() == typeof(ShibeOnline);
 
 #pragma warning disable
-    public class ShibeOnlineJson : List<string>, IJsonToList
+    public class ShibeOnlineJson : List<string>, IJsonToList<string>
     {
         public List<string> ToList() => this;
     }
 #pragma warning restore
-
 }

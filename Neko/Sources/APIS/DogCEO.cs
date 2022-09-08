@@ -17,26 +17,32 @@ public class DogCEO : IImageSource
         public IImageSource? LoadConfig() => enabled ? new DogCEO(breed) : null;
     }
 
+    public bool Faulted { get; set; }
+
 
     private const int URL_COUNT = 10; // max 50
     private readonly MultiURLs<DogCEOJson> URLs;
+    private readonly Breed breed;
 
     public DogCEO(Breed b)
     {
+        breed = b;
         URLs = b == Breed.all
-            ? (new($"https://dog.ceo/api/breeds/image/random/{URL_COUNT}"))
-            : (new($"https://dog.ceo/api/breed/{BreedPath(b)}/images/random/{URL_COUNT}"));
+            ? (new($"https://dog.ceo/api/breeds/image/random/{URL_COUNT}", this))
+            : (new($"https://dog.ceo/api/breed/{BreedPath(b)}/images/random/{URL_COUNT}", this));
     }
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
-        var url = await URLs.GetURL();
+        var url = await URLs.GetURL(ct);
         return await Common.DownloadImage(url, ct);
     }
+
+    public string Name => "Dog CEO";
 
     public override string ToString()
     {
         var breed = Plugin.Config.Sources.DogCEO.breed;
-        return $"Dog CEO\tBreed: {BreedName(breed)}\tURLs: {URLs.URLCount}";
+        return $"Dog CEO\tBreed: {BreedName(breed)}\t{URLs}";
     }
 
     public static string BreedName(Breed b)
@@ -55,8 +61,10 @@ public class DogCEO : IImageSource
         return name.Replace("_", "/");
     }
 
+    public bool Equals(IImageSource? other) => other != null && other is DogCEO d && d.breed == breed;
+
 #pragma warning disable
-    public class DogCEOJson : IJsonToList
+    public class DogCEOJson : IJsonToList<string>
     {
         public List<string> message { get; set; }
         public string status { get; set; }

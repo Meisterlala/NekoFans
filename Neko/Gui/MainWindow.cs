@@ -27,6 +27,8 @@ public class MainWindow
 
     public readonly NekoQueue Queue;
 
+    public readonly Sources.Slideshow Slideshow;
+
     private bool imageGrayed;
 
     private Task<NekoImage>? nekoTaskCurrent;
@@ -35,6 +37,7 @@ public class MainWindow
     public MainWindow()
     {
         Queue = new(); // Start loading images
+        Slideshow = new(AsnyncNextNeko);
         AsnyncNextNeko();
     }
 
@@ -54,13 +57,13 @@ public class MainWindow
 
     public void DrawNeko()
     {
-        if (!NekoImage.DefaultNekoReady) return;
+        if (!NekoImage.Embedded.ImageLoading.Ready) return;
 
         var fontScale = ImGui.GetIO().FontGlobalScale;
         var size = new Vector2(100 * fontScale, 100 * fontScale);
 
-        ImGui.SetNextWindowSize(size * 4, ImGuiCond.FirstUseEver);
-        ImGui.SetNextWindowSizeConstraints(size, size * 20);
+        ImGui.SetNextWindowSize(size * 5, ImGuiCond.FirstUseEver);
+        ImGui.SetNextWindowSizeConstraints(size, size * 50);
         ImGui.SetNextWindowBgAlpha(Plugin.Config.GuiMainOpacity);
 
         var flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse;
@@ -86,17 +89,20 @@ public class MainWindow
             // Save visible State
             Visible = visible;
 
-            // Load Neko or fallback to default
+            // Load Neko or fallback to Error
             var currentNeko = nekoTaskCurrent != null
                 && nekoTaskCurrent.IsCompletedSuccessfully
                 && nekoTaskCurrent.Result.ImageStatus == ImageStatus.Successfull
-                ? nekoTaskCurrent.Result.Texture
-                : NekoImage.DefaultNekoTexture;
+                 ? nekoTaskCurrent.Result.Texture
+                 : nekoTaskCurrent != null
+                && (nekoTaskCurrent.IsFaulted || nekoTaskCurrent.IsCanceled)
+                 ? NekoImage.Embedded.ImageError.Texture
+                 : NekoImage.Embedded.ImageLoading.Texture;
 
             // Get Window Size
             var windowSize = ImGui.GetWindowSize();
             if (Plugin.Config.GuiMainShowTitleBar)
-                windowSize -= new Vector2(10f, 27f);
+                windowSize -= new Vector2(10f, 10f) + (new Vector2(0, 15f) * fontScale);
             else
                 windowSize -= new Vector2(10f, 10f);
 
@@ -105,7 +111,7 @@ public class MainWindow
 
             // Set image start position
             if (Plugin.Config.GuiMainShowTitleBar)
-                ImGui.SetCursorPos(startPos + new Vector2(5f, 23f));
+                ImGui.SetCursorPos(startPos + new Vector2(5f, 5f) + (new Vector2(0f, 15f) * fontScale));
             else
                 ImGui.SetCursorPos(startPos + new Vector2(5f, 5f));
 
@@ -125,6 +131,15 @@ public class MainWindow
                 imageGrayed = true;
                 // Load next Neko if Image is pressed
                 AsnyncNextNeko();
+            }
+
+            // Show Image description
+            if (ImGui.IsItemHovered()
+            && nekoTaskCurrent != null
+            && nekoTaskCurrent.IsCompletedSuccessfully
+            && !string.IsNullOrWhiteSpace(nekoTaskCurrent.Result.Description))
+            {
+                Common.ToolTip(nekoTaskCurrent.Result.Description);
             }
 
             // Allow move with right mouse button
@@ -151,7 +166,7 @@ public class MainWindow
             && nekoTaskCurrent != null
             && nekoTaskCurrent.IsCompletedSuccessfully)
             {
-                Helper.CopyToClipboard(nekoTaskCurrent?.Result.URL ?? "");
+                Helper.CopyToClipboard(nekoTaskCurrent?.Result.URLImage ?? "");
             }
 
             // Open in Browser with b
@@ -160,7 +175,7 @@ public class MainWindow
             && nekoTaskCurrent != null
             && nekoTaskCurrent.IsCompletedSuccessfully)
             {
-                Helper.OpenInBrowser(nekoTaskCurrent?.Result.URL ?? "");
+                Helper.OpenInBrowser(nekoTaskCurrent?.Result.URLClick ?? "");
             }
 
             ImGui.PopStyleColor(3);
@@ -173,6 +188,10 @@ public class MainWindow
 
     private void AsnyncNextNeko()
     {
+        // Restart the timer for the slideshow
+        Slideshow.Restart();
+
+        // Dont load next neko if the current one is loading
         if (nekoTaskNext != null && !nekoTaskNext.IsCompleted) return;
         if (nekoTaskNext != null && nekoTaskNext.IsCompleted) nekoTaskNext.Dispose();
 

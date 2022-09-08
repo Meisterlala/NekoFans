@@ -17,26 +17,32 @@ public class TheCatAPI : IImageSource
         public IImageSource? LoadConfig() => enabled ? new TheCatAPI(breed) : null;
     }
 
+    public bool Faulted { get; set; }
+
+    public string Name => "TheCatAPI";
+
     private const int URL_COUNT = 10;
     private readonly MultiURLs<TheCatAPIJson> URLs;
+    private readonly Breed breed;
 
     public TheCatAPI(Breed breed = Breed.All)
     {
         var baseUrl = $"https://api.thecatapi.com/v1/images/search?limit={URL_COUNT}";
 
+        this.breed = breed;
         if (breed == Breed.All)
         {
-            URLs = new(baseUrl);
+            URLs = new(baseUrl, this);
             return;
         }
 
         var info = GetBreedInfo(breed);
-        URLs = new(baseUrl + $"&breed_ids={info.ID}");
+        URLs = new(baseUrl + $"&breed_ids={info.ID}", this);
     }
 
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
-        var url = await URLs.GetURL();
+        var url = await URLs.GetURL(ct);
         return await Common.DownloadImage(url, ct);
     }
 
@@ -49,11 +55,13 @@ public class TheCatAPI : IImageSource
             : info;
     }
 
-    public override string ToString() => $"TheCatAPI\tBreed: {Plugin.Config.Sources.TheCatAPI.breed}\t URLs: {URLs.URLCount}";
+    public override string ToString() => $"TheCatAPI\tBreed: {Plugin.Config.Sources.TheCatAPI.breed}\t{URLs}";
+
+    public bool Equals(IImageSource? other) => other != null && other is TheCatAPI cat && cat.breed == breed;
 
 #pragma warning disable
 
-    public class TheCatAPIJson : List<TheCatAPIJson.Entry>, IJsonToList
+    public class TheCatAPIJson : List<TheCatAPIJson.Entry>, IJsonToList<string>
     {
         public class Entry
         {
@@ -72,8 +80,6 @@ public class TheCatAPI : IImageSource
             return res;
         }
     }
-
-
 
     public enum Breed
     {
