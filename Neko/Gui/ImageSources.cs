@@ -464,6 +464,12 @@ public class ImageSourcesGUI
             {
                 Plugin.Config.Sources.Twitter.queries.RemoveAll(q => q == TwitterTableEntries[selectedTwitterEntry].Query);
                 TwitterTableEntries.RemoveAt(selectedTwitterEntry);
+                if (TwitterTableEntries.Count == 0)
+                {
+                    Twitter.Config.Query query = new();
+                    Plugin.Config.Sources.Twitter.queries.Add(query);
+                    TwitterTableEntries.Add(new(query, null, false));
+                }
                 Plugin.Config.Save();
                 Plugin.UpdateImageSource();
                 selectedTwitterEntry = selectedTwitterEntry < 0

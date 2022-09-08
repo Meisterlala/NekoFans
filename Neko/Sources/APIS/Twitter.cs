@@ -83,7 +83,15 @@ public abstract class Twitter : IImageSource
 
         public IImageSource? LoadConfig()
         {
-            if (!enabled || queries.Count == 0)
+            // Load Default entries
+            if (queries.Count == 0)
+            {
+                queries.Add(new Query() { searchText = "@FF_XIV_EN", enabled = false });
+                queries.Add(new Query() { searchText = "#gposers", enabled = true });
+                queries.Add(new Query() { searchText = "#FFXIV OR #FF14", enabled = true });
+            }
+
+            if (!enabled)
                 return null;
 
             var enabledQueries = queries.FindAll((q) => q.enabled);

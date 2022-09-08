@@ -30,7 +30,7 @@ public class ConfigWindow
         try
         {
             var fontScale = ImGui.GetIO().FontGlobalScale;
-            var size = new Vector2(400 * fontScale, 250 * fontScale);
+            var size = new Vector2(450 * fontScale, 300 * fontScale);
 
             ImGui.SetNextWindowSize(size * 2, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowSizeConstraints(size, size * 20);
