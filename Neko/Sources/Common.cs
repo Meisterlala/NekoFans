@@ -92,10 +92,12 @@ public static class Common
                 DebugHelper.LogNetwork(() => "Sending request to get json:\n" + request.ToString());
             stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
         }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
             throw new Exception("Error occured when trying to donwload: " + request.RequestUri, ex);
         }
+
 
         // Ensure Success
         try
@@ -111,6 +113,8 @@ public static class Common
             throw new Exception("Could not Download .json from: " + request.RequestUri);
         }
 
+        // Stop Early if requested
+        ct.ThrowIfCancellationRequested();
 
         // Parse Json
         T? result;
@@ -122,6 +126,7 @@ public static class Common
             if (result == null)
                 throw new Exception("Did not get a response from: " + request.RequestUri);
         }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
             PluginLog.LogDebug(response.Content.ReadAsStringAsync(ct).Result);
@@ -130,7 +135,6 @@ public static class Common
 
         DebugHelper.LogNetwork(() => $"Response from {request.RequestUri} trying to get a json:\n{JsonSerializer.Serialize(result, new JsonSerializerOptions() { WriteIndented = true })}");
 
-        ct.ThrowIfCancellationRequested();
         return result;
     }
 

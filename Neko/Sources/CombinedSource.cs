@@ -226,12 +226,15 @@ public class CombinedSource : IImageSource
         });
 
         // Add source and print log
-        void AddIfDoesntContain(IImageSource source)
+        void AddIfDoesntContain(IImageSource source, bool wrapInCS = false)
         {
             if (!Contains(source))
             {
                 Dalamud.Logging.PluginLog.LogDebug($"Added {source.Name} as ImageSource");
-                AddSource(source);
+                if (wrapInCS)
+                    AddSource(new CombinedSource(source));
+                else
+                    AddSource(source);
             }
         }
         // Add all sources that are not in this
@@ -240,9 +243,9 @@ public class CombinedSource : IImageSource
             if (s is CombinedSource cs)
             {
                 foreach (var child in cs.sources)
-                    AddIfDoesntContain(child);
+                    AddIfDoesntContain(child, true);
             }
-            else if (!Contains(s))
+            else
             {
                 AddIfDoesntContain(s);
             }

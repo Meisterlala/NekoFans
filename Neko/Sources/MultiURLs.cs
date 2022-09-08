@@ -110,7 +110,7 @@ public class MultiURLsGeneric<TJson, TQueueElement>
         catch (AggregateException ex)
         {
             FaultCheck.IncreaseFaultCount(caller);
-            PluginLog.LogError(ex.InnerExceptions[0], "Could not get more URLs to images");
+            PluginLog.LogWarning(ex.InnerExceptions[0], "Could not get more URLs to images");
         }
         finally
         {
@@ -132,7 +132,6 @@ public class MultiURLsGeneric<TJson, TQueueElement>
             URLs.Enqueue(item);
         }
     }
-
 
 
     protected virtual HttpRequestMessage ModifyRequest(HttpRequestMessage response) => response;

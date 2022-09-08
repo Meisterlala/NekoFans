@@ -17,10 +17,17 @@ public class FaultCheck : IImageSource
         }
     }
 
+#if RANDOM_THROW // Set a higher limit for testing
+    private const int MaxFaultCount = 25;
+#else
+    private const int MaxFaultCount = 5;
+#endif
+
     private int FaultCount;
     private readonly IImageSource Source;
-    private const int MaxFaultCount = 5;
-    public bool HasFaulted => FaultCount >= MaxFaultCount;
+
+    public bool HasFaulted => FaultCount >= MaxFaultCount || Source.Faulted;
+    private CancellationTokenSource cts = new();
 
     public string Name => Source.Name;
 
@@ -34,31 +41,42 @@ public class FaultCheck : IImageSource
             return await NekoImage.Embedded.ImageError.Load();
         }
 
+        // If either the caller passed a token, which is cancelled, or the token of this class is cancelled
+        // this childToken will be cancelled
+        var childToken = CancellationTokenSource.CreateLinkedTokenSource(ct, cts.Token).Token;
+
         try
         {
-            return await Source.Next(ct); ;
+            return await Source.Next(childToken); ;
         }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
+        catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
             Interlocked.Increment(ref FaultCount);
+            if (HasFaulted)
+            {
+                lock (this)
+                {
+                    if (!cts.IsCancellationRequested)
+                        FaultLimitReached();
+                }
+            }
             throw new Exception($"Image Task faulted. Fault Count increased to {FaultCount}", ex);
         }
     }
 
     public void FaultLimitReached()
     {
-        PluginLog.LogWarning("Fault limit reached for " + Source.ToString());
+        PluginLog.LogError($"Fault limit reached for {Source.Name}. This API will be disabled");
         Source.Faulted = true;
+        cts.Cancel();
     }
 
     public void ResetFaultCount()
     {
         Interlocked.Exchange(ref FaultCount, 0);
         Source.Faulted = false;
+        cts = new();
     }
 
     public override string ToString()

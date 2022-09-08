@@ -275,8 +275,7 @@ public class ImageSourcesGUI
     }
 
     private int selectedTwitterEntry = -1;
-    private bool showTwitterHelp;
-
+    private bool twitterHelpOpen;
 
     private void DrawTwitter()
     {
@@ -307,25 +306,24 @@ public class ImageSourcesGUI
                 ? (" ", null)
                 : entry.ImageSource == null
                 ? ("?", null)
-                : entry.ImageSource.Faulted
-                ? ("ERROR", null)
                 : entry?.ImageSource?.TweetStatus() ?? ("?", null);
 
         // Find max width needed of TweetCount Column or use default
-        var tweetCountColumWidth = TwitterTableEntries.Count > 0
-            ? TwitterTableEntries.Max((e) => ImGui.CalcTextSize(TweetStatus(e).Item1).X)
+        var tweetStatusColumWidth = TwitterTableEntries.Count > 0
+            ? TwitterTableEntries.Max((e) => ImGui.CalcTextSize(TweetStatus(e).Item1).X + 5)
             : ImGui.CalcTextSize(TweetStatus(null).Item1).X;
 
         // It should be bigger than the header
-        if (tweetCountColumWidth < ImGui.CalcTextSize("Count").X)
-            tweetCountColumWidth = ImGui.CalcTextSize("Count").X;
+        var statusWidth = ImGui.CalcTextSize("Status").X;
+        if (tweetStatusColumWidth < statusWidth)
+            tweetStatusColumWidth = statusWidth;
 
         ImGui.Indent(INDENT);
         ImGui.BeginTable("TwitterConfig##Twitter", 3, ImGuiTableFlags.PadOuterX | ImGuiTableFlags.RowBg);
 
         ImGui.TableSetupColumn("Enabled##Twitter", ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoResize | ImGuiTableColumnFlags.NoSort);
-        ImGui.TableSetupColumn("Search Text##Twitter", ImGuiTableColumnFlags.WidthStretch, 100f - ImGui.GetColumnWidth(0) - tweetCountColumWidth);
-        ImGui.TableSetupColumn("Status##Twitter", ImGuiTableColumnFlags.WidthFixed, tweetCountColumWidth);
+        ImGui.TableSetupColumn("Search Text##Twitter", ImGuiTableColumnFlags.WidthStretch, 100f - ImGui.GetColumnWidth(0) - tweetStatusColumWidth);
+        ImGui.TableSetupColumn("Status##Twitter", ImGuiTableColumnFlags.WidthFixed, tweetStatusColumWidth);
         ImGui.TableHeadersRow();
 
         // Color of Selectable
@@ -352,10 +350,9 @@ public class ImageSourcesGUI
             ImGui.PushItemWidth(-1);  // Remove Label
             if (entry.ImageSource?.Faulted ?? false)
                 ImGui.PushStyleColor(ImGuiCol.FrameBg, TableTextRed);
-            if (ImGui.InputText($"##TwitterTableEntrySearchText_{i}", ref entry.QueryDirty.searchText, 256))
+            if (ImGui.InputText($"##TwitterTableEntrySearchText_{i}", ref entry.QueryDirty.searchText, 450))
                 entry.IsDirty = true;
-
-            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+            if (ImGui.IsItemClicked())
                 selectedTwitterEntry = i;
             if (entry.ImageSource?.Faulted ?? false)
                 ImGui.PopStyleColor();
@@ -365,9 +362,14 @@ public class ImageSourcesGUI
             // Status
             ImGui.TableNextColumn();
             var (text, tooltip) = TweetStatus(entry);
+            var tooltipPos = ImGui.GetCursorScreenPos();
             ImGui.Text(text);
             if (!string.IsNullOrEmpty(tooltip))
-                Common.ToolTip(tooltip);
+            {
+                var height = ImGui.GetFrameHeight();
+                var end = tooltipPos + new Vector2(ImGui.GetColumnWidth(), height);
+                Common.ToolTip(tooltip, tooltipPos, end);
+            }
 
             // Selectabel Row
             ImGui.SameLine();
@@ -389,7 +391,7 @@ public class ImageSourcesGUI
             Plugin.Config.Save();
         }
 
-        string GetHelpText() => showTwitterHelp ? "Hide Help" : "Show Help";
+        static string GetHelpText() => ImGui.IsPopupOpen("Twitter Help##Twitter") ? "Hide Help" : "Show Help";
 
         // Save button only when there are changes to save
         if (TwitterTableEntries.Find((e) => e.IsDirty) != null)
@@ -447,9 +449,11 @@ public class ImageSourcesGUI
                 ImGui.SameLine(((ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X - INDENT) / 2) - (lengthHelp / 2) + INDENT);
 
             if (ImGui.Button($"{GetHelpText()}##Twitter"))
-                ImGui.OpenPopup("TwitterHelp");
+                twitterHelpOpen = !twitterHelpOpen;
         }
-
+        // Draw the Help
+        if (twitterHelpOpen)
+            DrawTwitterHelp();
 
         // Remove Button (Right align)
         if (selectedTwitterEntry >= 0)
@@ -467,11 +471,112 @@ public class ImageSourcesGUI
                 : selectedTwitterEntry > TwitterTableEntries.Count - 1
                 ? TwitterTableEntries.Count - 1
                 : selectedTwitterEntry;
+                // Update ImageSource references
+                foreach (var entry in TwitterTableEntries)
+                {
+                    if (entry.ImageSource == null)
+                        entry.ImageSource = Plugin.ImageSource.GetAll<Twitter>().Find((s) => s.ConfigQuery.Equals(entry.Query));
+                }
             }
         }
+    }
 
+    private void DrawTwitterHelp()
+    {
+        var fontScale = ImGui.GetIO().FontGlobalScale;
+        var minSize = new Vector2(400 * fontScale, 200 * fontScale);
+        ImGui.SetNextWindowSize(minSize * 2, ImGuiCond.FirstUseEver);
+        ImGui.SetNextWindowSizeConstraints(minSize, minSize * 20);
+
+        // Begin Window
+        if (!ImGui.Begin("Neko Fans Twitter Help##NekoTwitter", ref twitterHelpOpen, ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse)) return;
+
+        // Close Button
+        ImGui.SetCursorPosX(ImGui.GetWindowContentRegionMax().X - 20f - ImGui.CalcTextSize("X").X);
+        if (Common.IconButton(Dalamud.Interface.FontAwesomeIcon.Times, "##twitterCloseButton"))
+            twitterHelpOpen = false;
+        ImGui.SetCursorPosY(ImGui.GetCursorPosY() - ImGui.GetTextLineHeightWithSpacing());
+        ImGui.SetCursorPosX(ImGui.GetStyle().WindowPadding.X);
+
+        // Ignore spacing inbeween Text, TextWrapped and TextColored
+        var spacing = ImGui.GetStyle().ItemSpacing;
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0f, spacing.Y));
+
+        // How to use the Table:
+        ImGui.TextColored(TwitterLight, "How to use the Table:");
+        ImGui.Separator();
+        ImGui.TextWrapped("The table is used to add and remove Twitter searches. The status column shows the current status of the API request and displays how many matching Tweets were found. "
+                        + "Make sure to enable each row you want to use and click on the \"Save Changes\" button to save your changes. \n"
+                        + "New rows can be added by clicking on the \"Add\" button. Rows can be removed by selecting them and clicking on the \"Remove\" button.\n"
+                        + "If the search text is invalid, the input field will be colored red.");
+
+        // Search Text
+        ImGui.Spacing(); ImGui.Spacing();
+        ImGui.TextColored(TwitterLight, "How to select the Tweets you want to see:");
+        ImGui.Separator();
+        ImGui.TextWrapped("There are 2 modes. You can either view Tweets from a specific user or all Tweets that match a query. The status column will show \"OK\" if you are viewing tweets from a specific user or the amount of tweets mathcing a query.");
+
+        // By User  
+        ImGui.Spacing();
+        ImGui.TextColored(TwitterLight, "Search by Username:");
+        Common.TextWithColorsWrapped(new Common.Segment[]{
+            new("The last 600 Tweets from a specific user can be viewed by entering a Twitter username. If the user exists, then the status column will show the text \"OK\""),
+        });
+        ImGui.Spacing();
+        Common.TextWithColorsWrapped(new Common.Segment[]{
+            new("@username",  Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
+            new(" (e.g. "),
+            new("@nasa",      Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
+            new(") will show you the last 600 Tweets from Nasa."),
+        });
+
+        // By Query  
+        ImGui.Spacing();
+        ImGui.TextColored(TwitterLight, "Search by Query:");
+        Common.TextWithColorsWrapped(new Common.Segment[]{
+            new("You can combine multiple search terms. Only Tweets that were posted in the last 7 days will be shown. The status column will show the amount of matching Tweets."),
+        });
+        ImGui.Spacing();
+        Common.TextWithColorsWrapped(new Common.Segment[]{
+            new("#hashtag",         Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
+            new(" (e.g. "),
+            new("#gposers",         Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
+            new(") Matches any Tweet containing the hashtag #gposers\n"),
+            new("keyword",          Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
+            new(" (e.g. "),
+            new("neko",             Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
+            new(") Matches any Tweet that contains the word \"neko\"\n"),
+            new("@username",        Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
+            new(" (e.g. "),
+            new("@ff_xiv_en",       Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
+            new(") Matches any Tweet that mentions the user @ff_xiv_en\n"),
+            new("lang:language",    Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
+            new(" (e.g. "),
+            new("lang:en",          Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
+            new(") Matches any Tweet which is classified as English\n"),
+            new("a OR b",           Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
+            new(" (e.g. "),
+            new("Miqo'te OR Viera", Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
+            new(") Matches any Tweet containing the word \"Miqo'te\" or \"Viera\"\n"),
+            new("-a",               Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
+            new(" (e.g. "),
+            new("-Lalafell",        Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
+            new(") Matches any Tweet which doesn't contain the word \"Lalafell\""),
+        });
+        ImGui.Spacing();
+        Common.TextWithColorsWrapped(new Common.Segment[]{
+            new("There are many more options. For more information, please visit the "),
+        }); ImGui.SameLine();
+        // Clickable Link
+        Common.ClickLinkWrapped("Twitter API Documentation.", () => Helper.OpenInBrowser("https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query"));
+
+        // Itemspacing
+        ImGui.PopStyleVar();
+
+        ImGui.End();
         ImGui.Unindent(INDENT);
     }
+
 
     private static void CheckIfNoSource()
     {

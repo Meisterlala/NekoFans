@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using Dalamud.Interface.Components;
 using ImGuiNET;
@@ -6,16 +7,22 @@ namespace Neko.Gui;
 
 public static class Common
 {
+    /// <summary>
+    /// Round (i) Image with a tooltip
+    /// </summary>
+    /// <param name="desc">What gets shown on hover</param>
     public static void HelpMarker(string desc)
     {
-
         if (desc == "")
             return;
 
         ImGuiComponents.HelpMarker(desc);
-        // ToolTip(desc);
     }
 
+    /// <summary>
+    /// Draw a text with a Font Awesome Icon
+    /// </summary>
+    /// <param name="icon"></param>
     public static void FontAwesomeIcon(Dalamud.Interface.FontAwesomeIcon icon)
     {
         ImGui.PushFont(Dalamud.Interface.UiBuilder.IconFont);
@@ -23,6 +30,10 @@ public static class Common
         ImGui.PopFont();
     }
 
+    /// <summary>
+    /// Shows a tooltip if the mouse is hovering over the last item.
+    /// </summary>
+    /// <param name="desc">Text</param>
     public static void ToolTip(string desc)
     {
         if (desc == "")
@@ -38,15 +49,205 @@ public static class Common
         }
     }
 
+    /// <summary>
+    /// Shows a tooltip if the mouse is hovering over the last item.
+    /// </summary>
+    /// <param name="desc">Text</param>
+    /// <param name="start">Tooltip hover Rectange start pos</param>
+    /// <param name="end">Tooltip hover Rectange end pos</param>
+    public static void ToolTip(string desc, Vector2 start, Vector2 end)
+    {
+        if (desc == "")
+            return;
+
+        if (ImGui.IsMouseHoveringRect(start, end))
+        {
+            ImGui.BeginTooltip();
+            ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35.0f);
+            ImGui.Text(desc);
+            ImGui.PopTextWrapPos();
+            ImGui.EndTooltip();
+        }
+    }
+
+    /// <summary>
+    /// A Button with a FontAwesome Icon
+    /// </summary>
+    /// <param name="icon">The FontAwsome Icon</param>
+    /// <param name="ID">The ID/Name of the Button (e.g. ##Neko)</param>
+    /// <returns>If Button pressed</returns>
+    public static bool IconButton(Dalamud.Interface.FontAwesomeIcon icon, string ID = "")
+    {
+        ImGui.PushFont(Dalamud.Interface.UiBuilder.IconFont);
+        ImGui.PushStyleColor(ImGuiCol.Button, 0);
+        var ret = ImGui.Button(Dalamud.Interface.FontAwesomeExtensions.ToIconString(icon) + ID);
+        ImGui.PopStyleColor();
+        ImGui.PopFont();
+        return ret;
+    }
+
+    /// <summary>
+    /// Shows a Notification to the user
+    /// </summary>
+    /// <param name="text"></param>
+    /// <param name="type"></param>
     public static void Notification(string text, Dalamud.Interface.Internal.Notifications.NotificationType type = default) =>
             Plugin.PluginInterface.UiBuilder.AddNotification(text, "Neko Fans", type);
+
+
+    /// <summary>
+    /// Only used for <see cref="TextWithColorsWrapped"/> to store the color and the text
+    /// </summary>
+    public struct Segment
+    {
+        public string Text;
+        public Vector4 Color;
+
+        public Segment(string text, Vector4 color)
+        {
+            Text = text;
+            Color = color;
+        }
+
+        public Segment(string text)
+        {
+            Text = text;
+            Color = ImGui.GetStyle().Colors[(int)ImGuiCol.Text];
+        }
+    }
+
+
+    /// <summary>
+    /// Draws a text wrapped with multiple colors.
+    /// </summary>
+    /// <param name="segments">Text Segments</param>
+    public static void TextWithColorsWrapped(Segment[] segments)
+    {
+        var wrapWidth = ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
+        var space = ImGui.CalcTextSize(" ").X - 2f;
+
+        // Setup Spacing
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0, 0));
+
+        foreach (var seg in segments)
+        {
+            // Set Text Color
+            ImGui.PushStyleColor(ImGuiCol.Text, seg.Color);
+            var split = seg.Text.Split(' ');
+
+            for (var i = 0; i < split.Length; i++)
+            {
+                var wordWidth = ImGui.CalcTextSize(split[i]).X;
+                var cursorPos = ImGui.GetCursorPos();
+
+                // If the word is too long to fit on the line, just print it on the next line
+                if (cursorPos.X + wordWidth > wrapWidth)
+                    ImGui.NewLine();
+
+                ImGui.Text(split[i]);
+                ImGui.SameLine();
+
+                // Remove space at the end
+                if (i < split.Length - 1)
+                    ImGui.SetCursorPosX(ImGui.GetCursorPos().X + space);
+                else
+                    ImGui.SetCursorPosX(ImGui.GetCursorPos().X);
+
+                // Add newline if needed
+                if (split[i].Contains('\n'))
+                    ImGui.NewLine();
+            }
+            // Reset Text Color
+            ImGui.PopStyleColor();
+        }
+
+        // Itemspacing
+        ImGui.PopStyleVar();
+    }
+
+    /// <summary>
+    /// Displays a blue underlined clickable text wrapped over multiple lines.
+    /// </summary>
+    public static void ClickLinkWrapped(string text, Action onClick)
+    {
+        var color = ImGui.ColorConvertFloat4ToU32(new Vector4(.1f, .1f, 1f, 1f));
+
+        var wrapWidth = ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
+        var space = ImGui.CalcTextSize(" ").X - 2f;
+
+        ImGui.PushStyleColor(ImGuiCol.Text, color);
+        // Underline
+        var textOffset = new Vector2(0f, ImGui.GetTextLineHeight());
+        var start = ImGui.GetCursorScreenPos() + textOffset;
+
+        var split = text.Split(' ');
+        for (var i = 0; i < split.Length; i++)
+        {
+            var wordWidth = ImGui.CalcTextSize(split[i]).X;
+            var cursorPos = ImGui.GetCursorPos();
+
+            // If the word is too long to fit on the line, just print it on the next line
+            if (cursorPos.X + wordWidth > wrapWidth)
+            {
+                ImGui.GetWindowDrawList().AddLine(start, ImGui.GetCursorScreenPos() + textOffset, color);
+                ImGui.NewLine();
+                start = ImGui.GetCursorScreenPos() + textOffset;
+            }
+
+            ImGui.Text(split[i]);
+            ImGui.SameLine();
+
+            // Remove space at the end
+            if (i < split.Length - 1)
+                ImGui.SetCursorPosX(ImGui.GetCursorPos().X + space);
+            else
+                ImGui.SetCursorPosX(ImGui.GetCursorPos().X);
+
+            // Add newline if needed
+            if (split[i].Contains('\n'))
+            {
+                ImGui.GetWindowDrawList().AddLine(start, ImGui.GetCursorScreenPos() + textOffset, color);
+                ImGui.NewLine();
+                start = ImGui.GetCursorScreenPos() + textOffset;
+            }
+
+            // Clickable
+            if (ImGui.IsItemClicked())
+                onClick();
+        }
+
+        ImGui.GetWindowDrawList().AddLine(start, ImGui.GetCursorScreenPos() + textOffset, color);
+
+        ImGui.PopStyleColor(); // POP ImGuiCol.Text = blue
+    }
+
+    /// <summary>
+    /// Displays a blue underlined clickable text
+    /// </summary>
+    public static void ClickLink(string text, Action onClick)
+    {
+        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(.1f, .1f, 1f, 1f));
+        // Underline
+        var size = ImGui.CalcTextSize(text);
+        var start = ImGui.GetCursorScreenPos() + new Vector2(0f, size.Y);
+        var end = start + size - new Vector2(0f, size.Y);
+        ImGui.GetWindowDrawList().AddLine(start, end, ImGui.ColorConvertFloat4ToU32(new Vector4(.1f, .1f, 1f, 1f)));
+
+        // Text
+        ImGui.TextUnformatted(text);
+        if (ImGui.IsItemClicked())
+            onClick();
+
+        ImGui.PopStyleColor(); // POP ImGuiCol.Text = blue
+    }
 
     /// <summary>
     /// Aligns an image in a rectange. imageSize doesnt have to fit in rectange
     /// </summary>
-    /// <returns> 
-    /// Starting position and End position of the aligned image.
-    /// </returns>
+    /// <param name="imgSize">Size of the object to align</param>
+    /// <param name="rectangle">Space to align in</param>
+    /// <param name="alignment">How it should be aligned</param>
+    /// <returns>Starting position and End position of the aligned image.</returns>   
     public static (Vector2, Vector2) AlignImage(Vector2 imgSize, Vector2 rectangle, Configuration.ImageAlignment alignment)
     {
         var imageRatio = imgSize.X / imgSize.Y;

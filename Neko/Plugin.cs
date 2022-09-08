@@ -66,6 +66,11 @@ public class Plugin : IDalamudPlugin
 
     public static void UpdateImageSource() => ImageSource.UpdateFrom(Config.LoadSources());
 
+    /// <summary>
+    ///  This will clear all downloaded images and start downloading new ones.
+    /// </summary>
+    public static void ReloadSources() => ImageSource = Config.LoadSources();
+
     private void OnCommand(string command, string args)
     {
         var input = command + args;

@@ -62,8 +62,8 @@ public class MainWindow
         var fontScale = ImGui.GetIO().FontGlobalScale;
         var size = new Vector2(100 * fontScale, 100 * fontScale);
 
-        ImGui.SetNextWindowSize(size * 4, ImGuiCond.FirstUseEver);
-        ImGui.SetNextWindowSizeConstraints(size, size * 20);
+        ImGui.SetNextWindowSize(size * 5, ImGuiCond.FirstUseEver);
+        ImGui.SetNextWindowSizeConstraints(size, size * 50);
         ImGui.SetNextWindowBgAlpha(Plugin.Config.GuiMainOpacity);
 
         var flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse;
@@ -102,7 +102,7 @@ public class MainWindow
             // Get Window Size
             var windowSize = ImGui.GetWindowSize();
             if (Plugin.Config.GuiMainShowTitleBar)
-                windowSize -= new Vector2(10f, 27f);
+                windowSize -= new Vector2(10f, 10f) + (new Vector2(0, 15f) * fontScale);
             else
                 windowSize -= new Vector2(10f, 10f);
 
@@ -111,7 +111,7 @@ public class MainWindow
 
             // Set image start position
             if (Plugin.Config.GuiMainShowTitleBar)
-                ImGui.SetCursorPos(startPos + new Vector2(5f, 23f));
+                ImGui.SetCursorPos(startPos + new Vector2(5f, 5f) + (new Vector2(0f, 15f) * fontScale));
             else
                 ImGui.SetCursorPos(startPos + new Vector2(5f, 5f));
 

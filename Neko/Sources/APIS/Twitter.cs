@@ -24,9 +24,6 @@ public abstract class Twitter : IImageSource
     private const int URLThreshold = 5;
     private readonly string search;
 
-    // The Status is a touple of a string that is always displayed, and a optional help message
-    private (string, string?)? status;
-    private Task<(string, string?)>? statusTask;
     private readonly CancellationTokenSource cts = new();
 
     public readonly Config.Query ConfigQuery;
@@ -56,22 +53,12 @@ public abstract class Twitter : IImageSource
 
     public abstract Task<NekoImage> Next(CancellationToken ct = default);
 
-    public abstract Task<(string, string?)> Status(CancellationToken ct = default);
+    public abstract (string, string?) Status(CancellationToken ct = default);
 
     public abstract override string ToString();
 
-    public (string, string?) TweetStatus()
-    {
-        // Use cached result if available
-        if (status.HasValue)
-            return status.Value;
-
-        // Start TweetCount Task
-        if (statusTask == null)
-            statusTask = Status(cts.Token);
-
-        return ("?", null);
-    }
+    // The Status is a touple of a string that is always displayed, and a optional help message
+    public (string, string?) TweetStatus() => Status(cts.Token);
 
     public bool Equals(IImageSource? other) => other != null && other is Twitter t && t.ConfigQuery == ConfigQuery;
 
@@ -201,6 +188,7 @@ public abstract class Twitter : IImageSource
 
         private readonly TwitterMultiURLs<SearchJson, ImageResponse> URLs;
         private readonly string searchQuery;
+        private Task<(string, string?)>? TweetCount;
 
         public Search(Config.Query query) : base(query)
         {
@@ -222,32 +210,38 @@ public abstract class Twitter : IImageSource
             return image;
         }
 
-        public override async Task<(string, string?)> Status(CancellationToken ct = default)
+        public override (string, string?) Status(CancellationToken ct = default)
         {
-            // Wait for task to finish
-            if (statusTask != null)
-                await statusTask;
-
-            // Use cached result if available
-            if (status.HasValue)
-                return status.Value;
-
-            var URL = $"https://api.twitter.com/2/tweets/counts/recent?granularity=day&{searchQuery}";
-            var task = Task.Run(async () =>
+            // Start a new task to get the tweet count
+            lock (this)
             {
-                try
+                if (TweetCount == null)
                 {
-                    var response = await Common.ParseJson<CountJson>(AuthorizedRequest(URL), ct);
-                    status = (response.Meta.TotalTweetCount.ToString(), $"Found {response.Meta.TotalTweetCount} tweets matching \"{search}\"");
-                    return status.Value;
+                    var URL = $"https://api.twitter.com/2/tweets/counts/recent?granularity=day&{searchQuery}";
+                    async Task<(string, string?)> getCount()
+                    {
+                        try
+                        {
+                            var response = await Common.ParseJson<CountJson>(AuthorizedRequest(URL), ct);
+                            return (response.Meta.TotalTweetCount.ToString(), $"Found {response.Meta.TotalTweetCount} tweets matching \"{search}\"");
+                        }
+                        catch
+                        {
+                            return ("?", null!);
+                        }
+                    }
+                    TweetCount = getCount();
                 }
-                catch
-                {
-                    return ("?", null!);
-                }
-            });
+            }
 
-            return await task;
+            if (!TweetCount.IsCompleted)
+                return ("LOADING", "Getting the amount of tweets");
+
+            // Wait for the Completed task to catch exceptions
+            try { TweetCount.Wait(CancellationToken.None); }
+            catch (Exception e) { return ("ERROR", $"Error getting the amount of tweets.\n{e.Message}"); }
+
+            return TweetCount.Result;
         }
 
         #region JSON
@@ -421,7 +415,7 @@ public abstract class Twitter : IImageSource
         {
             lock (userIDTaskLock)
             {
-                if (userID == null || userIDTask == null || usernameReadable == null)
+                if (userIDTask == null)
                     userIDTask = GetUserID(ct);
             }
             await userIDTask;
@@ -437,45 +431,31 @@ public abstract class Twitter : IImageSource
         }
 
 
-        public override async Task<(string, string?)> Status(CancellationToken ct = default)
+        public override (string, string?) Status(CancellationToken ct = default)
         {
-            // Wait for task to finish
-            if (statusTask != null && statusTask.Status == TaskStatus.Running)
-                await statusTask;
-
-            // Use cached result if available
-            if (status.HasValue)
-                return status.Value;
-
-            if (!ValidUsername(ConfigQuery.searchText))
+            // Get User ID if not already done
+            lock (userIDTaskLock)
             {
-                status = ("ERROR", "Invalid username");
-                return status.Value;
-            }
-
-            if (userIDTask != null && userIDTask.Status == TaskStatus.Running)
-            {
-                await userIDTask;
-                if (string.IsNullOrEmpty(userID))
+                if (userIDTask == null)
                 {
-                    status = ("ERROR", "Failed to get user ID. The user may not exist");
-                    return status.Value;
-                }
-            }
-            else
-            {
-                userIDTask = GetUserID(ct);
-
-                try { await userIDTask; }
-                catch (Exception)
-                {
-                    status = ("ERROR", $"Failed to get user ID. The user may not exist");
-                    return status.Value;
+                    PluginLog.Log("Getting user ID");
+                    try { userIDTask = GetUserID(ct); }
+                    catch (Exception e) { return ("ERROR", e.Message); }
                 }
             }
 
-            status = ("OK", $"@{username} was found  with the name \"{usernameReadable}\"");
-            return status.Value;
+            // Return "Loading" if not done
+            if (!userIDTask.IsCompleted)
+                return ("LOADING", null);
+
+            // "Wait" fot the completed task to finish to catch the exception
+            try { userIDTask.Wait(CancellationToken.None); }
+            catch (AggregateException e) { return ("ERROR", e.InnerException?.Message); }
+
+            // Return OK
+            return userIDTask != null && userIDTask.IsCompletedSuccessfully && !string.IsNullOrEmpty(userID) && !string.IsNullOrEmpty(usernameReadable)
+                ? ("OK", $"Found user @{username} with the name {usernameReadable}")
+                : ("ERROR", "Unknown error");
         }
 
         public static async Task<UserLookupJson.SuccessRespone> GetIDFromUsername(string username, CancellationToken ct = default)
@@ -484,7 +464,7 @@ public abstract class Twitter : IImageSource
             var response = await Common.ParseJson<UserLookupJson>(AuthorizedRequest(URL), ct);
 
             return response.Errors != null
-                ? throw new Exception($"Twitter API returned the Error: {response.Errors[0].Detail}")
+                ? throw new Exception($"Twitter API returned the Error:\n{response.Errors[0].Detail}")
                 : response.Data ?? throw new Exception("Could not find Username");
         }
 

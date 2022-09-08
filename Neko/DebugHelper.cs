@@ -21,10 +21,10 @@ public static class DebugHelper
 
     public class ThrowChance
     {
-        public const double DownloadImage = 0.3;
-        public const double ParseJson = 0.3;
-        public const double GetURL = 0.3;
-        public const double Mock = 0.3;
+        public const double DownloadImage = 0.1;
+        public const double ParseJson = 0.1;
+        public const double GetURL = 0.1;
+        public const double Mock = 0;
     }
 
     public static void RandomThrow(double chance = 0.3)
@@ -44,14 +44,14 @@ public static class DebugHelper
 
     public class Delay
     {
-        public const int DownloadImage = 1000 * 1;
+        public const int DownloadImage = 1000 * 2;
         public const int ParseJson = 1000 * 2;
         public const int GetURL = 1000 * 1;
         public const int Mock = 150;
         public const int MultiURL = 1000 * 2;
 
         public const double mean = 1.0;
-        public const double stdDev = 0.4;
+        public const double stdDev = 0.3;
     }
 
     private static readonly Random DelayRandom = new();

@@ -11,12 +11,12 @@ public class ConfigWindow
 {
     public bool Visible;
 
-    private int QueueDonwloadCount;
-    private int QueuePreloadCount;
-
     public static readonly Vector4 RedColor = new(0.38f, 0.1f, 0.1f, 0.55f);
+
     private readonly ImageSourcesGUI imageSourcesGUI = new();
 
+    private int QueueDonwloadCount;
+    private int QueuePreloadCount;
 
     public ConfigWindow()
     {
@@ -32,11 +32,12 @@ public class ConfigWindow
             var fontScale = ImGui.GetIO().FontGlobalScale;
             var size = new Vector2(400 * fontScale, 250 * fontScale);
 
-            ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowSize(size * 2, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowSizeConstraints(size, size * 20);
 
             if (!ImGui.Begin("Neko Fans Configuration", ref Visible)) return;
 
+            // The Tab Bar
             if (ImGui.BeginTabBar("##tabBar"))
             {
                 if (ImGui.BeginTabItem("Look & Feel"))
@@ -74,7 +75,7 @@ public class ConfigWindow
 
     private static void DrawLook()
     {
-        ImGui.PushItemWidth(-200);
+        ImGui.PushItemWidth(-200 * ImGui.GetIO().FontGlobalScale);
 
         // Background opacity slider
         if (ImGui.SliderFloat("Background opacity", ref Plugin.Config.GuiMainOpacity, 0, 1))
@@ -92,7 +93,6 @@ public class ConfigWindow
             if (ImGui.Checkbox("Show resize handle", ref Plugin.Config.GuiMainShowResize))
                 Plugin.Config.Save();
             ImGui.SameLine(); Common.HelpMarker("Show or hide the grey triangle in the bottom right corner of the window.");
-
         }
 
         // Lock Window
@@ -106,6 +106,8 @@ public class ConfigWindow
         ImGui.SameLine(); Common.HelpMarker("Show or hide the bar on top of the image.\n" +
                                             "Hold down the right mouse button to move the window.\n" +
                                             "Press the middle mouse button to close the window when no title bar is displayed.");
+
+        ImGui.Separator();
 
         // Slideshow Enable / Disable
         if (ImGui.Checkbox("Slideshow", ref Plugin.Config.SlideshowEnabled))
@@ -129,6 +131,8 @@ public class ConfigWindow
             Common.ToolTip("Input the interval length in seconds.\nHolding Control while pressing the + or - button changes the inverval by 1 minute.");
             ImGui.SameLine(); Common.HelpMarker("How long to wait before displaying a new image.");
         }
+
+        ImGui.Separator();
 
         // Image Alignment Submenu
         if (ImGui.CollapsingHeader("Image alignment"))
@@ -155,7 +159,7 @@ public class ConfigWindow
     {
         ImGui.PushItemWidth(-200);
 
-        ImGui.PushItemWidth(100);
+        ImGui.PushItemWidth(150 * ImGui.GetIO().FontGlobalScale);
         // Image Queue System
         ImGui.Text("Image preloading system");
         ImGui.SameLine(); Common.HelpMarker("Images are loaded in the background, to make displaying the next image faster.");
@@ -195,6 +199,7 @@ public class ConfigWindow
         }
         ImGui.PopItemWidth();
 
+        ImGui.Separator();
 
         // Clear Image queue
         if (ImGui.Button("Clear all downloaded images##Advanced"))
@@ -207,10 +212,15 @@ public class ConfigWindow
 
         // Clear Image queue
         if (ImGui.Button("Rest all faulty Image Sources##Advanced"))
-        {
             Plugin.ImageSource.ResetFaultySources();
-        }
-        ImGui.SameLine(); Common.HelpMarker("If an API has a problem, it will be disabled.\n Clicking this Button will reset all disabled APIs.\n You can also disable and enable APIs in the 'Image sources' menu to reset them.");
+        ImGui.SameLine(); Common.HelpMarker("If an API has a problem, it will be disabled. It the name of the API is red, it is disabled.\n" +
+                                            "Clicking this Button will reset all disabled APIs.\n You can also disable and enable APIs in the 'Image sources' menu to reset them.");
+
+        // Reload from Config
+        if (ImGui.Button("Reload Image Sources from config##Advanced"))
+            Plugin.ReloadSources();
+        ImGui.SameLine(); Common.HelpMarker("This will reload all Image Sources from the state saved in the configuration file.");
+
         ImGui.PopItemWidth();
     }
 
@@ -265,11 +275,9 @@ public class ConfigWindow
                 ImGui.PopStyleVar();
             }
         }
-
         ImGui.EndChild();
         ImGui.PopStyleColor();
     }
-
 
     private static void DrawDev()
     {
@@ -311,8 +319,6 @@ public class ConfigWindow
             ImGui.TextWrapped(keybind.Item2);
             ImGui.TableNextRow();
         }
-
-
         ImGui.EndTable();
     }
 }

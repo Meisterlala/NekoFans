@@ -253,7 +253,7 @@ public class NekoQueue
         lock (queue)
         {
             if (!queue.Remove(item))
-                PluginLog.LogWarning("Could not remove item from queue");
+                PluginLog.LogDebug("Could not remove item from queue");
             // Refill Queue
             FillQueue();
             LoadImages();
