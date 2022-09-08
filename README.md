@@ -1,4 +1,4 @@
-# Neko Fans Plugin for FFXIV <img src="icon.png" align="right" width="220">
+# Neko Fans Plugin for FFXIV <img src="icon.png" align="right" width="240">
 
 [![Build](https://github.com/Meisterlala/NekoFans/actions/workflows/build.yml/badge.svg)](https://github.com/Meisterlala/NekoFans/actions/workflows/build.yml)
 
@@ -20,7 +20,7 @@ https://raw.githubusercontent.com/Meisterlala/NekoFans/master/repo.json
 
 You can also download a specific version on the [release page](https://github.com/Meisterlala/NekoFans/releases) and install it manually. Unzip the downloaded file and add the folder to "Dev Plugin Locations" in the experimantal settings.
 
-## NSFW Images
+## NSFW Images <img src="icon18.png" align="left" height="160">
 
 By default you can only view Safe for Work (SFW) images.
 
