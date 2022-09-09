@@ -28,7 +28,7 @@ Installing the **Neko Fans NSFW 18+ Patch** Plugin will give you full access to 
 
 ## Usage
 
-To use the plugin, you must have launched the game via FFXIVQuickLauncher.
+To use the plugin, you must have launched the game via [XIVLauncher](https://github.com/goatcorp/FFXIVQuickLauncher).
 Then, all you need to do is type `/neko` in the in game chat to open the main window.
 
 Everytime you click on the image, a new one will appear.
