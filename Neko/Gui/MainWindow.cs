@@ -141,9 +141,8 @@ public class MainWindow
 
             // Allow move with right mouse button
             if (ImGui.IsMouseDragging(ImGuiMouseButton.Right)
-            && (ImGui.IsWindowHovered()
-                || (ImGui.IsWindowFocused()
-                && ImGui.IsMouseDown(ImGuiMouseButton.Right))))
+            && ImGui.IsWindowHovered()
+                && ImGui.IsMouseDown(ImGuiMouseButton.Right)))
             {
                 ImGui.SetWindowFocus(); // This is needed, if you drag to fast and the window cant keep up
                 ImGui.SetWindowPos(ImGui.GetIO().MouseDelta + ImGui.GetWindowPos());
@@ -152,14 +151,14 @@ public class MainWindow
             // Allow close with middle mouse button
             if (!Plugin.Config.GuiMainShowTitleBar
             && ImGui.IsMouseDragging(ImGuiMouseButton.Middle)
-            && ImGui.IsWindowFocused())
+            && ImGui.IsWindowHovered())
             {
                 Visible = false;
             }
 
             // Copy to clipboard with c
             if (Helper.KeyPressed(Dalamud.Game.ClientState.Keys.VirtualKey.C)
-            && (ImGui.IsWindowFocused() || ImGui.IsWindowHovered())
+            && ImGui.IsWindowHovered()
             && nekoTaskCurrent?.IsCompletedSuccessfully == true)
             {
                 Helper.CopyToClipboard(nekoTaskCurrent?.Result.URLDownloadWebsite ?? "");
@@ -167,7 +166,7 @@ public class MainWindow
 
             // Open in Browser with b
             if (Helper.KeyPressed(Dalamud.Game.ClientState.Keys.VirtualKey.B)
-            && (ImGui.IsWindowFocused() || ImGui.IsWindowHovered())
+            && ImGui.IsWindowHovered()
             && nekoTaskCurrent?.IsCompletedSuccessfully == true)
             {
                 Helper.OpenInBrowser(nekoTaskCurrent?.Result.URLOpenOnClick ?? "");
