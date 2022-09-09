@@ -6,12 +6,13 @@ using Neko.Gui;
 namespace Neko;
 
 #pragma warning disable CA1816 // Dispose warining
+#pragma warning disable RCS1170 // Use read-only auto-implemented property.
 
 public class Plugin : IDalamudPlugin
 {
-    [PluginService] public static CommandManager CommandManager { get; } = null!;
-    [PluginService] public static DalamudPluginInterface PluginInterface { get; } = null!;
-    [PluginService] public static Dalamud.Game.ClientState.Keys.KeyState KeyState { get; } = null!;
+    [PluginService] public static CommandManager CommandManager { get; private set; } = null!;
+    [PluginService] public static DalamudPluginInterface PluginInterface { get; private set; } = null!;
+    [PluginService] public static Dalamud.Game.ClientState.Keys.KeyState KeyState { get; private set; } = null!;
 
     public string Name => "Neko Fans";
 

@@ -5,6 +5,7 @@ using Dalamud.Plugin.Ipc;
 namespace NekoLewd;
 
 #pragma warning disable CA1816 // Dispose warining
+#pragma warning disable RCS1170 // Use read-only auto-implemented property.
 
 /// <summary>
 /// This Plugin returns true via IPC.
