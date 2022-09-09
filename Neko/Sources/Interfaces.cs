@@ -33,7 +33,6 @@ public interface IImageSource : IEquatable<IImageSource>
     public string ToString();
 }
 
-
 /// <summary>
 /// Describes how to load a config to generate a class
 /// </summary>

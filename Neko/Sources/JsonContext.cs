@@ -6,8 +6,7 @@ using Neko.Sources.APIS;
 
 namespace Neko.Sources;
 
-
-public class JsonContext
+public static class JsonContext
 {
     public static readonly Dictionary<Type, JsonSerializerContext> dic = new()
     {
@@ -17,7 +16,7 @@ public class JsonContext
         { typeof(ShibeOnline.ShibeOnlineJson), ShibeOnlineContext.Default },
         { typeof(TheCatAPI.TheCatAPIJson), TheCatAPIContext.Default },
         { typeof(Twitter.Search.SearchJson), TwitterSearchJsonContext.Default },
-        { typeof(Twitter.Search.CountJson), TwitterCountJsonContext.Default },
+        { typeof(Twitter.CountJson), TwitterCountJsonContext.Default },
         { typeof(Twitter.UserTimeline.TweetTimelineJson), TweetTimelineJsonContext.Default },
         { typeof(Twitter.UserTimeline.UserLookupJson), UserLookupJsonContext.Default },
         { typeof(Waifuim.WaifuImJson), WaifuimContext.Default },
@@ -36,7 +35,6 @@ public class JsonContext
     }
 }
 
-
 [JsonSerializable(typeof(Catboys.CatboysJson))]
 internal partial class CatboysContext : JsonSerializerContext { }
 
@@ -52,7 +50,7 @@ internal partial class ShibeOnlineContext : JsonSerializerContext { }
 [JsonSerializable(typeof(Twitter.Search.SearchJson))]
 internal partial class TwitterSearchJsonContext : JsonSerializerContext { }
 
-[JsonSerializable(typeof(Twitter.Search.CountJson))]
+[JsonSerializable(typeof(Twitter.CountJson))]
 internal partial class TwitterCountJsonContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(Twitter.UserTimeline.TweetTimelineJson))]
@@ -69,7 +67,3 @@ internal partial class WaifuimContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(WaifuPics.WaifuPicsJson))]
 internal partial class WaifuPicsContext : JsonSerializerContext { }
-
-
-
-

@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
 
-
 namespace Neko.Sources;
 
 public static class Common
@@ -56,7 +55,6 @@ public static class Common
         return image;
     }
 
-
     public static async Task<NekoImage> DownloadImage(string url, CancellationToken ct = default)
     {
         HttpRequestMessage request = new(HttpMethod.Get, url)
@@ -72,7 +70,6 @@ public static class Common
         };
         return await DownloadImage(request, ct).ConfigureAwait(false);
     }
-
 
     /// <summary>
     /// Downloads and Parses a .json file
@@ -97,7 +94,6 @@ public static class Common
         {
             throw new Exception("Error occured when trying to donwload: " + request.RequestUri, ex);
         }
-
 
         // Ensure Success
         try

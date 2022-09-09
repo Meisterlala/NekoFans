@@ -101,7 +101,6 @@ public class NekoQueue
         return res;
     }
 
-
     public async Task<NekoImage> Pop()
     {
         QueueItem popped;
@@ -137,7 +136,7 @@ public class NekoQueue
             {
                 var item = queue[i];
                 if ((item.downloadTask?.IsFaulted ?? true)
-                    || (item.imageTask != null && item.imageTask.IsFaulted))
+                    || (item.imageTask?.IsFaulted == true))
                 {
                     break;
                 }
@@ -273,8 +272,7 @@ public class NekoQueue
     {
         if (item.imageTask != null                          // If already loading
             || !item.imageShouldLoad                        // If it should not load
-            || item.downloadTask == null                    // If never downloaded
-            || !item.downloadTask.IsCompletedSuccessfully)  // If couldnt download
+            || item.downloadTask?.IsCompletedSuccessfully != true)  // If couldnt download
         {
             return;
         }

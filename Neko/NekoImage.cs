@@ -14,11 +14,11 @@ public enum ImageStatus
 }
 
 /// <summary>
-/// Handles loading an Image from a data[] to GPU. 
+/// Handles loading an Image from a data[] to GPU.
 /// <para>
-/// The reason, that this class is so complicated is that calling <see cref="Dalamud.Interface.UiBuilder.LoadImageAsync"/> 
-/// sometimes causes a <see cref="AccessViolationException"/> when the Garbage Collector is collecting during the loading 
-/// of the Image. This is 'fixed' by pausing the GC before loading, and then restarting it afterwards. This will still 
+/// The reason, that this class is so complicated is that calling <see cref="Dalamud.Interface.UiBuilder.LoadImageAsync"/>
+/// sometimes causes a <see cref="AccessViolationException"/> when the Garbage Collector is collecting during the loading
+/// of the Image. This is 'fixed' by pausing the GC before loading, and then restarting it afterwards. This will still
 /// cause a <see cref="AccessViolationException"/> when the Ephemeral memory is to small.
 /// </para>
 /// </summary>
@@ -55,9 +55,9 @@ public class NekoImage
             var gc_type = Environment.GetEnvironmentVariable("DOTNET_gcServer") ??
                           Environment.GetEnvironmentVariable("COMPlus_gcServer") ?? "0";
             var arch = Architecture.Server32Bit;
-            if (Environment.Is64BitProcess & gc_type == "0")
+            if (Environment.Is64BitProcess && gc_type == "0")
                 arch = Architecture.Workstation64Bit;
-            else if (!Environment.Is64BitProcess & gc_type == "0")
+            else if (!Environment.Is64BitProcess && gc_type == "0")
                 arch = Architecture.Workstation32Bit;
             else if (Environment.Is64BitProcess)
                 arch = Architecture.Server64Bit;
@@ -75,19 +75,19 @@ public class NekoImage
 
     public TextureWrap Texture => _texture ?? throw new Exception("await LoadImage() before accessing the texture");
 
-    public string? URLImage { get; private set; }
-    public string? URLClick { get; set; }
+    public string? URLDownloadWebsite { get; }
+    public string? URLOpenOnClick { get; set; }
     public string? Description { get; set; }
     public string? DebugInfo { get; set; }
 
-    public long RAMUsage => _data != null ? _data.Length : 0;
+    public long RAMUsage => (_data?.Length) ?? 0;
     public long VRAMUsage => _texture != null ? _texture.Height * _texture.Width * 4 : 0;
 
     public NekoImage(byte[] data, string url)
     {
         _data = data;
-        URLImage = url;
-        URLClick = url;
+        URLDownloadWebsite = url;
+        URLOpenOnClick = url;
         ImageStatus = ImageStatus.HasData;
     }
 
@@ -111,7 +111,7 @@ public class NekoImage
     public void Dispose()
     {
 #if DEBUG
-        if (_texture != null || (_data != null && _data.Length > 0))
+        if (_texture != null || (_data?.Length > 0))
             PluginLog.LogVerbose("Disposing Image  " + ToString());
 #endif
         _texture?.Dispose();
@@ -133,15 +133,13 @@ public class NekoImage
             name += $"Data: {Helper.SizeSuffix(_data.Length)}\t";
         if (_texture != null)
             name += $"Texture: {Helper.SizeSuffix(_texture.Height * _texture.Width * 4)}\t";
-        if (URLImage != null)
-            name += $"URL: {URLImage}";
+        if (URLDownloadWebsite != null)
+            name += $"URL: {URLDownloadWebsite}";
         if (DebugInfo != null)
             name += $"\n└─DebugInfo: {DebugInfo}";
 
-
-        return name == "" ? "Invalid Texture" : name;
+        return name.Length == 0 ? "Invalid Texture" : name;
     }
-
 
     /// <summary>
     /// Load image from RAM to GPU VRAM
@@ -161,7 +159,7 @@ public class NekoImage
         try
         {
             // try correct size
-            if (0 == Interlocked.Exchange(ref inNoGCRegion, 1))
+            if (Interlocked.Exchange(ref inNoGCRegion, 1) == 0)
             {
                 GC.TryStartNoGCRegion(EphemeralMemorySize, true);
             }
@@ -204,7 +202,7 @@ public class NekoImage
         // Restart GC
         try
         {
-            if (1 == Interlocked.Exchange(ref inNoGCRegion, 0))
+            if (Interlocked.Exchange(ref inNoGCRegion, 0) == 1)
             {
                 GC.EndNoGCRegion();
             }
@@ -230,8 +228,6 @@ public class NekoImage
         ImageStatus = ImageStatus.Successfull;
         return _texture;
     }
-
-
 
     public class Embedded
     {
@@ -281,6 +277,5 @@ public class NekoImage
 
         public static implicit operator NekoImage(Embedded embedded) => embedded.Image ?? throw new Exception("await Load() before accessing the texture");
         public static implicit operator Task<NekoImage>(Embedded embedded) => embedded.Load();
-
     }
 }

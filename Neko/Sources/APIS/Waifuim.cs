@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-
 namespace Neko.Sources.APIS;
 
 public class Waifuim : IImageSource
@@ -19,9 +18,9 @@ public class Waifuim : IImageSource
         {
             return !enabled
             ? null
-            : sfw && (nsfw & NSFW.AllowNSFW)
+            : sfw && nsfw && NSFW.AllowNSFW
             ? new CombinedSource(new Waifuim(false), new Waifuim(true))
-            : new Waifuim(nsfw & NSFW.AllowNSFW);
+            : new Waifuim(nsfw && NSFW.AllowNSFW);
         }
     }
 

@@ -19,7 +19,6 @@ public class DogCEO : IImageSource
 
     public bool Faulted { get; set; }
 
-
     private const int URL_COUNT = 10; // max 50
     private readonly MultiURLs<DogCEOJson> URLs;
     private readonly Breed breed;
@@ -313,6 +312,5 @@ public class DogCEO : IImageSource
         {Breed.wolfhound_irish,             new BreedInfo("Irish wolfhounds are big-hearted, gentle and sensitive but their size is an important consideration. They're the size of another person and owners must plan accordingly.")},
     };
 #pragma warning restore
-
 
 }

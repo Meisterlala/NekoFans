@@ -29,7 +29,7 @@ public static class Helper
         // it would round up to 1000 or more
         if (Math.Round(adjustedSize, decimalPlaces) >= 1000)
         {
-            mag += 1;
+            mag++;
             adjustedSize /= 1024;
         }
 
@@ -47,7 +47,7 @@ public static class Helper
 
     public static void CopyToClipboard(string text)
     {
-        if (text == "")
+        if (text.Length == 0)
         {
             Gui.Common.Notification("Unable to copy to Clipboard", Dalamud.Interface.Internal.Notifications.NotificationType.Error);
             return;
@@ -63,7 +63,7 @@ public static class Helper
 
     public static void OpenInBrowser(string url)
     {
-        if (url == "")
+        if (url.Length == 0)
         {
             Gui.Common.Notification("Unable to open in a Browser", Dalamud.Interface.Internal.Notifications.NotificationType.Error);
             return;
@@ -73,7 +73,7 @@ public static class Helper
         try
         {
             var uri = new Uri(url);
-            var scheme = uri.GetLeftPart(UriPartial.Scheme).ToString();
+            var scheme = uri.GetLeftPart(UriPartial.Scheme);
             if (scheme is not "https://" and not "http://")
                 throw new Exception("Invald scheme");
         }
@@ -142,5 +142,4 @@ public static class Helper
             interval += $"{span.Milliseconds}ms";
         return interval;
     }
-
 }

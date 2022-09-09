@@ -72,7 +72,6 @@ public class ConfigWindow
         }
     }
 
-
     private static void DrawLook()
     {
         ImGui.PushItemWidth(-200 * ImGui.GetIO().FontGlobalScale);

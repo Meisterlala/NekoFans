@@ -9,7 +9,8 @@
         "build",
         "${workspaceFolder}/Neko/Neko.csproj",
         "/property:GenerateFullPaths=true",
-        "/consoleloggerparameters:NoSummary"
+        "/consoleloggerparameters:NoSummary",
+        "/p:DefineConstants=\"DEBUG\"",
       ],
       "problemMatcher": "$msCompile",
       "group": {

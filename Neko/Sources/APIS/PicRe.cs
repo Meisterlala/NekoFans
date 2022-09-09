@@ -1,7 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-
 namespace Neko.Sources.APIS;
 
 public class PicRe : IImageSource
@@ -19,7 +18,7 @@ public class PicRe : IImageSource
 
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
-        var url = "https://pic.re/images";
+        const string url = "https://pic.re/images";
         return await Common.DownloadImage(url, ct);
     }
 

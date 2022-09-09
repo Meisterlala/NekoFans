@@ -44,7 +44,6 @@ public class Mock : IImageSource
         FileName = fileName;
     }
 
-
     public Task<NekoImage> Next(CancellationToken ct = default)
     {
 #if !DEBUG

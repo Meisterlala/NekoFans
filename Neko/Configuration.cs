@@ -8,7 +8,6 @@ namespace Neko;
 
 public class Configuration : IPluginConfiguration
 {
-
     public class SourceConfig
     {
         public Catboys.Config Catboys = new();
@@ -82,5 +81,3 @@ public class Configuration : IPluginConfiguration
         JsonSerializer.Serialize(this, typeof(Configuration),
             new JsonSerializerOptions() { WriteIndented = true, IncludeFields = true });
 }
-
-

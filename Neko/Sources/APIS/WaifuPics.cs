@@ -36,7 +36,6 @@ public class WaifuPics : IImageSource
                 comSFW.AddSource(new WaifuPics("sfw", category));
             }
 
-
             var comNSFW = new CombinedSource();
             foreach (var f in Helper.GetFlags(nsfwCategories))
             {
@@ -55,7 +54,6 @@ public class WaifuPics : IImageSource
     }
 
     public bool Faulted { get; set; }
-
 
     private readonly string url;
     private readonly string type;

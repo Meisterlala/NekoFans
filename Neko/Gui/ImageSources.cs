@@ -173,7 +173,6 @@ public class ImageSourcesGUI
         ImGui.Unindent(INDENT);
     }
 
-
     private static void DrawDogCEO()
     {
         if (DogCEOBreedNames == null) // Load names only once, then use cached
@@ -212,7 +211,6 @@ public class ImageSourcesGUI
             ImGui.EndCombo();
         }
         ImGui.Unindent(INDENT);
-
     }
 
     private static void DrawTheCatAPI()
@@ -253,7 +251,6 @@ public class ImageSourcesGUI
         }
         ImGui.Unindent(INDENT);
     }
-
 
     private static List<TwitterTableEntry>? TwitterTableEntries;
 
@@ -480,8 +477,7 @@ public class ImageSourcesGUI
                 // Update ImageSource references
                 foreach (var entry in TwitterTableEntries)
                 {
-                    if (entry.ImageSource == null)
-                        entry.ImageSource = Plugin.ImageSource.GetAll<Twitter>().Find((s) => s.ConfigQuery.Equals(entry.Query));
+                    entry.ImageSource ??= Plugin.ImageSource.GetAll<Twitter>().Find((s) => s.ConfigQuery.Equals(entry.Query));
                 }
             }
         }
@@ -583,7 +579,6 @@ public class ImageSourcesGUI
         ImGui.Unindent(INDENT);
     }
 
-
     private static void CheckIfNoSource()
     {
         var hasSome = Plugin.ImageSource.Count() > 0;
@@ -611,7 +606,6 @@ public class ImageSourcesGUI
 
         ImGui.TextWrapped("No Image source is selected. This makes loading new images impossible.");
     }
-
 
     private static void EnumSelectable<T>(ImageSourceConfig source, string name, T single, ref T combined) where T : Enum
     {
@@ -653,12 +647,9 @@ public class ImageSourcesGUI
         if (hasFaulted)
             ImGui.PopStyleColor(2);
 
-
         ImGui.SameLine();
         ImGui.TextDisabled(source.Description);
         ImGui.SameLine();
         Common.HelpMarker(source.Help);
-
     }
-
 }

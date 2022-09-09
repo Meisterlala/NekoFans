@@ -14,7 +14,6 @@ public class Catboys : IImageSource
 
     public bool Faulted { get; set; }
 
-
 #pragma warning disable
     public class CatboysJson
     {
@@ -28,14 +27,13 @@ public class Catboys : IImageSource
 
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
-        var url = "https://api.catboys.com/img";
+        const string url = "https://api.catboys.com/img";
         var response = await Common.ParseJson<CatboysJson>(url, ct);
         return await Common.DownloadImage(response.url, ct);
     }
 
     public override string ToString() => "Catboys";
     public string Name => "Catboys";
-
 
     public bool Equals(IImageSource? other) => other != null && other.GetType() == typeof(Catboys);
 }

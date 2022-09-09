@@ -13,7 +13,7 @@ public static class Common
     /// <param name="desc">What gets shown on hover</param>
     public static void HelpMarker(string desc)
     {
-        if (desc == "")
+        if (desc.Length == 0)
             return;
 
         ImGuiComponents.HelpMarker(desc);
@@ -36,7 +36,7 @@ public static class Common
     /// <param name="desc">Text</param>
     public static void ToolTip(string desc)
     {
-        if (desc == "")
+        if (desc.Length == 0)
             return;
 
         if (ImGui.IsItemHovered())
@@ -57,7 +57,7 @@ public static class Common
     /// <param name="end">Tooltip hover Rectange end pos</param>
     public static void ToolTip(string desc, Vector2 start, Vector2 end)
     {
-        if (desc == "")
+        if (desc.Length == 0)
             return;
 
         if (ImGui.IsMouseHoveringRect(start, end))
@@ -94,7 +94,6 @@ public static class Common
     public static void Notification(string text, Dalamud.Interface.Internal.Notifications.NotificationType type = default) =>
             Plugin.PluginInterface.UiBuilder.AddNotification(text, "Neko Fans", type);
 
-
     /// <summary>
     /// Only used for <see cref="TextWithColorsWrapped"/> to store the color and the text
     /// </summary>
@@ -115,7 +114,6 @@ public static class Common
             Color = ImGui.GetStyle().Colors[(int)ImGuiCol.Text];
         }
     }
-
 
     /// <summary>
     /// Draws a text wrapped with multiple colors.
@@ -247,7 +245,7 @@ public static class Common
     /// <param name="imgSize">Size of the object to align</param>
     /// <param name="rectangle">Space to align in</param>
     /// <param name="alignment">How it should be aligned</param>
-    /// <returns>Starting position and End position of the aligned image.</returns>   
+    /// <returns>Starting position and End position of the aligned image.</returns>
     public static (Vector2, Vector2) AlignImage(Vector2 imgSize, Vector2 rectangle, Configuration.ImageAlignment alignment)
     {
         var imageRatio = imgSize.X / imgSize.Y;

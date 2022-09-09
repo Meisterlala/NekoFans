@@ -17,8 +17,8 @@ public abstract class Twitter : IImageSource
     // the text below. The name of the variables is a lie, so it wont be found by 
     // automated github scanning tools.
     // Please don't abuse this <3 (or i will have to disable the feature)
-    private static readonly string fhaksdn = "QUFBQUFBQUFBQUFBQUFBQUFBQUFBRkdlZ1FFQUFBQUFWV1JJandraFExOXhlMzJrb1JlRDdaMVI4U00";
-    private static readonly string asasdjsaf = "lM0RNQ3lsbWdFOURwcHdCTmlyTnJOeFFXNEF1WjdoZjYyWkFISG1uUTh5OTdsSllrcWg5Yg==";
+    private const string fhaksdn = "QUFBQUFBQUFBQUFBQUFBQUFBQUFBRkdlZ1FFQUFBQUFWV1JJandraFExOXhlMzJrb1JlRDdaMVI4U00";
+    private const string asasdjsaf = "lM0RNQ3lsbWdFOURwcHdCTmlyTnJOeFFXNEF1WjdoZjYyWkFISG1uUTh5OTdsSllrcWg5Yg==";
     private static readonly string uuuuuu = Encoding.UTF8.GetString(Convert.FromBase64String(fhaksdn + asasdjsaf));
 
     private const int URLThreshold = 5;
@@ -31,7 +31,7 @@ public abstract class Twitter : IImageSource
 
     public virtual string Name => "Twitter";
 
-    public Twitter(Config.Query query)
+    protected Twitter(Config.Query query)
     {
         ConfigQuery = query;
         search = query.searchText;
@@ -112,8 +112,6 @@ public abstract class Twitter : IImageSource
                     imageSources.AddSource(t);
                 }
             }
-
-
             return imageSources;
         }
     }
@@ -151,7 +149,7 @@ public abstract class Twitter : IImageSource
             var span = DateTime.Now - localTime;
 
             var time = span.TotalSeconds < 5
-                ? $"now"
+                ? "now"
                 : span.TotalSeconds < 60
                 ? $"{span.Seconds} seconds ago"
                 : span.TotalMinutes < 60
@@ -177,14 +175,11 @@ public abstract class Twitter : IImageSource
 
         public string URLTweetID(string authorUsername)
             => $"https://twitter.com/{authorUsername}/status/{TweetID}";
-
     }
-
-
 
     public class Search : Twitter
     {
-        private static readonly string URLSearch = "https://api.twitter.com/2/tweets/search/recent";
+        private const string URLSearch = "https://api.twitter.com/2/tweets/search/recent";
         private static readonly string[] URLSearchParams = {
             "tweet.fields=id,text,attachments,created_at,possibly_sensitive",
             "media.fields=url,type",
@@ -192,11 +187,12 @@ public abstract class Twitter : IImageSource
             "expansions=attachments.media_keys,author_id",
             "max_results=10",
         };
-        private static readonly string URLQueryBegin = "query=has:media -is:retweet ";
+        private const string URLQueryBegin = "query=has:media -is:retweet ";
 
         private readonly TwitterMultiURLs<SearchJson, ImageResponse> URLs;
         private readonly string searchQuery;
         private Task<(string, string?)>? TweetCount;
+        private readonly object TweetCountLock = new();
 
         public Search(Config.Query query) : base(query)
         {
@@ -214,14 +210,14 @@ public abstract class Twitter : IImageSource
             var searchResult = await URLs.GetURL(ct);
             var image = await Common.DownloadImage(searchResult.Media.Url, ct);
             image.Description = searchResult.TweetDescription();
-            image.URLClick = searchResult.URLTweetID();
+            image.URLOpenOnClick = searchResult.URLTweetID();
             return image;
         }
 
         public override (string, string?) Status(CancellationToken ct = default)
         {
             // Start a new task to get the tweet count
-            lock (this)
+            lock (TweetCountLock)
             {
                 if (TweetCount == null)
                 {
@@ -266,7 +262,6 @@ public abstract class Twitter : IImageSource
                 // Check for metadata
                 if (Includes.Users == null)
                     return results;
-
 
                 // For each tweet
                 foreach (var tweet in Data)
@@ -423,8 +418,7 @@ public abstract class Twitter : IImageSource
         {
             lock (userIDTaskLock)
             {
-                if (userIDTask == null)
-                    userIDTask = GetUserID(ct);
+                userIDTask ??= GetUserID(ct);
             }
             await userIDTask;
 
@@ -434,10 +428,9 @@ public abstract class Twitter : IImageSource
             var nextTweet = await URLs.GetURL(ct);
             var image = await Common.DownloadImage(nextTweet.Media.Url, ct);
             image.Description = nextTweet.TweetDescription(usernameReadable, username);
-            image.URLClick = nextTweet.URLTweetID(username);
+            image.URLOpenOnClick = nextTweet.URLTweetID(username);
             return image;
         }
-
 
         public override (string, string?) Status(CancellationToken ct = default)
         {
@@ -461,7 +454,9 @@ public abstract class Twitter : IImageSource
             catch (AggregateException e) { return ("ERROR", e.InnerException?.Message); }
 
             // Return OK
-            return userIDTask != null && userIDTask.IsCompletedSuccessfully && !string.IsNullOrEmpty(userID) && !string.IsNullOrEmpty(usernameReadable)
+            return userIDTask?.IsCompletedSuccessfully == true
+                && !string.IsNullOrEmpty(userID)
+                && !string.IsNullOrEmpty(usernameReadable)
                 ? ("OK", $"Found user @{username} with the name {usernameReadable}")
                 : ("ERROR", "Unknown error");
         }
@@ -484,7 +479,6 @@ public abstract class Twitter : IImageSource
             userID = response.Id;
             usernameReadable = response.Name;
         }
-
 
         #region JSON
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
