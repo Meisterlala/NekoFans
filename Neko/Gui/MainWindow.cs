@@ -142,7 +142,7 @@ public class MainWindow
             // Allow move with right mouse button
             if (ImGui.IsMouseDragging(ImGuiMouseButton.Right)
             && ImGui.IsWindowHovered()
-                && ImGui.IsMouseDown(ImGuiMouseButton.Right)))
+            && ImGui.IsMouseDown(ImGuiMouseButton.Right))
             {
                 ImGui.SetWindowFocus(); // This is needed, if you drag to fast and the window cant keep up
                 ImGui.SetWindowPos(ImGui.GetIO().MouseDelta + ImGui.GetWindowPos());
@@ -150,7 +150,7 @@ public class MainWindow
 
             // Allow close with middle mouse button
             if (!Plugin.Config.GuiMainShowTitleBar
-            && ImGui.IsMouseDragging(ImGuiMouseButton.Middle)
+            && ImGui.IsMouseDown(ImGuiMouseButton.Middle)
             && ImGui.IsWindowHovered())
             {
                 Visible = false;
