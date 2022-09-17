@@ -53,17 +53,22 @@ public class ImageSourcesGUI
                 typeof(Twitter), Plugin.Config.Sources.Twitter),
         };
 
-    private readonly Vector4 TwitterDark = new(0.0549f, 0.29411f, 0.4431372f, 1f);
-    private readonly Vector4 TwitterLight = new(0.11372549f, 0.6313725f, 0.94901960f, 0.8f);
-    private readonly Vector4 TableTextBG = new(0.29019607f, 0.29019607f, 0.29019607f, 0.823529f);
-    private readonly Vector4 TableTextRed = new(0.38823529f, 0.1098039f, 0.1098039f, 1f);
+    private static readonly Vector4 TwitterDark = new(0.0549f, 0.29411f, 0.4431372f, 1f);
+    private static readonly Vector4 TwitterLight = new(0.11372549f, 0.6313725f, 0.94901960f, 0.8f);
+    private static readonly Vector4 TableTextBG = new(0.29019607f, 0.29019607f, 0.29019607f, 0.823529f);
+    private static readonly Vector4 TableTextRed = new(0.38823529f, 0.1098039f, 0.1098039f, 1f);
 
     private const float INDENT = 32f;
     private static (TheCatAPI.Breed[], string[])? TheCatAPIBreedNames;
     private static (DogCEO.Breed[], string[])? DogCEOBreedNames;
 
+    private readonly HeaderImage.Individual Header = new();
+
     public void Draw()
     {
+        // ------------ Header --------------
+        if (Plugin.Config.ShowHeaders)
+            DrawHeader();
         // ------------ Mock Images for debugging --------------
         if (Plugin.PluginInterface.IsDevMenuOpen)
             DrawMock();
@@ -97,6 +102,24 @@ public class ImageSourcesGUI
             DrawTwitter();
 
         CheckIfNoSource();
+    }
+
+    private void DrawHeader()
+    {
+        var height = ImGui.GetFontSize() * 9f;
+        var width = ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X - (2 * ImGui.GetStyle().WindowPadding.X);
+
+        var imgSize = Header.TryGetSize();
+        if (imgSize == null)
+            return;
+
+        var (start, end) = Common.AlignImage(imgSize.Value, new Vector2(width, height), Configuration.ImageAlignment.Top);
+        var cursorPos = ImGui.GetCursorPos();
+        start += new Vector2(cursorPos.X + ImGui.GetStyle().WindowPadding.X, cursorPos.Y);
+        end += cursorPos;
+
+        Header.Draw((start, end));
+        Common.ToolTip($"The amount of images you downloaded with Neko Fans is {Plugin.Config.LocalDownloadCount}");
     }
 
     private static void DrawMock()

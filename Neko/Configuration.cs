@@ -42,6 +42,10 @@ public class Configuration : IPluginConfiguration
     public int QueueDownloadCount = 5;
     public int QueuePreloadCount = 2;
 
+    public bool EnableTelemetry = true;
+    public int LocalDownloadCount;
+    public bool ShowHeaders = true;
+
     public ImageAlignment Alignment = ImageAlignment.Center;
 
     public void Save() => Plugin.PluginInterface.SavePluginConfig(this);

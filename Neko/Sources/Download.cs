@@ -1,6 +1,5 @@
 using System;
 using System.Net.Http;
-using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,28 +7,12 @@ using Dalamud.Logging;
 
 namespace Neko.Sources;
 
-public static class Common
+public static class Download
 {
-    private static readonly HttpClient client = new(
-        new HttpClientHandler()
-        {
-            AutomaticDecompression = System.Net.DecompressionMethods.All
-        }
-    )
-    {
-        DefaultRequestHeaders = {
-            UserAgent =
-             {
-                new("NekoFans", Assembly.GetExecutingAssembly().GetName().Version?.ToString()),
-                new("(a Plugin for Final Fantasy XIV)")
-            },
-        },
-    };
-
     /// <summary>
     /// Download an Image and Store it in a <see cref="NekoImage"/>
     /// </summary>
-    public static async Task<NekoImage> DownloadImage(HttpRequestMessage request, CancellationToken ct = default)
+    public static async Task<NekoImage> DownloadImage(HttpRequestMessage request, Type? caller = default, CancellationToken ct = default)
     {
         DebugHelper.RandomThrow(DebugHelper.ThrowChance.DownloadImage);
         await DebugHelper.RandomDelay(DebugHelper.Delay.DownloadImage, ct);
@@ -37,7 +20,7 @@ public static class Common
         byte[]? bytes;
         try
         {
-            var response = await client.SendAsync(request, ct).ConfigureAwait(false);
+            var response = await Plugin.HttpClient.SendAsync(request, ct).ConfigureAwait(false);
             if (response.RequestMessage != null)
                 DebugHelper.LogNetwork(() => "Sent request to download image:\n" + response.RequestMessage?.ToString());
             response.EnsureSuccessStatusCode();
@@ -48,14 +31,23 @@ public static class Common
             throw new Exception("Could not download image from: " + request.RequestUri, ex);
         }
 
-        PluginLog.Log($"Downloaded {Helper.SizeSuffix(bytes.LongLength, 1)} from {request.RequestUri}");
+        // Log Download if its not the Telemetry API
+        if (!request.RequestUri?.ToString().StartsWith(Plugin.ControlServer) ?? false)
+            PluginLog.Log($"Downloaded {Helper.SizeSuffix(bytes.LongLength, 1)} from {request.RequestUri}");
 
         ct.ThrowIfCancellationRequested();
         NekoImage? image = new(bytes, request.RequestUri?.ToString() ?? "");
+
+        if (caller != null)
+        {
+            image.Creator = caller;
+            Telemetry.RegisterDownload(caller);
+        }
+
         return image;
     }
 
-    public static async Task<NekoImage> DownloadImage(string url, CancellationToken ct = default)
+    public static async Task<NekoImage> DownloadImage(string url, Type? caller = default, CancellationToken ct = default)
     {
         HttpRequestMessage request = new(HttpMethod.Get, url)
         {
@@ -68,7 +60,7 @@ public static class Common
                     }
                 }
         };
-        return await DownloadImage(request, ct).ConfigureAwait(false);
+        return await DownloadImage(request, caller, ct).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -84,7 +76,7 @@ public static class Common
         HttpResponseMessage response;
         try
         {
-            response = await client.SendAsync(request, ct).ConfigureAwait(false);
+            response = await Plugin.HttpClient.SendAsync(request, ct).ConfigureAwait(false);
             if (response.RequestMessage != null)
                 DebugHelper.LogNetwork(() => "Sending request to get json:\n" + request.ToString());
             stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);

@@ -42,7 +42,7 @@ public class Waifuim : IImageSource
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
         var url = await URLs.GetURL(ct);
-        return await Common.DownloadImage(url, ct);
+        return await Download.DownloadImage(url, typeof(Waifuim), ct);
     }
 
     public override string ToString() => $"waifu.im ({(nsfw ? "NSFW" : "SFW")})\t{URLs}";

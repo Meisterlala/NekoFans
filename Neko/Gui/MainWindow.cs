@@ -105,7 +105,7 @@ public class MainWindow
                 windowSize -= new Vector2(10f, 10f);
 
             // Align Image
-            var (startPos, endPos) = Common.AlignImage(new Vector2(currentNeko.Height, currentNeko.Width), windowSize, Plugin.Config.Alignment);
+            var (startPos, endPos) = Common.AlignImage(new Vector2(currentNeko.Width, currentNeko.Height), windowSize, Plugin.Config.Alignment);
 
             // Set image start position
             if (Plugin.Config.GuiMainShowTitleBar)

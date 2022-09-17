@@ -1,3 +1,5 @@
+using System.Net.Http;
+using System.Reflection;
 using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Plugin;
@@ -21,8 +23,26 @@ public class Plugin : IDalamudPlugin
     public static ConfigWindow? GuiConfig { get; private set; }
     public static Sources.CombinedSource ImageSource { get; private set; } = null!;
 
+    public const string ControlServer = "http://34.149.0.8";
+
     private const string CommandMain = "/neko";
     private const string CommandConfig = "/nekocfg";
+
+    public static readonly HttpClient HttpClient = new(
+        new HttpClientHandler()
+        {
+            AutomaticDecompression = System.Net.DecompressionMethods.All
+        }
+    )
+    {
+        DefaultRequestHeaders = {
+            UserAgent =
+             {
+                new("NekoFans", Assembly.GetExecutingAssembly().GetName().Version?.ToString()),
+                new("(a Plugin for Final Fantasy XIV)")
+            },
+        },
+    };
 
     public Plugin()
     {

@@ -33,7 +33,7 @@ public class DogCEO : IImageSource
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
         var url = await URLs.GetURL(ct);
-        return await Common.DownloadImage(url, ct);
+        return await Download.DownloadImage(url, typeof(DogCEO), ct);
     }
 
     public string Name => "Dog CEO";

@@ -50,14 +50,14 @@ public class MultiURLsGeneric<TJson, TQueueElement>
     {
         this.maxCount = maxCount;
         this.caller = caller;
-        parseJson = () => Common.ParseJson<TJson>(url, cts.Token);
+        parseJson = () => Download.ParseJson<TJson>(url, cts.Token);
     }
 
     public MultiURLsGeneric(Func<HttpRequestMessage> requestGen, IImageSource caller, int maxCount = URLThreshold)
     {
         this.maxCount = maxCount;
         this.caller = caller;
-        parseJson = () => Common.ParseJson<TJson>(ModifyRequest(requestGen()), cts.Token);
+        parseJson = () => Download.ParseJson<TJson>(ModifyRequest(requestGen()), cts.Token);
     }
 
     ~MultiURLsGeneric()

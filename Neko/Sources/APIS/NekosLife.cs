@@ -27,9 +27,9 @@ public class NekosLife : IImageSource
     {
         const string url = "https://nekos.life/api/v2/img/neko";
         // Get a random image URL
-        var response = await Common.ParseJson<NekosLifeJson>(url, ct);
+        var response = await Download.ParseJson<NekosLifeJson>(url, ct);
         // Download  image
-        return await Common.DownloadImage(response.url, ct);
+        return await Download.DownloadImage(response.url, typeof(NekosLife), ct);
     }
 
     public override string ToString() => "Nekos.life";

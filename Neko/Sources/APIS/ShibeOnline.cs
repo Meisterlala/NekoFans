@@ -26,7 +26,7 @@ public class ShibeOnline : IImageSource
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
         var url = await URLs.GetURL(ct);
-        return await Common.DownloadImage(url, ct);
+        return await Download.DownloadImage(url, typeof(ShibeOnline), ct);
     }
 
     public override string ToString() => $"Shibe.online\t{URLs}";

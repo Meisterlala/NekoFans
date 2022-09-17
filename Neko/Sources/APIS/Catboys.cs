@@ -28,8 +28,8 @@ public class Catboys : IImageSource
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
         const string url = "https://api.catboys.com/img";
-        var response = await Common.ParseJson<CatboysJson>(url, ct);
-        return await Common.DownloadImage(response.url, ct);
+        var response = await Download.ParseJson<CatboysJson>(url, ct);
+        return await Download.DownloadImage(response.url, typeof(Catboys), ct);
     }
 
     public override string ToString() => "Catboys";

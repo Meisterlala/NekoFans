@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Numerics;
 using Dalamud.Interface.Components;
 using ImGuiNET;
@@ -248,7 +249,7 @@ public static class Common
     /// <returns>Starting position and End position of the aligned image.</returns>
     public static (Vector2, Vector2) AlignImage(Vector2 imgSize, Vector2 rectangle, Configuration.ImageAlignment alignment)
     {
-        var imageRatio = imgSize.X / imgSize.Y;
+        var imageRatio = imgSize.Y / imgSize.X;
         var rectangeRatio = rectangle.Y / rectangle.X;
         var scaled = new Vector2(rectangle.Y / imageRatio, rectangle.X * imageRatio);
         var widthReduced = rectangeRatio > imageRatio; // True when width of image is bigger than rectangle
@@ -298,6 +299,8 @@ public static class Common
             _ => rectangle
         };
 
+        Debug.Assert(start.X >= 0 && start.Y >= 0 && end.X >= 0 && end.Y >= 0, "Start and end should be positive");
+        Debug.Assert(start.X <= rectangle.X && start.Y <= rectangle.Y && end.X <= rectangle.X && end.Y <= rectangle.Y, "Start and end should be smaller than rectangle");
         return (start, end);
     }
 }

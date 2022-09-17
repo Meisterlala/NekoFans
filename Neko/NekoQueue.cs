@@ -245,7 +245,7 @@ public class NekoQueue
     {
         foreach (var ex in task.Exception?.Flatten().InnerExceptions ?? new(Array.Empty<Exception>()))
         {
-            PluginLog.LogWarning(ex, "Loading of a image failed");
+            PluginLog.LogWarning(ex, "Loading of an image failed");
         }
 
         // Remove from queue

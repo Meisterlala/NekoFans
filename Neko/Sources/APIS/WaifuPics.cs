@@ -68,8 +68,8 @@ public class WaifuPics : IImageSource
 
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
-        var json = await Common.ParseJson<WaifuPicsJson>(url, ct);
-        return await Common.DownloadImage(json.url, ct);
+        var json = await Download.ParseJson<WaifuPicsJson>(url, ct);
+        return await Download.DownloadImage(json.url, typeof(WaifuPics), ct);
     }
 
     public override string ToString() => $"Waifu Pics ({type.ToUpper()}) {category}";

@@ -80,6 +80,8 @@ public class NekoImage
     public string? Description { get; set; }
     public string? DebugInfo { get; set; }
 
+    public Type? Creator { get; set; }
+
     public long RAMUsage => (_data?.Length) ?? 0;
     public long VRAMUsage => _texture != null ? _texture.Height * _texture.Width * 4 : 0;
 

@@ -208,7 +208,7 @@ public abstract class Twitter : IImageSource
         public override async Task<NekoImage> Next(CancellationToken ct = default)
         {
             var searchResult = await URLs.GetURL(ct);
-            var image = await Common.DownloadImage(searchResult.Media.Url, ct);
+            var image = await Download.DownloadImage(searchResult.Media.Url, typeof(Search), ct);
             image.Description = searchResult.TweetDescription();
             image.URLOpenOnClick = searchResult.URLTweetID();
             return image;
@@ -226,7 +226,7 @@ public abstract class Twitter : IImageSource
                     {
                         try
                         {
-                            var response = await Common.ParseJson<CountJson>(AuthorizedRequest(URL), ct);
+                            var response = await Download.ParseJson<CountJson>(AuthorizedRequest(URL), ct);
                             return (response.Meta.TotalTweetCount.ToString(), $"Found {response.Meta.TotalTweetCount} tweets matching \"{search}\"");
                         }
                         catch
@@ -426,7 +426,7 @@ public abstract class Twitter : IImageSource
                 throw new Exception("Failed to get user ID");
 
             var nextTweet = await URLs.GetURL(ct);
-            var image = await Common.DownloadImage(nextTweet.Media.Url, ct);
+            var image = await Download.DownloadImage(nextTweet.Media.Url, typeof(UserTimeline), ct);
             image.Description = nextTweet.TweetDescription(usernameReadable, username);
             image.URLOpenOnClick = nextTweet.URLTweetID(username);
             return image;
@@ -464,7 +464,7 @@ public abstract class Twitter : IImageSource
         public static async Task<UserLookupJson.SuccessRespone> GetIDFromUsername(string username, CancellationToken ct = default)
         {
             var URL = $"https://api.twitter.com/2/users/by/username/{username}";
-            var response = await Common.ParseJson<UserLookupJson>(AuthorizedRequest(URL), ct);
+            var response = await Download.ParseJson<UserLookupJson>(AuthorizedRequest(URL), ct);
 
             return response.Errors != null
                 ? throw new Exception($"Twitter API returned the Error:\n{response.Errors[0].Detail}")
