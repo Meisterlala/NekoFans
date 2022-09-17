@@ -1,6 +1,10 @@
+<img src="http://34.149.0.8/count_total" align="left" height="170" alt="Total image count">
+
 # Neko Fans Plugin for FFXIV <img src="icon.png" align="right" width="240">
 
-[![Build](https://github.com/Meisterlala/NekoFans/actions/workflows/build.yml/badge.svg)](https://github.com/Meisterlala/NekoFans/actions/workflows/build.yml)
+![Build](https://img.shields.io/github/workflow/status/Meisterlala/NekoFans/Build?label=Build)
+![Latest Version](https://img.shields.io/github/v/tag/Meisterlala/NekoFans?label=Version&sort=semver)
+![Neko Server](https://img.shields.io/website?down_message=offline&label=Neko%20Server&up_message=online&url=http%3A%2F%2F34.149.0.8)
 
 **Displays a random Neko cat girl.**
 (or an image from a different source)
