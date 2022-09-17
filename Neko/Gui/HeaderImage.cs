@@ -170,7 +170,7 @@ public abstract class HeaderImage
     public class Individual : HeaderImage
     {
         protected override TimeSpan RetryTimer => TimeSpan.FromMinutes(1);
-        protected override TimeSpan UpdateTimer => TimeSpan.FromSeconds(5);
+        protected override TimeSpan UpdateTimer => TimeSpan.FromSeconds(1);
 
         private int lastCount;
 

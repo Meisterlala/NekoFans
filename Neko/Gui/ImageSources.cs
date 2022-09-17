@@ -106,12 +106,14 @@ public class ImageSourcesGUI
 
     private void DrawHeader()
     {
-        var height = ImGui.GetFontSize() * 9f;
-        var width = ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X - (2 * ImGui.GetStyle().WindowPadding.X);
-
         var imgSize = Header.TryGetSize();
         if (imgSize == null)
             return;
+
+        var regionMax = ImGui.GetWindowContentRegionMax();
+        var regionMin = ImGui.GetWindowContentRegionMin();
+        var height = (regionMax.Y - regionMin.Y) * 0.3f;
+        var width = regionMax.X - regionMin.X - (2 * ImGui.GetStyle().WindowPadding.X);
 
         var (start, end) = Common.AlignImage(imgSize.Value, new Vector2(width, height), Configuration.ImageAlignment.Top);
         var cursorPos = ImGui.GetCursorPos();
