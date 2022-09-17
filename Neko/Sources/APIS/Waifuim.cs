@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-
 namespace Neko.Sources.APIS;
 
 public class Waifuim : IImageSource
@@ -19,9 +18,9 @@ public class Waifuim : IImageSource
         {
             return !enabled
             ? null
-            : sfw && (nsfw & NSFW.AllowNSFW)
+            : sfw && nsfw && NSFW.AllowNSFW
             ? new CombinedSource(new Waifuim(false), new Waifuim(true))
-            : new Waifuim(nsfw & NSFW.AllowNSFW);
+            : new Waifuim(nsfw && NSFW.AllowNSFW);
         }
     }
 
@@ -43,7 +42,7 @@ public class Waifuim : IImageSource
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
         var url = await URLs.GetURL(ct);
-        return await Common.DownloadImage(url, ct);
+        return await Download.DownloadImage(url, typeof(Waifuim), ct);
     }
 
     public override string ToString() => $"waifu.im ({(nsfw ? "NSFW" : "SFW")})\t{URLs}";

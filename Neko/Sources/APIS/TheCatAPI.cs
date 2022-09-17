@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-
 namespace Neko.Sources.APIS;
 
 public class TheCatAPI : IImageSource
@@ -43,7 +42,7 @@ public class TheCatAPI : IImageSource
     public async Task<NekoImage> Next(CancellationToken ct = default)
     {
         var url = await URLs.GetURL(ct);
-        return await Common.DownloadImage(url, ct);
+        return await Download.DownloadImage(url, typeof(TheCatAPI), ct);
     }
 
     public static BreedInfo GetBreedInfo(Breed b)

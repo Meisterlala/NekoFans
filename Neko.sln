@@ -5,20 +5,36 @@ VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Neko", "Neko\Neko.csproj", "{13C812E9-0D42-4B95-8646-40EEBF30636F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NekoLewd", "NekoLewd\NekoLewd.csproj", "{5D22A1BA-E504-4CE8-9D44-07CF4236BDDE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
+		Debug|x64 = Debug|x64
+		Delays|x64 = Delays|x64
+		Network|x64 = Network|x64
+		Release|x64 = Release|x64
+		Throw|x64 = Throw|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Debug|Any CPU.Build.0 = Debug|x64
-		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Release|Any CPU.ActiveCfg = Release|x64
-		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Release|Any CPU.Build.0 = Release|x64
-		{A5233F5E-815F-496D-98F8-1CA4FFB05E24}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{A5233F5E-815F-496D-98F8-1CA4FFB05E24}.Debug|Any CPU.Build.0 = Debug|x64
-		{A5233F5E-815F-496D-98F8-1CA4FFB05E24}.Release|Any CPU.ActiveCfg = Release|x64
-		{A5233F5E-815F-496D-98F8-1CA4FFB05E24}.Release|Any CPU.Build.0 = Release|x64
+		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Debug|x64.ActiveCfg = Debug|x64
+		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Debug|x64.Build.0 = Debug|x64
+		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Delays|x64.ActiveCfg = Delays|x64
+		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Delays|x64.Build.0 = Delays|x64
+		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Network|x64.ActiveCfg = Network|x64
+		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Network|x64.Build.0 = Network|x64
+		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Release|x64.ActiveCfg = Release|x64
+		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Release|x64.Build.0 = Release|x64
+		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Throw|x64.ActiveCfg = Throw|x64
+		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Throw|x64.Build.0 = Throw|x64
+		{5D22A1BA-E504-4CE8-9D44-07CF4236BDDE}.Debug|x64.ActiveCfg = Debug|x64
+		{5D22A1BA-E504-4CE8-9D44-07CF4236BDDE}.Debug|x64.Build.0 = Debug|x64
+		{5D22A1BA-E504-4CE8-9D44-07CF4236BDDE}.Delays|x64.ActiveCfg = Debug|x64
+		{5D22A1BA-E504-4CE8-9D44-07CF4236BDDE}.Delays|x64.Build.0 = Debug|x64
+		{5D22A1BA-E504-4CE8-9D44-07CF4236BDDE}.Network|x64.ActiveCfg = Release|x64
+		{5D22A1BA-E504-4CE8-9D44-07CF4236BDDE}.Network|x64.Build.0 = Release|x64
+		{5D22A1BA-E504-4CE8-9D44-07CF4236BDDE}.Release|x64.ActiveCfg = Release|x64
+		{5D22A1BA-E504-4CE8-9D44-07CF4236BDDE}.Throw|x64.ActiveCfg = Release|x64
+		{5D22A1BA-E504-4CE8-9D44-07CF4236BDDE}.Throw|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

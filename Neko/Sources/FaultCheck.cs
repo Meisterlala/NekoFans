@@ -5,7 +5,7 @@ using Dalamud.Logging;
 
 namespace Neko.Sources;
 
-public class FaultCheck : IImageSource
+public sealed class FaultCheck : IImageSource
 {
     public bool Faulted
     {
@@ -27,6 +27,7 @@ public class FaultCheck : IImageSource
     private readonly IImageSource Source;
 
     public bool HasFaulted => FaultCount >= MaxFaultCount || Source.Faulted;
+    private readonly object FaultLock = new();
     private CancellationTokenSource cts = new();
 
     public string Name => Source.Name;
@@ -47,7 +48,7 @@ public class FaultCheck : IImageSource
 
         try
         {
-            return await Source.Next(childToken); ;
+            return await Source.Next(childToken);
         }
         catch (OperationCanceledException) { throw; }
         catch (Exception ex)
@@ -55,7 +56,7 @@ public class FaultCheck : IImageSource
             Interlocked.Increment(ref FaultCount);
             if (HasFaulted)
             {
-                lock (this)
+                lock (FaultLock)
                 {
                     if (!cts.IsCancellationRequested)
                         FaultLimitReached();
@@ -112,5 +113,5 @@ public class FaultCheck : IImageSource
         PluginLog.LogDebug("Could not increase FaultCount for {0}", source);
     }
 
-    public bool Equals(IImageSource? other) => other != null && other.Equals(Source);
+    public bool Equals(IImageSource? other) => other?.Equals(Source) == true;
 }

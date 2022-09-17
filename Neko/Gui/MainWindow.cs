@@ -54,7 +54,6 @@ public class MainWindow
         }
     }
 
-
     public void DrawNeko()
     {
         if (!NekoImage.Embedded.ImageLoading.Ready) return;
@@ -90,8 +89,7 @@ public class MainWindow
             Visible = visible;
 
             // Load Neko or fallback to Error
-            var currentNeko = nekoTaskCurrent != null
-                && nekoTaskCurrent.IsCompletedSuccessfully
+            var currentNeko = nekoTaskCurrent?.IsCompletedSuccessfully == true
                 && nekoTaskCurrent.Result.ImageStatus == ImageStatus.Successfull
                  ? nekoTaskCurrent.Result.Texture
                  : nekoTaskCurrent != null
@@ -107,7 +105,7 @@ public class MainWindow
                 windowSize -= new Vector2(10f, 10f);
 
             // Align Image
-            var (startPos, endPos) = Common.AlignImage(new Vector2(currentNeko.Height, currentNeko.Width), windowSize, Plugin.Config.Alignment);
+            var (startPos, endPos) = Common.AlignImage(new Vector2(currentNeko.Width, currentNeko.Height), windowSize, Plugin.Config.Alignment);
 
             // Set image start position
             if (Plugin.Config.GuiMainShowTitleBar)
@@ -135,8 +133,7 @@ public class MainWindow
 
             // Show Image description
             if (ImGui.IsItemHovered()
-            && nekoTaskCurrent != null
-            && nekoTaskCurrent.IsCompletedSuccessfully
+            && nekoTaskCurrent?.IsCompletedSuccessfully == true
             && !string.IsNullOrWhiteSpace(nekoTaskCurrent.Result.Description))
             {
                 Common.ToolTip(nekoTaskCurrent.Result.Description);
@@ -144,9 +141,8 @@ public class MainWindow
 
             // Allow move with right mouse button
             if (ImGui.IsMouseDragging(ImGuiMouseButton.Right)
-            && (ImGui.IsWindowHovered()
-                || (ImGui.IsWindowFocused()
-                && ImGui.IsMouseDown(ImGuiMouseButton.Right))))
+            && ImGui.IsWindowHovered()
+            && ImGui.IsMouseDown(ImGuiMouseButton.Right))
             {
                 ImGui.SetWindowFocus(); // This is needed, if you drag to fast and the window cant keep up
                 ImGui.SetWindowPos(ImGui.GetIO().MouseDelta + ImGui.GetWindowPos());
@@ -154,28 +150,26 @@ public class MainWindow
 
             // Allow close with middle mouse button
             if (!Plugin.Config.GuiMainShowTitleBar
-            && ImGui.IsMouseDragging(ImGuiMouseButton.Middle)
-            && ImGui.IsWindowFocused())
+            && ImGui.IsMouseDown(ImGuiMouseButton.Middle)
+            && ImGui.IsWindowHovered())
             {
                 Visible = false;
             }
 
             // Copy to clipboard with c
             if (Helper.KeyPressed(Dalamud.Game.ClientState.Keys.VirtualKey.C)
-            && (ImGui.IsWindowFocused() || ImGui.IsWindowHovered())
-            && nekoTaskCurrent != null
-            && nekoTaskCurrent.IsCompletedSuccessfully)
+            && ImGui.IsWindowHovered()
+            && nekoTaskCurrent?.IsCompletedSuccessfully == true)
             {
-                Helper.CopyToClipboard(nekoTaskCurrent?.Result.URLImage ?? "");
+                Helper.CopyToClipboard(nekoTaskCurrent?.Result.URLDownloadWebsite ?? "");
             }
 
             // Open in Browser with b
             if (Helper.KeyPressed(Dalamud.Game.ClientState.Keys.VirtualKey.B)
-            && (ImGui.IsWindowFocused() || ImGui.IsWindowHovered())
-            && nekoTaskCurrent != null
-            && nekoTaskCurrent.IsCompletedSuccessfully)
+            && ImGui.IsWindowHovered()
+            && nekoTaskCurrent?.IsCompletedSuccessfully == true)
             {
-                Helper.OpenInBrowser(nekoTaskCurrent?.Result.URLClick ?? "");
+                Helper.OpenInBrowser(nekoTaskCurrent?.Result.URLOpenOnClick ?? "");
             }
 
             ImGui.PopStyleColor(3);
@@ -185,15 +179,14 @@ public class MainWindow
             ImGui.PopStyleColor();
     }
 
-
     private void AsnyncNextNeko()
     {
         // Restart the timer for the slideshow
         Slideshow.Restart();
 
         // Dont load next neko if the current one is loading
-        if (nekoTaskNext != null && !nekoTaskNext.IsCompleted) return;
-        if (nekoTaskNext != null && nekoTaskNext.IsCompleted) nekoTaskNext.Dispose();
+        if (nekoTaskNext?.IsCompleted == false) return;
+        if (nekoTaskNext?.IsCompleted == true) nekoTaskNext.Dispose();
 
         // Get next image from Queue
         nekoTaskNext = Queue.Pop();
@@ -201,8 +194,7 @@ public class MainWindow
         var processResult = (Task<NekoImage> task) =>
         {
             var _ = task.Exception?.Flatten();  // This is done to prevent System.AggregateException
-            if (nekoTaskCurrent != null)
-                nekoTaskCurrent.Dispose();
+            nekoTaskCurrent?.Dispose();
             nekoTaskCurrent = task;
             imageGrayed = false;
         };
@@ -213,5 +205,4 @@ public class MainWindow
         else // Update later
             nekoTaskNext.ContinueWith(processResult);
     }
-
 }

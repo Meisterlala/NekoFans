@@ -14,6 +14,7 @@ public class ConfigWindow
     public static readonly Vector4 RedColor = new(0.38f, 0.1f, 0.1f, 0.55f);
 
     private readonly ImageSourcesGUI imageSourcesGUI = new();
+    private readonly HeaderImage.Total headerImage = new();
 
     private int QueueDonwloadCount;
     private int QueuePreloadCount;
@@ -72,9 +73,18 @@ public class ConfigWindow
         }
     }
 
-
-    private static void DrawLook()
+    private void DrawLook()
     {
+        // Draw Header
+        if (Plugin.Config.ShowHeaders)
+        {
+            headerImage.DrawFullWidth();
+            var text = "The total amount of images displayed by all Neko Fans users.";
+            if (!Plugin.Config.EnableTelemetry)
+                text += "\nYou are not included in the total count because you disabled \"Contribute to public image count\".";
+            Common.ToolTip(text);
+        }
+
         ImGui.PushItemWidth(-200 * ImGui.GetIO().FontGlobalScale);
 
         // Background opacity slider
@@ -106,6 +116,14 @@ public class ConfigWindow
         ImGui.SameLine(); Common.HelpMarker("Show or hide the bar on top of the image.\n" +
                                             "Hold down the right mouse button to move the window.\n" +
                                             "Press the middle mouse button to close the window when no title bar is displayed.");
+
+        ImGui.Separator();
+
+        // Show / Hide Header
+        if (ImGui.Checkbox("Show header image", ref Plugin.Config.ShowHeaders))
+            Plugin.Config.Save();
+        ImGui.SameLine(); Common.HelpMarker("Show or hide the image at the top of the window. It shows the total amount of images downloaded by all Neko Fans users.\n" +
+                                            "The image in the 'Image sources' Tab shows the amount of images you downloaded.");
 
         ImGui.Separator();
 
@@ -198,6 +216,15 @@ public class ConfigWindow
             ImGui.SameLine(); ImGui.TextDisabled(Helper.SizeSuffix(Plugin.GuiMain.Queue.VRAMUsage()));
         }
         ImGui.PopItemWidth();
+
+        ImGui.Separator();
+
+        // Telemetry
+        if (ImGui.Checkbox("Contribute to public image count", ref Plugin.Config.EnableTelemetry))
+            Plugin.Config.Save();
+        ImGui.SameLine(); Common.HelpMarker("Contribute to the public image count by sending the amount of images you downloaded to the Neko Fans server.\n" +
+                                            "The Image Source name and the downloaded image count will be sent.\n" +
+                                            "The Twitter seach text will not be sent. And no personal information will be sent.");
 
         ImGui.Separator();
 

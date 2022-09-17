@@ -18,7 +18,6 @@ public class CombinedSource : IImageSource
     private readonly List<IImageSource> sources = new();
     private readonly Random random = new();
 
-
     public CombinedSource(params IImageSource[] source)
     {
         foreach (var s in source)
@@ -49,7 +48,7 @@ public class CombinedSource : IImageSource
         if (source == null)
             return;
 
-        if (source is CombinedSource comb && comb.sources.Count <= 0)
+        if (source is CombinedSource comb && comb.sources.Count == 0)
             return;
 
         var combined = GetAll<CombinedSource>();

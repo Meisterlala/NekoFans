@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 
 namespace Neko;
 
-
 #pragma warning disable IDE0022 // Use expression body for methods
 #pragma warning disable IDE0052 // Remove unused parameter
 
@@ -19,7 +18,7 @@ public static class DebugHelper
 
     private static readonly Random ThrowRandom = new();
 
-    public class ThrowChance
+    public static class ThrowChance
     {
         public const double DownloadImage = 0.1;
         public const double ParseJson = 0.1;
@@ -29,20 +28,19 @@ public static class DebugHelper
 
     public static void RandomThrow(double chance = 0.3)
     {
-
-#if RANDOM_THROW
-        if (ThrowRandom.NextDouble() <= chance) {
-             throw new Exception("\n"
-                +  "┌───────────────────┐\n"
-                +  "│         Random Throw\n"
-                + $"│        Chance: {chance:P}\n"
-                +  "└───────────────────┘");
+#if THROW
+        if (ThrowRandom.NextDouble() <= chance)
+        {
+            throw new Exception("\n"
+               + "┌───────────────────┐\n"
+               + "│         Random Throw\n"
+               + $"│        Chance: {chance:P}\n"
+               + "└───────────────────┘");
         }
 #endif
     }
 
-
-    public class Delay
+    public static class Delay
     {
         public const int DownloadImage = 1000 * 2;
         public const int ParseJson = 1000 * 2;
@@ -58,7 +56,7 @@ public static class DebugHelper
 
     public static Task RandomDelay(int delayMS, CancellationToken ct = default)
     {
-#if RANDOM_DELAY
+#if DELAY
         var u1 = 1.0 - DelayRandom.NextDouble(); //uniform(0,1] random doubles
         var u2 = 1.0 - DelayRandom.NextDouble();
         var randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
@@ -73,4 +71,3 @@ public static class DebugHelper
 #endif
     }
 }
-

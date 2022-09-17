@@ -5,9 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
 
-
 namespace Neko.Sources;
-
 
 /// <summary>
 /// Stores a List of URLs, which are provided from an API.
@@ -25,7 +23,6 @@ public class MultiURLs<T> : MultiURLsGeneric<T, string>
     {
     }
 }
-
 
 /// <summary>
 /// Stores a List of <typeparamref name="TQueueElement"/>, which are provided from an API.
@@ -53,14 +50,14 @@ public class MultiURLsGeneric<TJson, TQueueElement>
     {
         this.maxCount = maxCount;
         this.caller = caller;
-        parseJson = () => Common.ParseJson<TJson>(url, cts.Token);
+        parseJson = () => Download.ParseJson<TJson>(url, cts.Token);
     }
 
     public MultiURLsGeneric(Func<HttpRequestMessage> requestGen, IImageSource caller, int maxCount = URLThreshold)
     {
         this.maxCount = maxCount;
         this.caller = caller;
-        parseJson = () => Common.ParseJson<TJson>(ModifyRequest(requestGen()), cts.Token);
+        parseJson = () => Download.ParseJson<TJson>(ModifyRequest(requestGen()), cts.Token);
     }
 
     ~MultiURLsGeneric()
@@ -82,7 +79,7 @@ public class MultiURLsGeneric<TJson, TQueueElement>
 
             // Load more if needed
             if (_urlCount <= maxCount
-                && 0 == Interlocked.Exchange(ref taskRunning, 1))
+                && Interlocked.Exchange(ref taskRunning, 1) == 0)
             {
                 getNewURLs = StartTask();
             }
@@ -116,7 +113,6 @@ public class MultiURLsGeneric<TJson, TQueueElement>
         {
             Interlocked.Exchange(ref taskRunning, 0);
         }
-
     }
 
     protected virtual void OnTaskSuccessfull(TJson result)
@@ -132,7 +128,6 @@ public class MultiURLsGeneric<TJson, TQueueElement>
             URLs.Enqueue(item);
         }
     }
-
 
     protected virtual HttpRequestMessage ModifyRequest(HttpRequestMessage response) => response;
 

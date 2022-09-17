@@ -5,6 +5,7 @@ using Dalamud.Plugin.Ipc;
 namespace NekoLewd;
 
 #pragma warning disable CA1816 // Dispose warining
+#pragma warning disable RCS1170 // Use read-only auto-implemented property.
 
 /// <summary>
 /// This Plugin returns true via IPC.
@@ -17,7 +18,7 @@ public class Plugin : IDalamudPlugin
 {
     public string Name => "Neko Fans NSFW 18+ Patch";
 
-    [PluginService] public static DalamudPluginInterface PluginInterface { get; private set; } = null!;
+    [PluginService] public static DalamudPluginInterface PluginInterface { get; } = null!;
 
     private readonly ICallGateProvider<bool> IPCProvider;
 

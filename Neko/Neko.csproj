@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>1.1.3</Version>
+    <Version>1.1.4</Version>
     <TargetFramework>net6.0-windows</TargetFramework>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -16,6 +16,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <OutputPath Condition="'$(OS)' == 'Windows_NT'">$(AppData)\XIVLauncher\devPlugins\Neko</OutputPath>
     <OutputPath Condition="'$(OS)' == 'Unix'">$(HOME)/.xlcore/devPlugins/Neko</OutputPath>
+    <Configurations>Debug;Release;Network;Delays;Throw</Configurations>
   </PropertyGroup>
 
   <!-- Info for the Dalamud Packer -->
@@ -25,7 +26,7 @@
       <Author>Meisterlala</Author>
       <Name>Neko Fans</Name>
       <Punchline>Frustrated in a dungeon? Look at a cute cat girl!</Punchline>
-      <Description>Shows you an image of a random neko character. Click on the image to view the next one.\nMultiple Image APIs are supported, allowing you to look at Catboys, Waifus, Cats, Dogs and more.\nWarning: You might see naughty images</Description>
+      <Description>Shows you an image of a random neko character. Click on the image to view the next one.\nYou can choose different image sources, allowing you to look at Catboys, Waifus, Cats, Dogs and more.\n\nSupported APIs:\nTwitter, Nekos.life, Catboys, Dog CEO, The Cat API, Pic.re, Waifu.im, Waifu.pics and shibe.online\n\nWarning: You might see naughty images</Description>
       <IconUrl>https://raw.githubusercontent.com/Meisterlala/NekoFans/master/icon.png</IconUrl>
       <Tags>
         <Tag>anime</Tag>
@@ -46,6 +47,16 @@
     <DalamudLibPath Condition="'$(OS)' == 'Windows_NT'">$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
     <DalamudLibPath Condition="'$(OS)' == 'Unix'">$(HOME)/.xlcore/dalamud/Hooks/dev/</DalamudLibPath>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+
+  <!-- Define Constants based on the Configuration -->
+  <!-- Everything is defined in the Debug Configuration, so roslyn is happy.
+       use dotnet build /p:DefineConstants="DEBUG" if you want a normal Debug build  -->
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <DefineConstants>TRACE;NETWORK;THROW;DELAY</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <DefineConstants></DefineConstants>
   </PropertyGroup>
 
   <!-- Load DLLs included with Dalamud -->

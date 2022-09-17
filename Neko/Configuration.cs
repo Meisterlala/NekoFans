@@ -8,7 +8,6 @@ namespace Neko;
 
 public class Configuration : IPluginConfiguration
 {
-
     public class SourceConfig
     {
         public Catboys.Config Catboys = new();
@@ -42,6 +41,10 @@ public class Configuration : IPluginConfiguration
 
     public int QueueDownloadCount = 5;
     public int QueuePreloadCount = 2;
+
+    public bool EnableTelemetry = true;
+    public int LocalDownloadCount;
+    public bool ShowHeaders = true;
 
     public ImageAlignment Alignment = ImageAlignment.Center;
 
@@ -82,5 +85,3 @@ public class Configuration : IPluginConfiguration
         JsonSerializer.Serialize(this, typeof(Configuration),
             new JsonSerializerOptions() { WriteIndented = true, IncludeFields = true });
 }
-
-
