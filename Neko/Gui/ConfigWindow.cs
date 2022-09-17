@@ -159,7 +159,7 @@ public class ConfigWindow
         // List Hotkeys
         if (ImGui.CollapsingHeader("Hotkeys"))
         {
-            ImGui.TextWrapped("The following Hotkeys are only active when the main window is active.");
+            ImGui.TextWrapped("The following Hotkeys are only active when your mouse is over the displayed image.");
             (string, string, bool)[] keybind = {
                 ("left mouse button", "next image", true),
                 ("middle mouse botton", "close window", !Plugin.Config.GuiMainShowTitleBar),
