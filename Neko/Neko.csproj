@@ -26,7 +26,7 @@
       <Author>Meisterlala</Author>
       <Name>Neko Fans</Name>
       <Punchline>Frustrated in a dungeon? Look at a cute cat girl!</Punchline>
-      <Description>Shows you an image of a random neko character. Click on the image to view the next one.\nMultiple Image APIs are supported, allowing you to look at Catboys, Waifus, Cats, Dogs and more.\nWarning: You might see naughty images</Description>
+      <Description>Shows you an image of a random neko character. Click on the image to view the next one.\nYou can choose different image sources, allowing you to look at Catboys, Waifus, Cats, Dogs and more.\n\nSupported APIs:\nTwitter, Nekos.life, Catboys, Dog CEO, The Cat API, Pic.re, Waifu.im, Waifu.pics and shibe.online\n\nWarning: You might see naughty images</Description>
       <IconUrl>https://raw.githubusercontent.com/Meisterlala/NekoFans/master/icon.png</IconUrl>
       <Tags>
         <Tag>anime</Tag>
