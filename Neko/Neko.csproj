@@ -38,6 +38,11 @@
       <CategoryTags>
         <Tag>UI</Tag>
       </CategoryTags>
+      <Images>
+        <Icon>../icon.png</Icon>
+        <Marketing>../images/image1.png</Marketing>
+        <Marketing>../images/image2.png</Marketing>
+      </Images>
       <Hidden>False</Hidden>
     </DalamudPlugin>
   </ProjectExtensions>
