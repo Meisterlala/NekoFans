@@ -23,14 +23,13 @@ Inspired by [Nya](https://github.com/Sirspam/Nya) for Beat Saber.
 </p>
 </details>
 
-Enable "Get plugin testing builds" in the experimental settings of Dalamud, or
-add this as a custom plugin repository in the experimental settings:
+Open the Plugin installer with `/xlplugins`, search for _Neko Fans_ and click install. If you also want the NSFW Patch you have to add the custom repository below in the experimental settings of Dalamud `/xlsettings`
 
 ```url
 https://raw.githubusercontent.com/Meisterlala/NekoFans/master/repo.json
 ```
 
-You can also download a specific version on the [release page](https://github.com/Meisterlala/NekoFans/releases) and install it manually. Unzip the downloaded file and add the folder to "Dev Plugin Locations" in the experimantal settings.
+You can also download a specific version on the [release page](https://github.com/Meisterlala/NekoFans/releases) and install it manually. Unzip the downloaded file and add the folder to "Dev Plugin Locations" in the experimental settings.
 
 ## NSFW Images <img src="icon18.png" align="left" height="160">
 
