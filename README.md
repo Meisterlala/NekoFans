@@ -15,6 +15,14 @@ Inspired by [Nya](https://github.com/Sirspam/Nya) for Beat Saber.
 
 ## Installing
 
+<details><summary>Click here for a video tutorial</summary>
+<p>
+
+![Tutorial](/resources/install_video.gif)
+
+</p>
+</details>
+
 Enable "Get plugin testing builds" in the experimental settings of Dalamud, or
 add this as a custom plugin repository in the experimental settings:
 
