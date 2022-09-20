@@ -112,7 +112,7 @@ public class ImageSourcesGUI
 
         var regionMax = ImGui.GetWindowContentRegionMax();
         var regionMin = ImGui.GetWindowContentRegionMin();
-        var height = (regionMax.Y - regionMin.Y) * 0.3f;
+        var height = (regionMax.Y - regionMin.Y) * 0.25f;
         var width = regionMax.X - regionMin.X - (2 * ImGui.GetStyle().WindowPadding.X);
 
         var (start, end) = Common.AlignImage(imgSize.Value, new Vector2(width, height), Configuration.ImageAlignment.Top);
