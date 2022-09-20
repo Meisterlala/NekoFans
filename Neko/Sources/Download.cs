@@ -98,7 +98,10 @@ public static class Download
                 throw new Exception("Exceded Limits of the API. Please try again later.", ex);
 
             DebugHelper.LogNetwork(() => $"Error Downloading Json from {request.RequestUri}:\n{JsonSerializer.Serialize(response.Content.ReadAsStringAsync(ct).Result, new JsonSerializerOptions() { WriteIndented = true })}");
-            throw new Exception("Could not Download .json from: " + request.RequestUri);
+            var exception = new HttpRequestException($"Could not Download .json from: {request.RequestUri} ({response.StatusCode})", ex);
+            exception.Data.Add("StatusCode", response.StatusCode);
+            exception.Data.Add("Content", response.Content.ReadAsStringAsync(ct).Result);
+            throw exception;
         }
 
         // Stop Early if requested

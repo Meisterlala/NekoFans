@@ -541,6 +541,12 @@ public class ImageSourcesGUI
         ImGui.Spacing(); ImGui.Spacing();
         ImGui.TextColored(TwitterLight, "How to select the Tweets you want to see:");
         ImGui.Separator();
+
+        // Button to Twitter Advanced Search
+        ImGui.Spacing();
+        if (ImGui.Button("Open Twitter Advanced Search", new Vector2(ImGui.GetWindowContentRegionMax().X - ImGui.GetStyle().WindowPadding.X, 25f * fontScale)))
+            Helper.OpenInBrowser("https://twitter.com/search-advanced");
+
         ImGui.TextWrapped("There are 2 modes. You can either view Tweets from a specific user or all Tweets that match a query. The status column will show \"OK\" if you are viewing tweets from a specific user or the amount of tweets mathcing a query.");
 
         // By User  
@@ -589,6 +595,12 @@ public class ImageSourcesGUI
             new(" (e.g. "),
             new("-Lalafell",        Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
             new(") Matches any Tweet which doesn't contain the word \"Lalafell\""),
+        });
+        ImGui.Spacing();
+        ImGui.Spacing();
+        Common.TextWithColorsWrapped(new Common.Segment[]{
+            new("Here is an example of what a query could look like:\n"),
+            new("lang:en #ffxiv #gposers -#miqote -#aura -#lala -#lalafell -(#meme OR funny)", Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
         });
         ImGui.Spacing();
         Common.TextWithColorsWrapped(new Common.Segment[]{

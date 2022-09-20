@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -227,11 +228,30 @@ public abstract class Twitter : IImageSource
                         try
                         {
                             var response = await Download.ParseJson<CountJson>(AuthorizedRequest(URL), ct);
-                            return (response.Meta.TotalTweetCount.ToString(), $"Found {response.Meta.TotalTweetCount} tweets matching \"{search}\"");
+                            return (response.Meta!.TotalTweetCount.ToString(), $"Found {response.Meta.TotalTweetCount} tweets matching:\n\"{search}\"");
+                        }
+                        catch (HttpRequestException e)
+                        {
+                            try
+                            {
+                                var content = (string)e.Data["Content"]!;
+                                var context = JsonContext.GetTypeInfo<CountJson>();
+                                var result = JsonSerializer.Deserialize(content, context)!;
+
+                                // Adjust position messages to account for hidden search text
+                                Regex adjustPosition = new(@"\(at position (\d+)\)", RegexOptions.Compiled);
+                                var error = adjustPosition.Replace(result.Errors![0].Message, (m) => $"(at position {int.Parse(m.Groups[1].Value) - URLQueryBegin.Length + 6})");
+
+                                return ("ERROR", $"{result.Title}\n({result.Detail})\n\n{error}");
+                            }
+                            catch
+                            {
+                                return ("?", "Twitter returned an unknown error");
+                            }
                         }
                         catch
                         {
-                            return ("?", null!);
+                            return ("?", "Twitter returned an unknown error");
                         }
                     }
                     TweetCount = getCount();
@@ -644,16 +664,19 @@ public abstract class Twitter : IImageSource
     public class CountJson
     {
         [JsonPropertyName("data")]
-        public List<Datum> Data { get; set; }
+        public List<Datum>? Data { get; set; }
 
         [JsonPropertyName("meta")]
-        public Metadata Meta { get; set; }
+        public Metadata? Meta { get; set; }
 
-        public class Metadata
-        {
-            [JsonPropertyName("total_tweet_count")]
-            public int TotalTweetCount { get; set; }
-        }
+        [JsonPropertyName("errors")]
+        public List<Error>? Errors { get; set; }
+
+        [JsonPropertyName("title")]
+        public string? Title { get; set; }
+
+        [JsonPropertyName("detail")]
+        public string? Detail { get; set; }
 
         public class Datum
         {
@@ -665,6 +688,27 @@ public abstract class Twitter : IImageSource
 
             [JsonPropertyName("tweet_count")]
             public int TweetCount { get; set; }
+        }
+
+        public class Metadata
+        {
+            [JsonPropertyName("total_tweet_count")]
+            public int TotalTweetCount { get; set; }
+        }
+
+        public class Error
+        {
+            [JsonPropertyName("parameters")]
+            public Parameter Parameters { get; set; }
+
+            [JsonPropertyName("message")]
+            public string Message { get; set; }
+
+            public class Parameter
+            {
+                [JsonPropertyName("query")]
+                public List<string> Query { get; set; }
+            }
         }
     }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
