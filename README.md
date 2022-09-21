@@ -11,7 +11,9 @@
 
 This is a plugin to be used with the [FFXIVQuickLauncher](https://github.com/goatcorp/FFXIVQuickLauncher) and [Dalamud](https://github.com/goatcorp/Dalamud).
 
-Inspired by [Nya](https://github.com/Sirspam/Nya) for Beat Saber.
+Some functions of the Plugin are provided by the [Neko Server](https://github.com/Meisterlala/NekoServer).
+
+> Inspired by [Nya](https://github.com/Sirspam/Nya) for Beat Saber.
 
 ## Installing
 
