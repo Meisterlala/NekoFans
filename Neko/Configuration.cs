@@ -21,6 +21,15 @@ public class Configuration : IPluginConfiguration
         public WaifuPics.Config WaifuPics = new();
     }
 
+    public class HotkeyConfig
+    {
+        public Hotkey NextImage = new("Next Image", HotkeyCondition.OnMouseOver, Key.SPACE);
+        public Hotkey ToggleWindow = new("Toggle Visibility", HotkeyCondition.OnMouseOver, Key.MBUTTON);
+        public Hotkey MoveWindow = new("Move Window", HotkeyCondition.OnMouseOver, Key.RBUTTON);
+        public Hotkey OpenInBrowser = new("Open in Browser", HotkeyCondition.OnMouseOver, Key.B);
+        public Hotkey CopyToClipboard = new("Copy to Clipboard", HotkeyCondition.OnMouseOver, Key.C);
+    }
+
     public enum ImageAlignment
     {
         TopLeft, Top, TopRight, Left, Center, Right, BottomLeft, Bottom, BottomRight
@@ -47,6 +56,8 @@ public class Configuration : IPluginConfiguration
     public bool ShowHeaders = true;
 
     public ImageAlignment Alignment = ImageAlignment.Center;
+
+    public HotkeyConfig Hotkeys = new();
 
     public void Save() => Plugin.PluginInterface.SavePluginConfig(this);
 

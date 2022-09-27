@@ -83,7 +83,7 @@ public abstract class HeaderImage
         if (NotReady())
             return;
 
-        var width = ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
+        var width = ImGui.GetWindowSize().X - ImGui.GetWindowContentRegionMin().X - (ImGui.GetStyle().WindowPadding.X * 2);
         Draw(new Vector2(width, width / image!.Texture.Width * image!.Texture.Height));
     }
 

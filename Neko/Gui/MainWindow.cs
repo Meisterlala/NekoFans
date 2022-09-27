@@ -118,17 +118,25 @@ public class MainWindow
             ImGui.PushStyleColor(ImGuiCol.ButtonActive, Vector4.Zero);
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Vector4.Zero);
 
+            // Show Next image
+            void advanceImage()
+            {
+                imageGrayed = true;
+                AsnyncNextNeko();
+            }
+
+            // Draw Image
             if (ImGui.ImageButton(currentNeko.ImGuiHandle,
                 endPos - startPos,
                 Vector2.Zero,
                 Vector2.One,
                 0,
                 Vector4.Zero,
-                imageGrayed ? new Vector4(.5f, .5f, .5f, 1f) : Vector4.One))
+                imageGrayed ? new Vector4(.5f, .5f, .5f, 1f) : Vector4.One)
+                || Plugin.Config.Hotkeys.NextImage.IsPressed()
+                )
             {
-                imageGrayed = true;
-                // Load next Neko if Image is pressed
-                AsnyncNextNeko();
+                advanceImage();
             }
 
             // Show Image description
@@ -140,33 +148,21 @@ public class MainWindow
             }
 
             // Allow move with right mouse button
-            if (ImGui.IsMouseDragging(ImGuiMouseButton.Right)
-            && ImGui.IsWindowHovered()
-            && ImGui.IsMouseDown(ImGuiMouseButton.Right))
+            if (Plugin.Config.Hotkeys.MoveWindow.IsHeld())
             {
                 ImGui.SetWindowFocus(); // This is needed, if you drag to fast and the window cant keep up
                 ImGui.SetWindowPos(ImGui.GetIO().MouseDelta + ImGui.GetWindowPos());
             }
 
-            // Allow close with middle mouse button
-            if (!Plugin.Config.GuiMainShowTitleBar
-            && ImGui.IsMouseDown(ImGuiMouseButton.Middle)
-            && ImGui.IsWindowHovered())
-            {
-                Visible = false;
-            }
-
             // Copy to clipboard with c
-            if (Helper.KeyPressed(Dalamud.Game.ClientState.Keys.VirtualKey.C)
-            && ImGui.IsWindowHovered()
+            if (Plugin.Config.Hotkeys.CopyToClipboard.IsPressed()
             && nekoTaskCurrent?.IsCompletedSuccessfully == true)
             {
                 Helper.CopyToClipboard(nekoTaskCurrent?.Result.URLDownloadWebsite ?? "");
             }
 
             // Open in Browser with b
-            if (Helper.KeyPressed(Dalamud.Game.ClientState.Keys.VirtualKey.B)
-            && ImGui.IsWindowHovered()
+            if (Plugin.Config.Hotkeys.OpenInBrowser.IsPressed()
             && nekoTaskCurrent?.IsCompletedSuccessfully == true)
             {
                 Helper.OpenInBrowser(nekoTaskCurrent?.Result.URLOpenOnClick ?? "");

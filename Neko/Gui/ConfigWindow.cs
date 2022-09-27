@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using Dalamud.Interface;
 using ImGuiNET;
@@ -113,9 +115,7 @@ public class ConfigWindow
         // Show Title Bar
         if (ImGui.Checkbox("Show window title bar", ref Plugin.Config.GuiMainShowTitleBar))
             Plugin.Config.Save();
-        ImGui.SameLine(); Common.HelpMarker("Show or hide the bar on top of the image.\n" +
-                                            "Hold down the right mouse button to move the window.\n" +
-                                            "Press the middle mouse button to close the window when no title bar is displayed.");
+        ImGui.SameLine(); Common.HelpMarker("Show or hide the bar on top of the image");
 
         ImGui.Separator();
 
@@ -159,15 +159,14 @@ public class ConfigWindow
         // List Hotkeys
         if (ImGui.CollapsingHeader("Hotkeys"))
         {
-            ImGui.TextWrapped("The following Hotkeys are only active when your mouse is over the displayed image.");
-            (string, string, bool)[] keybind = {
-                ("left mouse button", "next image", true),
-                ("middle mouse botton", "close window", !Plugin.Config.GuiMainShowTitleBar),
-                ("right mouse button", "move window", true),
-                ("B", "open image in web browser", true),
-                ("C", "copy image link to clipboard", true)};
+            var keybinds = new List<(Hotkey, string)>() {
+                (Plugin.Config.Hotkeys.NextImage, "Show the next image. You can always click on the image to show the next one."),
+                (Plugin.Config.Hotkeys.ToggleWindow, "Open or close the Neko window."),
+                (Plugin.Config.Hotkeys.MoveWindow,"Move the Neko window."),
+                (Plugin.Config.Hotkeys.OpenInBrowser, "Open the current image in your default browser."),
+                (Plugin.Config.Hotkeys.CopyToClipboard, "Copy the link of the current image to the clipboard") };
 
-            DrawKeybinds(keybind);
+            DrawKeybinds(keybinds);
         }
 
         ImGui.PopItemWidth();
@@ -318,34 +317,94 @@ public class ConfigWindow
             ImGui.TextWrapped(Plugin.Config.ToString());
     }
 
-    private static void DrawKeybinds((string, string, bool)[] keybinds)
+    private static Key[]? Keys;
+    private static string[]? KeyNames;
+    private static float? KeyLongestName;
+    private static HotkeyCondition[]? Conditions;
+    private static string[]? ConditionNames;
+    private static float? ConditionLongestName;
+
+    private static void DrawKeybinds(List<(Hotkey, string)> keybinds)
     {
-        ImGui.BeginTable("Keybinds##ConfigWindow", 3);
+        // Set static fields
+        Keys ??= Hotkey.KeyNames.Keys.ToArray();
+        KeyNames ??= Keys.Select(x => Hotkey.GetKeyName(x)).ToArray();
+        KeyLongestName ??= KeyNames.Max(x => ImGui.CalcTextSize(x).X);
+        Conditions ??= Hotkey.ConditionNames.Keys.ToArray();
+        ConditionNames ??= Conditions.Select(x => Hotkey.ConditionNames[x]).ToArray();
+        ConditionLongestName ??= ConditionNames.Max(x => ImGui.CalcTextSize(x).X);
 
-        ImGui.TableSetupColumn("Key##ConfigWindow", ImGuiTableColumnFlags.WidthFixed);
-        ImGui.TableSetupColumn("Arrow##ConfigWindow", ImGuiTableColumnFlags.WidthFixed, 20);
-        ImGui.TableSetupColumn("Description##ConfigWindowu", ImGuiTableColumnFlags.WidthStretch);
+        ImGui.BeginTable("Keybinds##ConfigWindow", 4, ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingFixedFit);
 
-        foreach (var keybind in keybinds)
+        var ConditionColumnwidth = (ConditionLongestName.Value * ImGui.GetIO().FontGlobalScale * 1.5f) - 10;
+        ImGui.TableSetupColumn("Condition##ConfigWindow", ImGuiTableColumnFlags.WidthFixed, ConditionColumnwidth);
+        var KeyColumnwidth = (KeyLongestName.Value * ImGui.GetIO().FontGlobalScale * 1.5f) - 35;
+        ImGui.TableSetupColumn("Key##ConfigWindow", ImGuiTableColumnFlags.WidthFixed, KeyColumnwidth);
+        ImGui.TableSetupColumn("Action##ConfigWindowu", ImGuiTableColumnFlags.WidthStretch);
+        ImGui.TableHeadersRow();
+
+        for (var i = 0; i < keybinds.Count; i++)
         {
-            // Skip if bool is false
-            if (!keybind.Item3)
-                continue;
+            var (hotkey, description) = keybinds[i];
 
-            // Right Align the first column (name of key)
+            ImGui.TableNextRow();
+            // Condition combo box
             ImGui.TableNextColumn();
-            var posX = ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(keybind.Item1).X - ImGui.GetScrollX();
-            if (posX > ImGui.GetCursorPosX())
-                ImGui.SetCursorPosX(posX);
-            ImGui.Text(keybind.Item1);
-            // Arrow ->
+            ImGui.SetNextItemWidth(ConditionColumnwidth);
+            if (ImGui.BeginCombo($"##Keybinds_Condition_{i}", hotkey.ConditionName))
+            {
+                for (var j = 0; j < ConditionNames.Length; j++)
+                {
+                    var name = ConditionNames[j];
+                    if (ImGui.Selectable($"{name}##Keybinds_Condition_{i}_{j}", Conditions[j] == hotkey.Condition))
+                    {
+                        hotkey.Condition = Conditions[j];
+                        Dalamud.Logging.PluginLog.Log($"Changed keybind {i} condition to {name}");
+                        Plugin.Config.Save();
+                    }
+                }
+                ImGui.EndCombo();
+            }
+
+            // Key combo box
             ImGui.TableNextColumn();
-            Common.FontAwesomeIcon(FontAwesomeIcon.LongArrowAltRight);
+            ImGui.SetNextItemWidth(KeyColumnwidth);
+            if (ImGui.BeginCombo($"##Keybinds_Combo_{i}", Hotkey.GetKeyName(hotkey.Key)))
+            {
+                for (var j = 0; j < KeyNames.Length; j++)
+                {
+                    var name = KeyNames[j];
+                    if (ImGui.Selectable($"{name}##Keybinds_Combo_{i}_{j}", hotkey.Key == Keys[j]))
+                    {
+                        hotkey.Key = Keys[j];
+                        Plugin.Config.Save();
+                    }
+                }
+                ImGui.EndCombo();
+            }
+
             // Description
             ImGui.TableNextColumn();
-            ImGui.TextWrapped(keybind.Item2);
-            ImGui.TableNextRow();
+            Common.FontAwesomeIcon(FontAwesomeIcon.LongArrowAltRight); ImGui.SameLine();
+            ImGui.Text(hotkey.Name); ImGui.SameLine();
+            Common.HelpMarker(description);
         }
         ImGui.EndTable();
+
+        // Check for duplicate keybinds
+        var containsDuplicate = false;
+        foreach (var (key, desc) in keybinds)
+        {
+            if (keybinds.Count(x => x.Item1.Key == key.Key) > 1)
+            {
+                containsDuplicate = true;
+                break;
+            }
+        }
+        if (containsDuplicate)
+        {
+            ImGui.TextColored(new Vector4(1, 0, 0, 1), "WARNING: Duplicate keys detected!");
+            Common.ToolTip("You have multiple actions set to the same key. This will cause issues.");
+        }
     }
 }

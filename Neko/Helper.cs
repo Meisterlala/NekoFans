@@ -118,16 +118,6 @@ public static class Helper
         }
     }
 
-    public static bool KeyPressed(Dalamud.Game.ClientState.Keys.VirtualKey key)
-    {
-        if (Plugin.KeyState[key])
-        {
-            Plugin.KeyState[key] = false;
-            return true;
-        }
-        return false;
-    }
-
     public static string SecondsToString(double seconds)
     {
         var span = TimeSpan.FromSeconds(seconds);
