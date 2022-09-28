@@ -359,7 +359,6 @@ public class ConfigWindow
                     if (ImGui.Selectable($"{name}##Keybinds_Condition_{i}_{j}", Conditions[j] == hotkey.Condition))
                     {
                         hotkey.Condition = Conditions[j];
-                        Dalamud.Logging.PluginLog.Log($"Changed keybind {i} condition to {name}");
                         Plugin.Config.Save();
                     }
                 }
