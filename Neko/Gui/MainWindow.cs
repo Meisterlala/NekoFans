@@ -37,7 +37,13 @@ public class MainWindow
     public MainWindow()
     {
         Queue = new(); // Start loading images
-        Slideshow = new(AsnyncNextNeko);
+        Slideshow = new(() =>
+        {
+            // Dont load image, if the window is not visible
+            if (!Visible) return;
+
+            AsnyncNextNeko();
+        });
         AsnyncNextNeko();
     }
 

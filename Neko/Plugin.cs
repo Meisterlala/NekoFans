@@ -119,12 +119,14 @@ public class Plugin : IDalamudPlugin
     {
         GuiMain ??= new();
         GuiMain.Visible = !GuiMain.Visible;
+        Config.Save();
     }
 
     public static void ToggleConfigGui()
     {
         GuiConfig ??= new();
         GuiConfig.Visible = !GuiConfig.Visible;
+        // Config.Save();
     }
 
     public static void ShowMainGui()

@@ -10,7 +10,7 @@ namespace Neko;
 
 public static class Telemetry
 {
-    private const int MaxQueueSize = 10;
+    private const int MaxQueueSize = 11;
 
     private static int errorCount;
     private static bool tmpDisabled;
@@ -42,7 +42,7 @@ public static class Telemetry
 
         // Save every X downloads or every Y minutes
         if ((DateTime.Now - lastSave > saveInterval
-        || Math.Abs(Plugin.Config.LocalDownloadCount - lastSaved) > 100)
+        || Math.Abs(Plugin.Config.LocalDownloadCount - lastSaved) > 50)
         && Interlocked.CompareExchange(ref saving, 1, 0) == 0)
         {
             lastSaved = Plugin.Config.LocalDownloadCount;
