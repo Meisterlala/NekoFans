@@ -108,7 +108,7 @@ public class Plugin : IDalamudPlugin
     private void DrawUI()
     {
         // Allow open/close with middle mouse button
-        if (Config.Hotkeys.ToggleWindow.IsPressed())
+        if (GuiMain?.Visible == false && Config.Hotkeys.ToggleWindow.IsPressed())
             ToggleMainGui();
 
         GuiMain?.Draw();

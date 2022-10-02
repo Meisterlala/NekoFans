@@ -160,6 +160,13 @@ public class MainWindow
                 ImGui.SetWindowPos(ImGui.GetIO().MouseDelta + ImGui.GetWindowPos());
             }
 
+            // Allow open/close with middle mouse button
+            if (Plugin.Config.Hotkeys.ToggleWindow.IsPressed())
+            {
+                Visible = !Visible;
+                Plugin.Config.Save();
+            }
+
             // Copy to clipboard with c
             if (Plugin.Config.Hotkeys.CopyToClipboard.IsPressed()
             && nekoTaskCurrent?.IsCompletedSuccessfully == true)
