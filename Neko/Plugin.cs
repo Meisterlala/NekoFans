@@ -23,7 +23,7 @@ public class Plugin : IDalamudPlugin
     public static ConfigWindow? GuiConfig { get; private set; }
     public static Sources.CombinedSource ImageSource { get; private set; } = null!;
 
-    public const string ControlServer = "http://34.149.0.8";
+    public const string ControlServer = "https://api.nekofans.net";
 
     private const string CommandMain = "/neko";
     private const string CommandConfig = "/nekocfg";
@@ -108,7 +108,7 @@ public class Plugin : IDalamudPlugin
     private void DrawUI()
     {
         // Allow open/close with middle mouse button
-        if (GuiMain?.Visible == false && Config.Hotkeys.ToggleWindow.IsPressed())
+        if (GuiMain?.Visible != true && Config.Hotkeys.ToggleWindow.IsPressed())
             ToggleMainGui();
 
         GuiMain?.Draw();
