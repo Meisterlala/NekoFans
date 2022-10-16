@@ -4,7 +4,7 @@
 
 ![Build](https://img.shields.io/github/workflow/status/Meisterlala/NekoFans/Build?label=Build)
 ![Latest Version](https://img.shields.io/github/v/tag/Meisterlala/NekoFans?label=Version&sort=semver)
-![Neko Server](https://img.shields.io/website?down_message=offline&label=Neko%20Server&up_message=online&url=http%3A%2F%2F34.149.0.8)
+![Neko Server](https://img.shields.io/website?down_message=offline&label=Neko%20Server&up_message=online&url=http%3A%2F%2Fapi.nekofans.net)
 
 **Displays a random Neko cat girl.**
 (or an image from a different source)
