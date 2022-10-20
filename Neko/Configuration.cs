@@ -12,6 +12,7 @@ public class Configuration : IPluginConfiguration
     {
         public Catboys.Config Catboys = new();
         public DogCEO.Config DogCEO = new();
+        public NekosBest.Config NekosBest = new();
         public NekosLife.Config NekosLife = new();
         public PicRe.Config PicRe = new();
         public ShibeOnline.Config ShibeOnline = new();
@@ -66,6 +67,7 @@ public class Configuration : IPluginConfiguration
         CombinedSource combined = new();
         combined.AddSource(Sources.Catboys.LoadConfig());
         combined.AddSource(Sources.DogCEO.LoadConfig());
+        combined.AddSource(Sources.NekosBest.LoadConfig());
         combined.AddSource(Sources.NekosLife.LoadConfig());
         combined.AddSource(Sources.PicRe.LoadConfig());
         combined.AddSource(Sources.ShibeOnline.LoadConfig());

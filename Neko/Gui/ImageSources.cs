@@ -35,6 +35,8 @@ public class ImageSourcesGUI
     private readonly ImageSourceConfig[] SourceList = {
             new ImageSourceConfig("Nekos.life", "Anime Catgirls", "https://nekos.life/",
                 typeof(NekosLife), Plugin.Config.Sources.NekosLife),
+            new ImageSourceConfig("nekos.best", "Anime Catgirls", "https://nekos.best/",
+                typeof(NekosBest), Plugin.Config.Sources.NekosBest),
             new ImageSourceConfig("shibe.online", "Shiba Inu Dogs", "https://shibe.online/",
                 typeof(ShibeOnline), Plugin.Config.Sources.ShibeOnline),
             new ImageSourceConfig("Catboys", "Anime Catboys","https://catboys.com/",
@@ -74,30 +76,34 @@ public class ImageSourcesGUI
             DrawMock();
         //  ------------ nekos.life --------------
         SourceCheckbox(SourceList[0], ref Plugin.Config.Sources.NekosLife.enabled);
+        //  ------------ nekos.best --------------
+        SourceCheckbox(SourceList[1], ref Plugin.Config.Sources.NekosBest.enabled);
+        if (Plugin.Config.Sources.NekosBest.enabled)
+            DrawNekosBest(SourceList[1]);
         //  ------------ shibe.online --------------
-        SourceCheckbox(SourceList[1], ref Plugin.Config.Sources.ShibeOnline.enabled);
+        SourceCheckbox(SourceList[2], ref Plugin.Config.Sources.ShibeOnline.enabled);
         //  ------------ Catboys --------------
-        SourceCheckbox(SourceList[2], ref Plugin.Config.Sources.Catboys.enabled);
+        SourceCheckbox(SourceList[3], ref Plugin.Config.Sources.Catboys.enabled);
         //  ------------ waifu.im --------------
-        SourceCheckbox(SourceList[3], ref Plugin.Config.Sources.Waifuim.enabled);
+        SourceCheckbox(SourceList[4], ref Plugin.Config.Sources.Waifuim.enabled);
         if (Plugin.Config.Sources.Waifuim.enabled && NSFW.AllowNSFW) // NSFW Check
             DrawWaifuim();
         //  ------------ Waifu.pics --------------
-        SourceCheckbox(SourceList[4], ref Plugin.Config.Sources.WaifuPics.enabled);
+        SourceCheckbox(SourceList[5], ref Plugin.Config.Sources.WaifuPics.enabled);
         if (Plugin.Config.Sources.WaifuPics.enabled)
-            DrawWaifuPics(SourceList[4]);
+            DrawWaifuPics(SourceList[5]);
         //  ------------ Pic.re --------------
-        SourceCheckbox(SourceList[5], ref Plugin.Config.Sources.PicRe.enabled);
+        SourceCheckbox(SourceList[6], ref Plugin.Config.Sources.PicRe.enabled);
         //  ------------ Dog CEO --------------
-        SourceCheckbox(SourceList[6], ref Plugin.Config.Sources.DogCEO.enabled);
+        SourceCheckbox(SourceList[7], ref Plugin.Config.Sources.DogCEO.enabled);
         if (Plugin.Config.Sources.DogCEO.enabled)
             DrawDogCEO();
         //  ------------ TheCatAPI --------------
-        SourceCheckbox(SourceList[7], ref Plugin.Config.Sources.TheCatAPI.enabled);
+        SourceCheckbox(SourceList[8], ref Plugin.Config.Sources.TheCatAPI.enabled);
         if (Plugin.Config.Sources.TheCatAPI.enabled)
             DrawTheCatAPI();
         //  ------------ Twitter --------------
-        SourceCheckbox(SourceList[8], ref Plugin.Config.Sources.Twitter.enabled);
+        SourceCheckbox(SourceList[9], ref Plugin.Config.Sources.Twitter.enabled);
         if (Plugin.Config.Sources.Twitter.enabled)
             DrawTwitter();
 
@@ -181,7 +187,38 @@ public class ImageSourcesGUI
         if (wp.sfwCategories == WaifuPics.CategoriesSFW.None && (wp.nsfwCategories == WaifuPics.CategoriesNSFW.None || !NSFW.AllowNSFW))
         {
             ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), "WARNING:"); ImGui.SameLine();
-            ImGui.TextWrapped("No categories selected. Please select at least one image category,");
+            ImGui.TextWrapped("No categories selected. Please select at least one image category.");
+        }
+        ImGui.Unindent(INDENT);
+    }
+
+    private static void DrawNekosBest(ImageSourceConfig source)
+    {
+        ImGui.Indent(INDENT);
+        var nb = Plugin.Config.Sources.NekosBest;
+        var preview = "";
+        foreach (var f in Helper.GetFlags(nb.categories))
+        {
+            preview += (Enum.GetName(typeof(NekosBest.Config.Category), f) ?? "unknown") + ", ";
+        }
+
+        preview = preview.Length > 3 ? preview[..^2] : "No categories selected";
+
+        if (ImGui.BeginCombo("Categories##NekosBest", preview))
+        {
+            EnumSelectable(source, "Waifu##NekosBest", NekosBest.Config.Category.Waifu, ref nb.categories);
+            EnumSelectable(source, "Neko##NekosBest", NekosBest.Config.Category.Neko, ref nb.categories);
+            EnumSelectable(source, "Kitsune##NekosBest", NekosBest.Config.Category.Kitsune, ref nb.categories);
+            EnumSelectable(source, "Husbando##NekosBest", NekosBest.Config.Category.Husbando, ref nb.categories);
+            ImGui.EndCombo();
+        }
+        if (preview.Length > 35)
+            Common.ToolTip(preview);
+
+        if (nb.categories == NekosBest.Config.Category.None)
+        {
+            ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), "WARNING:"); ImGui.SameLine();
+            ImGui.TextWrapped("No categories selected. Please select at least one image category.");
         }
         ImGui.Unindent(INDENT);
     }
@@ -688,5 +725,7 @@ public class ImageSourcesGUI
         ImGui.TextDisabled(source.Description);
         ImGui.SameLine();
         Common.HelpMarker(source.Help);
+        if (ImGui.IsItemClicked())
+            Helper.OpenInBrowser(source.Help);
     }
 }

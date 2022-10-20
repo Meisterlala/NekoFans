@@ -12,6 +12,7 @@ public static class JsonContext
     {
         { typeof(Catboys.CatboysJson), CatboysContext.Default },
         { typeof(DogCEO.DogCEOJson), DogCEOContext.Default },
+        { typeof(NekosBest.NekosBestJson), NekosBestContext.Default },
         { typeof(NekosLife.NekosLifeJson), NekosLifeContext.Default },
         { typeof(ShibeOnline.ShibeOnlineJson), ShibeOnlineContext.Default },
         { typeof(TheCatAPI.TheCatAPIJson), TheCatAPIContext.Default },
@@ -40,6 +41,9 @@ internal partial class CatboysContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(DogCEO.DogCEOJson))]
 internal partial class DogCEOContext : JsonSerializerContext { }
+
+[JsonSerializable(typeof(NekosBest.NekosBestJson))]
+internal partial class NekosBestContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(NekosLife.NekosLifeJson))]
 internal partial class NekosLifeContext : JsonSerializerContext { }
