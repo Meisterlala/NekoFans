@@ -110,7 +110,7 @@ public class ConfigWindow
         // Lock Window
         if (ImGui.Checkbox("Lock position", ref Plugin.Config.GuiMainLocked))
             Plugin.Config.Save();
-        ImGui.SameLine(); Common.HelpMarker("Lock the position of the window, not allowing it to be moved.\nYou can always move the window by holdng down the right mouse button and dragging.");
+        ImGui.SameLine(); Common.HelpMarker("Lock the position of the window, not allowing it to be moved.\nYou can always move the window by holdng down the selected hotkey and dragging your mouse.");
 
         // Show Title Bar
         if (ImGui.Checkbox("Show window title bar", ref Plugin.Config.GuiMainShowTitleBar))
