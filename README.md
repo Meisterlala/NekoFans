@@ -1,4 +1,4 @@
-<img src="http://34.149.0.8/count_total" align="left" width="100%" alt="Total image count">
+<img src="https://api.nekofans.net/count_total" align="left" width="100%" alt="Total image count">
 
 # Neko Fans Plugin for FFXIV <img src="icon.png" align="right" width="240">
 
