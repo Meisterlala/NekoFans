@@ -10,7 +10,7 @@ namespace Neko;
 
 public static class Telemetry
 {
-    private const int MaxQueueSize = 11;
+    private const int MaxQueueSize = 25;
 
     private static int errorCount;
     private static bool tmpDisabled;
@@ -19,6 +19,8 @@ public static class Telemetry
     private static int lastSaved = Plugin.Config.LocalDownloadCount;
     private static DateTime lastSave = DateTime.MinValue;
     private static readonly TimeSpan saveInterval = TimeSpan.FromMinutes(5);
+    private static DateTime lastUploaded = DateTime.Now;
+    private static readonly TimeSpan uploadInterval = TimeSpan.FromMinutes(5);
 
     private static readonly Dictionary<Type, int> countBuffer = new();
     private static readonly Dictionary<Type, string> apiNames = new()
@@ -66,7 +68,22 @@ public static class Telemetry
             if (countBuffer[api] >= MaxQueueSize)
             {
                 Send(api, countBuffer[api]);
+                lastUploaded = DateTime.Now;
                 countBuffer[api] = 0;
+            }
+
+            // Upload count if there was no changes in X minutes
+            if (DateTime.Now - lastUploaded > uploadInterval)
+            {
+                foreach (var (key, key_count) in countBuffer)
+                {
+                    if (key_count > 0)
+                    {
+                        Send(key, key_count);
+                        countBuffer[key] = 0;
+                    }
+                }
+                lastUploaded = DateTime.Now;
             }
         }
     }
