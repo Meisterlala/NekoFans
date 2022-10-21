@@ -10,7 +10,7 @@ public class NekosBest : IImageSource
 {
     public class Config : IImageConfig
     {
-        public bool enabled;
+        public bool enabled = true;
         public Category categories = Category.None;
 
         public IImageSource? LoadConfig()
