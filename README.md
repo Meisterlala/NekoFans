@@ -52,6 +52,7 @@ You can change to look and feel of the plugin in the Configutaion Menu, which ca
 
 - [Catboys](https://catboys.com/)
 - [Dog CEO](https://dog.ceo/dog-api/)
+- [nekos.best](https://nekos.best/)
 - [Nekos.life](https://nekos.life/)
 - [Pic.re](https://pic.re/)
 - [shibe.online](https://shibe.online/)
