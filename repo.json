@@ -3,9 +3,9 @@
     "Author": "Meisterlala",
     "Name": "Neko Fans",
     "Punchline": "Frustrated in a dungeon? Look at a cute cat girl!",
-    "Description": "Shows you an image of a random neko character. Click on the image to view the next one.\nYou can choose different image sources, allowing you to look at Catboys, Waifus, Cats, Dogs and more.\n\nSupported APIs:\nTwitter, Nekos.life, Catboys, Dog CEO, The Cat API, Pic.re, Waifu.im, Waifu.pics and shibe.online\n\nWarning: You might see naughty images",
+    "Description": "Shows you an image of a random neko character. Click on the image to view the next one.\nYou can choose different image sources, allowing you to look at Catboys, Waifus, Cats, Dogs and more.\n\nSupported APIs:\nTwitter, nekos.best, Nekos.life, Catboys, Dog CEO, The Cat API, Pic.re, Waifu.im, Waifu.pics and shibe.online\n\nWarning: You might see naughty images",
     "InternalName": "Neko",
-    "AssemblyVersion": "1.1.8",
+    "AssemblyVersion": "1.1.9",
     "RepoUrl": "https://github.com/Meisterlala/NekoFans",
     "ApplicableVersion": "any",
     "Tags": [
@@ -57,7 +57,7 @@
     "IsHide": "False",
     "IsTestingExclusive": "False",
     "LastUpdated": 1661525212,
-    "DownloadCount": 1263,
+    "DownloadCount": 1271,
     "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.1-NSFW/NekoFansLewd.zip",
     "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.1-NSFW/NekoFansLewd.zip",
     "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.1-NSFW/NekoFansLewd.zip"
