@@ -194,8 +194,7 @@ public class NekoImage
             {
                 if (CurrentState == State.Downloading)
                     await Await(State.Downloaded, ct);
-                if (CurrentState != State.LoadedGPU)
-                    await DecodeAndLoadGPUAsync(ct);
+                await DecodeAndLoadGPUAsync(ct);
             }, ct);
     }
 

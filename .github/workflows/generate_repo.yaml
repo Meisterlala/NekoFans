@@ -2,7 +2,7 @@ name: Generate Repo
 
 on:
   schedule:
-    - cron: '0 */12 * * *'
+    - cron: '0 1 */7 * *'
   workflow_dispatch:
   repository_dispatch:
     types: [new-release]
