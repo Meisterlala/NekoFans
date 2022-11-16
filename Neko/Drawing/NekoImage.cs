@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
@@ -143,9 +142,6 @@ public class NekoImage
         return res;
     }
 
-    private Task DecodeAsync(CancellationToken ct = default)
-        => Task.Run(Decode, ct);
-
     private void Decode()
     {
         DebugHelper.Assert(CurrentState == State.Downloaded, "Image is not downloaded");
@@ -164,23 +160,18 @@ public class NekoImage
         CurrentState = State.Decoded;
     }
 
-    private Task LoadGPUAsync(CancellationToken ct = default)
-        => Task.Run(LoadGPU, ct);
-
     private void LoadGPU()
     {
         DebugHelper.Assert(CurrentState == State.Decoded, "Image is not decoded");
         DebugHelper.Assert(Frames != null, "Image has no frames");
 
         var textures = ImageLoad.LoadFrames(this);
-        for (var i = 0; i < Frames.Count; i++)
+        for (var i = 0; i < Frames!.Count; i++)
         {
             Frames[i].Texture = textures[i];
         }
         CurrentState = State.LoadedGPU;
     }
-
-
 
     public Task DecodeAndLoadGPUAsync(CancellationToken ct = default)
         => Task.Run(() => { Decode(); LoadGPU(); }, ct);
@@ -200,7 +191,7 @@ public class NekoImage
         DebugHelper.Assert(CurrentState >= State.LoadedGPU, "Image not loaded into GPU VRAM yet");
         DebugHelper.Assert(Width.HasValue && Height.HasValue, "Image has no width or height");
         DebugHelper.Assert(Frames != null, "Image has no frames");
-        DebugHelper.Assert(Frames.Count == 1 || CycleTime > 0, "Image has multible Frames but no cycle time");
+        DebugHelper.Assert(Frames!.Count == 1 || CycleTime > 0, "Image has multible Frames but no cycle time");
 
         var frame = Frames[0];
         if (Frames.Count > 1)
@@ -219,6 +210,6 @@ public class NekoImage
         }
 
         DebugHelper.Assert(frame.Texture != null, "Frame has no texture");
-        return frame.Texture;
+        return frame.Texture!;
     }
 }

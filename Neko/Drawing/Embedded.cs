@@ -3,7 +3,6 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Dalamud.Logging;
-using ImGuiScene;
 
 namespace Neko.Drawing;
 

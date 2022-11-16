@@ -4,7 +4,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
-using Neko.Drawing;
 
 namespace Neko.Sources;
 
@@ -17,7 +16,7 @@ public static class Download
     }
 
     /// <summary>
-    /// 
+    /// Downloads a file from the internet and returns the data in from of a <see cref="Response"/>.
     /// </summary>
     public static async Task<Response> DownloadImage(HttpRequestMessage request, Type? called = default, CancellationToken ct = default)
     {

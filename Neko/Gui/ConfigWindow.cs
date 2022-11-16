@@ -188,8 +188,7 @@ public class ConfigWindow
                 QueueDonwloadCount = Plugin.Config.QueueDownloadCount;
             Plugin.Config.QueueDownloadCount = QueueDonwloadCount;
             Plugin.Config.Save();
-            if (Plugin.GuiMain != null)
-                Plugin.GuiMain.Queue.UpdateQueueLength();
+            Plugin.GuiMain?.Queue.UpdateQueueLength();
         }
         ImGui.SameLine(); Common.HelpMarker("The amount of images which are downloaded from the internet.\n" +
                                             "Increasing this will result in higher RAM usage. Recomended: 5");
@@ -205,8 +204,7 @@ public class ConfigWindow
                 QueuePreloadCount = Plugin.Config.QueuePreloadCount;
             Plugin.Config.QueuePreloadCount = QueuePreloadCount;
             Plugin.Config.Save();
-            if (Plugin.GuiMain != null)
-                Plugin.GuiMain.Queue.UpdateQueueLength();
+            Plugin.GuiMain?.Queue.UpdateQueueLength();
         }
         ImGui.SameLine(); Common.HelpMarker("The amount of images which are decoded and loaded into the GPU.\n" +
                                             "Increasing this will result in higher VRAM usage. Recomended: 2");
@@ -228,11 +226,9 @@ public class ConfigWindow
         ImGui.Separator();
 
         // Clear Image queue
-        if (ImGui.Button("Clear all downloaded images##Advanced"))
-        {
-            if (Plugin.GuiMain != null)
-                Plugin.GuiMain.Queue.Refresh();
-        }
+        if (ImGui.Button("Clear all downloaded images##Advanced") && Plugin.GuiMain != null)
+            Plugin.GuiMain.Queue.Refresh();
+
         ImGui.SameLine(); Common.HelpMarker("This will force all images to be downloaded again.");
         ImGui.PopItemWidth();
 
@@ -305,10 +301,21 @@ public class ConfigWindow
         ImGui.PopStyleColor();
     }
 
-    private static int CurrentSampler;
-
     private static void DrawDev()
     {
+        if (ImGui.CollapsingHeader("Currently Displayed"))
+        {
+            if (Plugin.GuiMain?.ImageCurrent != null)
+                ImGui.Text("ImageCurrent: \n" + Plugin.GuiMain?.ImageCurrent?.ToString());
+            else
+                ImGui.Text("ImageCurrent: None");
+            ImGui.Separator();
+            if (Plugin.GuiMain?.ImageNext != null)
+                ImGui.Text("ImageNext   : \n" + Plugin.GuiMain?.ImageNext?.ToString());
+            else
+                ImGui.Text("ImageNext   : None");
+        }
+
         if (ImGui.CollapsingHeader("Image Queue"))
             ImGui.TextWrapped(Plugin.GuiMain?.Queue.ToString() ?? "GuiMain not loaded");
         if (ImGui.CollapsingHeader("Image Sources"))
@@ -330,7 +337,7 @@ public class ConfigWindow
     {
         // Set static fields
         Keys ??= Hotkey.KeyNames.Keys.ToArray();
-        KeyNames ??= Keys.Select(x => Hotkey.GetKeyName(x)).ToArray();
+        KeyNames ??= Keys.Select(Hotkey.GetKeyName).ToArray();
         KeyLongestName ??= KeyNames.Max(x => ImGui.CalcTextSize(x).X);
         Conditions ??= Hotkey.ConditionNames.Keys.ToArray();
         ConditionNames ??= Conditions.Select(x => Hotkey.ConditionNames[x]).ToArray();

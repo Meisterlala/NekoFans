@@ -1,7 +1,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using ImGuiScene;
 using SharpDX;
 using SharpDX.Direct3D;
@@ -60,10 +59,10 @@ public static class ImageLoad
         DebugHelper.Assert(image.CurrentState != NekoImage.State.LoadedGPU, "Image is already loaded into GPU VRAM");
 
         var res = new List<TextureWrap>();
-        foreach (var frame in image.Frames)
+        foreach (var frame in image.Frames!)
         {
             DebugHelper.Assert(frame.Data != null, "Frame has no data");
-            res.Add(LoadTexture(frame.Data, image.Width!.Value, image.Height!.Value));
+            res.Add(LoadTexture(frame.Data!, image.Width!.Value, image.Height!.Value));
         }
         return res;
     }

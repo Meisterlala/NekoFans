@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using Neko.Drawing;
 
 namespace Neko.Sources;
@@ -286,8 +285,8 @@ public class CombinedSource : IImageSource
     public bool Equals(IImageSource? other) =>
         other != null
         && other is CombinedSource cs
-        && cs.sources.TrueForAll((e) => Contains(e))
-        && sources.TrueForAll((e) => cs.Contains(e));
+        && cs.sources.TrueForAll(Contains)
+        && sources.TrueForAll(cs.Contains);
 
     public void ResetFaultySources()
     {

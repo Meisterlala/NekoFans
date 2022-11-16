@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Numerics;
 using Dalamud.Interface.Components;
 using ImGuiNET;

@@ -1,9 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
-using Dalamud.Logging;
-using ImGuiScene;
 using Neko.Drawing;
 
 namespace Neko;

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Numerics;
 using System.Threading.Tasks;
 using ImGuiNET;
@@ -29,14 +28,13 @@ public class MainWindow
     }
 
     public readonly NekoQueue Queue;
-
     public readonly Sources.Slideshow Slideshow;
 
-    private bool imageGrayed;
+    public NekoImage? ImageCurrent { get; private set; }
+    public NekoImage? ImageNext { get; private set; }
 
-    private NekoImage? nekoCurrent;
-    private NekoImage? nekoNext;
     private DateTime displayTime;
+    private bool imageGrayed;
 
     public MainWindow()
     {
@@ -100,9 +98,9 @@ public class MainWindow
             Visible = visible;
 
             // Load Neko or fallback to Error
-            var displayedNeko = nekoCurrent?.CurrentState == NekoImage.State.LoadedGPU
-                 ? nekoCurrent
-                 : nekoCurrent?.CurrentState == NekoImage.State.Error
+            var displayedNeko = ImageCurrent?.CurrentState == NekoImage.State.LoadedGPU
+                 ? ImageCurrent
+                 : ImageCurrent?.CurrentState == NekoImage.State.Error
                  ? Embedded.ImageError
                  : Embedded.ImageLoading;
 
@@ -115,41 +113,35 @@ public class MainWindow
 
             // Align Image
             DebugHelper.Assert(displayedNeko.Width.HasValue && displayedNeko.Height.HasValue, "Image has no Width or Height");
-            var (startPos, endPos) = Common.AlignImage(new Vector2(displayedNeko.Width.Value, displayedNeko.Height.Value), windowSize, Plugin.Config.Alignment);
+            var (startPos, endPos) = Common.AlignImage(new Vector2(displayedNeko.Width!.Value, displayedNeko.Height!.Value), windowSize, Plugin.Config.Alignment);
 
-            // Set image start position
-            if (Plugin.Config.GuiMainShowTitleBar)
-                ImGui.SetCursorPos(startPos + new Vector2(5f, 5f) + (new Vector2(0f, 15f) * fontScale));
-            else
-                ImGui.SetCursorPos(startPos + new Vector2(5f, 5f));
+            // Calculate image start position
+            var cursorPos = Plugin.Config.GuiMainShowTitleBar
+                ? startPos + new Vector2(5f, 5f) + (new Vector2(0f, 15f) * fontScale)
+                : startPos + new Vector2(5f, 5f);
 
             // Transparancy
             ImGui.PushStyleColor(ImGuiCol.Button, Vector4.Zero);
             ImGui.PushStyleColor(ImGuiCol.ButtonActive, Vector4.Zero);
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Vector4.Zero);
 
-            // Show Next image
-            void advanceImage()
-            {
-                imageGrayed = true;
-                NextNeko();
-            }
-
             // Advance timer
             var elapedTime = (DateTime.Now - displayTime).TotalMilliseconds;
 
             // Draw Image
-            if (ImGui.ImageButton(displayedNeko.GetTexture(elapedTime).ImGuiHandle,
+            ImGui.SetCursorPos(cursorPos);
+            ImGui.Image(displayedNeko.GetTexture(elapedTime).ImGuiHandle,
                 endPos - startPos,
                 Vector2.Zero,
                 Vector2.One,
-                0,
-                Vector4.Zero,
-                imageGrayed ? new Vector4(.5f, .5f, .5f, 1f) : Vector4.One)
-                || Plugin.Config.Hotkeys.NextImage.IsPressed()
-                )
+                imageGrayed ? new Vector4(.5f, .5f, .5f, 1f) : Vector4.One);
+
+            // Invisible Button above Image
+            ImGui.SetCursorPos(cursorPos);
+            if (ImGui.InvisibleButton("##NekoImageMainButton", endPos - startPos)
+                || Plugin.Config.Hotkeys.NextImage.IsPressed())
             {
-                advanceImage();
+                NextNeko();
             }
 
             // Show Image description
@@ -190,22 +182,41 @@ public class MainWindow
 
     private void NextNeko()
     {
+        Dalamud.Logging.PluginLog.LogVerbose("POP image");
         // Restart the timer for the slideshow
         Slideshow.Restart();
 
         // Skip if there is already an image loading
-        if (nekoNext != null) return;
+        if (ImageNext != null) return;
 
         // Get next image from Queue
-        nekoNext = Queue.Pop();
+        ImageNext = Queue.Pop();
 
+        // No image found, load error image
+        if (ImageNext == null)
+        {
+            ImageCurrent = Embedded.ImageError;
+            ImageNext = null;
+            return;
+        }
+
+        // If ready to display, set as current
+        if (ImageNext.CurrentState == NekoImage.State.LoadedGPU)
+        {
+            ImageCurrent = ImageNext;
+            ImageNext = null;
+            displayTime = DateTime.Now;
+            return;
+        }
+
+        // If not ready, load it async
+        imageGrayed = true;
         Task.Run(async () =>
         {
-            await nekoNext.Await(NekoImage.State.LoadedGPU);
-            nekoCurrent = nekoNext;
+            await ImageNext.Await(NekoImage.State.LoadedGPU);
+            ImageCurrent = ImageNext;
             imageGrayed = false;
-            displayTime = DateTime.Now;
-            nekoNext = null;
+            ImageNext = null;
         });
     }
 }
