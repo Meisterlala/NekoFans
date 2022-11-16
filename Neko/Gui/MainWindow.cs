@@ -182,7 +182,6 @@ public class MainWindow
 
     private void NextNeko()
     {
-        Dalamud.Logging.PluginLog.LogVerbose("POP image");
         // Restart the timer for the slideshow
         Slideshow.Restart();
 

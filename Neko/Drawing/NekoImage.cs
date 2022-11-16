@@ -132,7 +132,7 @@ public class NekoImage
             res += $" Data: {Helper.SizeSuffix(RAMUsage)}";
         if (VRAMUsage != 0)
             res += $" Texture: {Helper.SizeSuffix(VRAMUsage)}";
-        if (Frames?.Count > 0)
+        if (Frames?.Count > 1)
             res += $"\nFrames: {Frames.Count}";
         if (Creator != null)
             res += $"\nCreator: {Creator.Name}";
@@ -185,6 +185,19 @@ public class NekoImage
                 Thread.Sleep(10);
             }
         }, ct);
+
+    public Task RequestLoadGPU(CancellationToken ct = default)
+    {
+        return CurrentState == State.LoadedGPU
+            ? Task.CompletedTask
+            : Task.Run(async () =>
+            {
+                if (CurrentState == State.Downloading)
+                    await Await(State.Downloaded, ct);
+                if (CurrentState != State.LoadedGPU)
+                    await DecodeAndLoadGPUAsync(ct);
+            }, ct);
+    }
 
     public TextureWrap GetTexture(double time)
     {

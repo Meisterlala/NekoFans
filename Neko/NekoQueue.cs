@@ -191,10 +191,7 @@ public class NekoQueue
     {
         for (var i = 0; i < TargetPreloadCount && i < queue.Count; i++)
         {
-            if (queue[i].CurrentState == NekoImage.State.Downloaded)
-            {
-                queue[i].DecodeAndLoadGPUAsync();
-            }
+            queue[i].RequestLoadGPU();
         }
     }
 }
