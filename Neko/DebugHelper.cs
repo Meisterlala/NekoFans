@@ -1,6 +1,8 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using ImGuiNET;
 
 namespace Neko;
 
@@ -9,6 +11,12 @@ namespace Neko;
 
 public static class DebugHelper
 {
+    public static void Assert(bool condition, string message, [CallerArgumentExpression("condition")] string? conditionString = null)
+    {
+        if (condition) return;
+        throw new Exception($"Assert Failed\n{conditionString}\n" + message);
+    }
+
     public static void LogNetwork(Func<string> message)
     {
 #if NETWORK

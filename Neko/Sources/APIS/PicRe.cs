@@ -1,5 +1,5 @@
 using System.Threading;
-using System.Threading.Tasks;
+using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
@@ -16,10 +16,11 @@ public class PicRe : IImageSource
 
     public string Name => "PicRe";
 
-    public async Task<NekoImage> Next(CancellationToken ct = default)
+    public NekoImage Next(CancellationToken ct = default)
     {
         const string url = "https://pic.re/images";
-        return await Download.DownloadImage(url, typeof(PicRe), ct);
+        return new NekoImage(async (_)
+            => await Download.DownloadImage(url, typeof(PicRe), ct));
     }
 
     public override string ToString() => "PicRe";

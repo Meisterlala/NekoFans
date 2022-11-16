@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
+using Neko.Drawing;
 
 namespace Neko.Sources;
 
@@ -15,7 +15,7 @@ public interface IImageSource : IEquatable<IImageSource>
     /// <summary>
     /// Load the next image form the web to ram, not to vram yet
     /// </summary>
-    public Task<NekoImage> Next(CancellationToken ct = default);
+    public NekoImage Next(CancellationToken ct = default);
 
     /// <summary>
     /// Indicates if the source is faulted and should not be used anymore

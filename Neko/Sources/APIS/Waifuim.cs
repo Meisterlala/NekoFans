@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
@@ -39,10 +40,13 @@ public class Waifuim : IImageSource
             : (new("https://api.waifu.im/random/?is_nsfw=false&gif=false&many=true", this));
     }
 
-    public async Task<NekoImage> Next(CancellationToken ct = default)
+    public NekoImage Next(CancellationToken ct = default)
     {
-        var url = await URLs.GetURL(ct);
-        return await Download.DownloadImage(url, typeof(Waifuim), ct);
+        return new NekoImage(async (_) =>
+        {
+            var url = await URLs.GetURL(ct);
+            return await Download.DownloadImage(url, typeof(Waifuim), ct);
+        });
     }
 
     public override string ToString() => $"waifu.im ({(nsfw ? "NSFW" : "SFW")})\t{URLs}";

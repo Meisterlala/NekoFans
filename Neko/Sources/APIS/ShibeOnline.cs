@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
+using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
@@ -23,10 +23,13 @@ public class ShibeOnline : IImageSource
     public ShibeOnline() =>
         URLs = new("http://shibe.online/api/shibes?count=" + URL_COUNT + "&urls=true&httpsUrls=true", this);
 
-    public async Task<NekoImage> Next(CancellationToken ct = default)
+    public NekoImage Next(CancellationToken ct = default)
     {
-        var url = await URLs.GetURL(ct);
-        return await Download.DownloadImage(url, typeof(ShibeOnline), ct);
+        return new NekoImage(async (_) =>
+        {
+            var url = await URLs.GetURL(ct);
+            return await Download.DownloadImage(url, typeof(ShibeOnline), ct);
+        });
     }
 
     public override string ToString() => $"Shibe.online\t{URLs}";

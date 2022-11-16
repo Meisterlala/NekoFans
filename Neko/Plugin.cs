@@ -1,8 +1,11 @@
+using System.Diagnostics;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading.Tasks;
 using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Plugin;
+using Neko.Drawing;
 using Neko.Gui;
 
 namespace Neko;
@@ -59,9 +62,13 @@ public class Plugin : IDalamudPlugin
 
         Config = Configuration.Load(); // Load Configuration
         ImageSource = Config.LoadSources(); // Load ImageSources from config
+
         // Load Embedded Images
-        var _imageError = NekoImage.Embedded.ImageError.Load();
-        var _ImageLoading = NekoImage.Embedded.ImageLoading.Load();
+        Task.Run(async () =>
+        {
+            await Embedded.ImageLoading.Load();
+            await Embedded.ImageError.Load();
+        });
 
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigGui;
         PluginInterface.UiBuilder.Draw += DrawUI;
@@ -75,8 +82,6 @@ public class Plugin : IDalamudPlugin
         ShowMainGui();
         ShowConfigGui();
 #endif
-
-
     }
 
     public void Dispose()

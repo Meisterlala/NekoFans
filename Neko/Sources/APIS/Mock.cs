@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
+using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
@@ -45,14 +46,15 @@ public class Mock : IImageSource
         FileName = fileName;
     }
 
-    public async Task<NekoImage> Next(CancellationToken ct = default)
+    public NekoImage Next(CancellationToken ct = default)
     {
 #if !DEBUG
         throw new Exception("Mock is only available in debug builds");
 #pragma warning disable CS0162
 #endif
-        await DebugHelper.RandomDelay(DebugHelper.Delay.Mock, ct);
-        var image = new NekoImage(Data, FileName);
+
+        // await DebugHelper.RandomDelay(DebugHelper.Delay.Mock, ct);
+        var image = new NekoImage(Data);
         lock (IndexLock)
         {
             Index++;
@@ -61,7 +63,7 @@ public class Mock : IImageSource
             image.DebugInfo = $"Mock Image {Index}";
             image.Description = $"Mock Image\nFile: {FileName}\nImage Index {Index}";
         }
-        return await Task.FromResult(image);
+        return image;
     }
 
     public static CombinedSource LoadSources()

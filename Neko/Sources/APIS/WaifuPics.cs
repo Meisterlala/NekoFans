@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
@@ -66,10 +67,13 @@ public class WaifuPics : IImageSource
         this.category = category;
     }
 
-    public async Task<NekoImage> Next(CancellationToken ct = default)
+    public NekoImage Next(CancellationToken ct = default)
     {
-        var json = await Download.ParseJson<WaifuPicsJson>(url, ct);
-        return await Download.DownloadImage(json.url, typeof(WaifuPics), ct);
+        return new NekoImage(async (_) =>
+        {
+            var json = await Download.ParseJson<WaifuPicsJson>(url, ct);
+            return await Download.DownloadImage(json.url, typeof(WaifuPics), ct);
+        });
     }
 
     public override string ToString() => $"Waifu Pics ({type.ToUpper()}) {category}";

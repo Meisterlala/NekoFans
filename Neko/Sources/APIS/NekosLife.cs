@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
@@ -23,13 +24,14 @@ public class NekosLife : IImageSource
     }
 #pragma warning restore
 
-    public async Task<NekoImage> Next(CancellationToken ct = default)
+    public NekoImage Next(CancellationToken ct = default)
     {
         const string url = "https://nekos.life/api/v2/img/neko";
-        // Get a random image URL
-        var response = await Download.ParseJson<NekosLifeJson>(url, ct);
-        // Download  image
-        return await Download.DownloadImage(response.url, typeof(NekosLife), ct);
+        return new NekoImage(async (_) =>
+        {
+            var response = await Download.ParseJson<NekosLifeJson>(url, ct);
+            return await Download.DownloadImage(response.url, typeof(NekosLife), ct);
+        });
     }
 
     public override string ToString() => "Nekos.life";

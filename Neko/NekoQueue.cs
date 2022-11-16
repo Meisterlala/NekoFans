@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
 using ImGuiScene;
+using Neko.Drawing;
 
 namespace Neko;
 
@@ -16,19 +17,9 @@ namespace Neko;
 /// </summary>
 public class NekoQueue
 {
-    private class QueueItem
-    {
-        public Task<NekoImage>? downloadTask;
-        public Task<TextureWrap>? imageTask;
-        public bool imageShouldLoad;
-    }
-
-    private readonly List<QueueItem> queue;
+    private readonly List<NekoImage> queue;
     private CancellationTokenSource tokenSource;
     public bool StopQueue;
-
-    // TODO: Remove
-    private int failCountGlobal = 20;
 
     public NekoQueue()
     {
@@ -53,25 +44,17 @@ public class NekoQueue
         var res = $"Queue length: {TargetDownloadCount}   preloaded: {TargetPreloadCount}{(StopQueue ? "   Queue Stopped" : "")}";
         for (var i = 0; i < queue.Count; i++)
         {
-            var item = queue[i];
-            if (item.downloadTask == null)
-                res += $"\n{i} [ Download not started ]";
-            else if (!item.downloadTask.IsCompleted)
-                res += $"\n{i} [ Downloading ]";
-            else if (!item.downloadTask.IsCompletedSuccessfully)
-                res += $"\n{i} [ Could not Download ]";
-            else if (item.imageTask?.IsCompletedSuccessfully ?? false)
-                res += $"\n{i} [  Loaded  ] {item.downloadTask.Result}";
-            else if (!item.imageTask?.IsCompleted ?? false)
-                res += $"\n{i} [ Loading  ] {item.downloadTask.Result}";
-            else if (item.imageTask?.IsFaulted ?? false)
-                res += $"\n{i} [  Error  ] {item.downloadTask.Result}";
-            else if (item.imageShouldLoad)
-                res += $"\n{i} [ Scheduled ] {item.downloadTask.Result}";
-            else if (item.downloadTask.IsCompleted)
-                res += $"\n{i} [ Downloaded ] {item.downloadTask.Result}";
-            else
-                res += $"\n{i} [ Unknown State ]";
+            var text = queue[i].ToString();
+            var lines = text.Split("\n");
+            res += $"\n{i,2} {lines[0]}";
+            for (var l = 1; l < lines.Length - 1; l++)
+            {
+                res += $"\n├─ {lines[l]}";
+            }
+            if (lines.Length > 1)
+            {
+                res += $"\n└─ {lines[^1]}";
+            }
         }
         return res;
     }
@@ -79,112 +62,83 @@ public class NekoQueue
     public long RAMUsage()
     {
         var res = 0L;
-        lock (queue)
+        foreach (var item in queue)
         {
-            foreach (var item in queue)
-            {
-                if (item.downloadTask?.IsCompletedSuccessfully ?? false)
-                    res += item.downloadTask.Result.RAMUsage;
-            }
+            res += item.RAMUsage;
         }
         return res;
     }
 
     public long VRAMUsage()
     {
-        var res = 0;
-        lock (queue)
+        var res = 0L;
+        foreach (var item in queue)
         {
-            foreach (var item in queue)
-            {
-                if (item.imageTask?.IsCompletedSuccessfully ?? false)
-                    res += item.imageTask.Result.Width * item.imageTask.Result.Height * 4;
-            }
+            res += item.VRAMUsage;
         }
         return res;
     }
 
-    public async Task<NekoImage> Pop()
+    public NekoImage? Pop()
     {
-        QueueItem popped;
+        NekoImage popped;
         // If the Queue is empty load new images, unless the queue is stopped
-        lock (queue)
+        if (queue.Count == 0)
         {
+            if (StopQueue)
+                return null;
+            // This happens when you restart the plugin with all ImageSources disabled
+            if (!Plugin.ImageSource.ContainsNonFaulted())
+                return null;
+            FillQueue();
+            LoadImages();
+
+            // If after trying to fill the queue there are no new images
+            // This happens when all ImageSources are faulted 
             if (queue.Count == 0)
-            {
-                if (StopQueue)
-                    return new NekoImage();
-                // This happens when you restart the plugin with all ImageSources disabled
-                if (!Plugin.ImageSource.ContainsNonFaulted())
-                    return new NekoImage();
-                FillQueue();
-                LoadImages();
-
-                // If after trying to fill the queue there are no new images
-                // This happens when all ImageSources are faulted 
-                if (queue.Count == 0)
-                    return new NekoImage();
-            }
-
-            // Check for NSFW mode (check for changes)
-            var _ = NSFW.AllowNSFW;
-
-            // Check if there are faulted images in the preloaded Queue
-            // If there are: just use the first image.
-            // If there are none:
-            //      If there are images in VRAM use the latest
-            //      else use the first
-            var index = 0;
-            for (var i = 0; i < TargetPreloadCount && i < queue.Count; i++)
-            {
-                var item = queue[i];
-                if ((item.downloadTask?.IsFaulted ?? true)
-                    || (item.imageTask?.IsFaulted == true))
-                {
-                    break;
-                }
-                else if ((item.downloadTask?.IsCompletedSuccessfully ?? false)
-                           && (item.imageTask?.IsCompletedSuccessfully ?? false))
-                {
-                    index = i;
-                    break;
-                }
-            }
-            // Remove from queue
-            popped = queue[index];
-            queue.RemoveAt(index);
+                return null;
         }
 
+        // Check for NSFW mode (check for changes)
+        var _ = NSFW.AllowNSFW;
+
+        // Check if there are faulted images in the preloaded Queue
+        // If there are: just use the first image.
+        // If there are none:
+        //      If there are images in VRAM use the latest
+        //      else use the first
+        var index = 0;
+        for (var i = 0; i < TargetPreloadCount && i < queue.Count; i++)
+        {
+            var item = queue[i];
+            if (item.CurrentState == NekoImage.State.Error)
+            {
+                break;
+            }
+            else if (item.CurrentState == NekoImage.State.LoadedGPU)
+            {
+                index = i;
+                break;
+            }
+            else if (item.CurrentState is NekoImage.State.Decoded or NekoImage.State.Downloaded)
+            {
+                index = i;
+            }
+        }
+        // Remove from queue
+        popped = queue[index];
+        queue.RemoveAt(index);
+
         // Refill Queue
-        FillQueue();
-        LoadImages();
+        UpdateQueueLength();
 
-        if (popped.downloadTask == null)
-            throw new Exception("Image was never downloaded");
+        // Started Loading
+        if (popped.CurrentState != NekoImage.State.LoadedGPU)
+        {
+            popped.DecodeAndLoadGPUAsync();
+        }
 
-        // Return image if it has loaded (and has errors)
-        if (popped.imageTask?.IsCompleted ?? false)
-            return await popped.downloadTask;
-
-        // Wait for download
-        if (!popped.downloadTask.IsCompleted)
-            await popped.downloadTask;
-
-        // Return if download didnt succeed
-        if (popped.downloadTask.IsFaulted)
-            return new NekoImage();
-
-        // Start Loading to VRAM
-        popped.imageShouldLoad = true;
-        LoadImage(popped);
-        if (popped.imageTask == null)
-            throw new Exception("Imagetask not started");
-
-        // Wait for load to VRAM
-        await popped.imageTask;
-
-        // Return if image load didnt succeed 
-        return popped.imageTask.IsFaulted ? new NekoImage() : await popped.downloadTask;
+        return popped;
     }
 
     public void UpdateQueueLength()
@@ -198,39 +152,8 @@ public class NekoQueue
     {
         if (queue.Count >= TargetDownloadCount) return; // Base case
 
-        Task<NekoImage>? downloadTask;
-        try
-        {
-            downloadTask = Plugin.ImageSource.Next(tokenSource.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            PluginLog.LogDebug("Image task cancelled");
-            return;
-        }
-        catch (Exception ex)
-        {
-            PluginLog.LogWarning(ex, "Error getting next image");
-            return;
-        }
-
-        var item = new QueueItem
-        {
-            downloadTask = downloadTask,
-        };
-
-        lock (queue)
-        {
-            queue.Add(item);
-        }
-
-        downloadTask.ContinueWith((task) =>
-        {
-            if (task.IsFaulted || task.IsCanceled)
-                HandleTaskExceptions(task, item);
-            else
-                LoadImages();
-        });
+        var next = Plugin.ImageSource.Next(tokenSource.Token);
+        queue.Add(next);
 
         FillQueue(); // Recursivly fill
     }
@@ -244,49 +167,38 @@ public class NekoQueue
         LoadImages();
     }
 
-    private void HandleTaskExceptions<T>(Task<T> task, QueueItem item)
-    {
-        foreach (var ex in task.Exception?.Flatten().InnerExceptions ?? new(Array.Empty<Exception>()))
+    /*
+        private void HandleTaskExceptions<T>(Task<T> task, QueueItem item)
         {
-            PluginLog.LogWarning(ex, "Loading of an image failed");
+            foreach (var ex in task.Exception?.Flatten().InnerExceptions ?? new(Array.Empty<Exception>()))
+            {
+                PluginLog.LogWarning(ex, "Loading of an image failed");
+            }
+
+            // TODO: remove
+            failCountGlobal--;
+            if (failCountGlobal < 0)
+                StopQueue = true;
+
+            // Remove from queue
+            lock (queue)
+            {
+                if (!queue.Remove(item))
+                    PluginLog.LogDebug("Could not remove item from queue");
+                // Refill Queue
+                FillQueue();
+                LoadImages();
+            }
         }
-
-        // TODO: remove
-        failCountGlobal--;
-        if (failCountGlobal < 0)
-            StopQueue = true;
-
-        // Remove from queue
-        lock (queue)
-        {
-            if (!queue.Remove(item))
-                PluginLog.LogDebug("Could not remove item from queue");
-            // Refill Queue
-            FillQueue();
-            LoadImages();
-        }
-    }
-
+    */
     private void LoadImages()
     {
         for (var i = 0; i < TargetPreloadCount && i < queue.Count; i++)
         {
-            queue[i].imageShouldLoad = true;
-            LoadImage(queue[i]);
+            if (queue[i].CurrentState == NekoImage.State.Downloaded)
+            {
+                queue[i].DecodeAndLoadGPUAsync();
+            }
         }
-    }
-
-    private void LoadImage(QueueItem item)
-    {
-        if (item.imageTask != null                          // If already loading
-            || !item.imageShouldLoad                        // If it should not load
-            || item.downloadTask?.IsCompletedSuccessfully != true)  // If couldnt download
-        {
-            return;
-        }
-
-        var img = item.downloadTask.Result;
-        item.imageTask = img.LoadImage();
-        item.imageTask.ContinueWith((task) => HandleTaskExceptions(task, item), TaskContinuationOptions.OnlyOnFaulted);
     }
 }

@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
+using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
@@ -52,7 +53,7 @@ public abstract class Twitter : IImageSource
                 }
         };
 
-    public abstract Task<NekoImage> Next(CancellationToken ct = default);
+    public abstract NekoImage Next(CancellationToken ct = default);
 
     public abstract (string, string?) Status(CancellationToken ct = default);
 
@@ -206,13 +207,16 @@ public abstract class Twitter : IImageSource
 
         public override string Name => $"Twitter Search: \"{search}\"";
 
-        public override async Task<NekoImage> Next(CancellationToken ct = default)
+        public override NekoImage Next(CancellationToken ct = default)
         {
-            var searchResult = await URLs.GetURL(ct);
-            var image = await Download.DownloadImage(searchResult.Media.Url, typeof(Search), ct);
-            image.Description = searchResult.TweetDescription();
-            image.URLOpenOnClick = searchResult.URLTweetID();
-            return image;
+            return new NekoImage(async (img) =>
+            {
+                var searchResult = await URLs.GetURL(ct);
+                var response = await Download.DownloadImage(searchResult.Media.Url, typeof(Search), ct);
+                img.Description = searchResult.TweetDescription();
+                img.URLOpenOnClick = searchResult.URLTweetID();
+                return response;
+            });
         }
 
         public override (string, string?) Status(CancellationToken ct = default)
@@ -434,22 +438,25 @@ public abstract class Twitter : IImageSource
 
         public override string Name => $"Twitter Timeline: @{username}";
 
-        public override async Task<NekoImage> Next(CancellationToken ct = default)
+        public override NekoImage Next(CancellationToken ct = default)
         {
-            lock (userIDTaskLock)
+            return new NekoImage(async (img) =>
             {
-                userIDTask ??= GetUserID(ct);
-            }
-            await userIDTask;
+                lock (userIDTaskLock)
+                {
+                    userIDTask ??= GetUserID(ct);
+                }
+                await userIDTask;
 
-            if (string.IsNullOrEmpty(userID) || usernameReadable == null)
-                throw new Exception("Failed to get user ID");
+                if (string.IsNullOrEmpty(userID) || usernameReadable == null)
+                    throw new Exception("Failed to get user ID");
 
-            var nextTweet = await URLs.GetURL(ct);
-            var image = await Download.DownloadImage(nextTweet.Media.Url, typeof(UserTimeline), ct);
-            image.Description = nextTweet.TweetDescription(usernameReadable, username);
-            image.URLOpenOnClick = nextTweet.URLTweetID(username);
-            return image;
+                var nextTweet = await URLs.GetURL(ct);
+                var response = await Download.DownloadImage(nextTweet.Media.Url, typeof(UserTimeline), ct);
+                img.Description = nextTweet.TweetDescription(usernameReadable, username);
+                img.URLOpenOnClick = nextTweet.URLTweetID(username);
+                return response;
+            });
         }
 
         public override (string, string?) Status(CancellationToken ct = default)

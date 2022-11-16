@@ -299,8 +299,8 @@ public static class Common
             _ => rectangle
         };
 
-        Debug.Assert(start.X >= 0 && start.Y >= 0 && end.X >= 0 && end.Y >= 0, "Start and end should be positive");
-        Debug.Assert(start.X <= rectangle.X && start.Y <= rectangle.Y && end.X <= rectangle.X && end.Y <= rectangle.Y, "Start and end should be smaller than rectangle");
+        DebugHelper.Assert(start.X >= 0 && start.Y >= 0 && end.X >= 0 && end.Y >= 0, "Start and end should be positive");
+        DebugHelper.Assert(start.X <= rectangle.X && start.Y <= rectangle.Y && end.X <= rectangle.X && end.Y <= rectangle.Y, "Start and end should be smaller than rectangle");
         return (start, end);
     }
 }

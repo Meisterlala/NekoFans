@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Neko.Drawing;
 
 namespace Neko.Sources;
 
@@ -26,7 +27,7 @@ public class CombinedSource : IImageSource
         }
     }
 
-    public Task<NekoImage> Next(CancellationToken ct = default)
+    public NekoImage Next(CancellationToken ct = default)
     {
         var nonFaulted = sources.FindAll(s => !s.Faulted);
 

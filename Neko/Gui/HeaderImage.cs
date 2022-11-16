@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
 using ImGuiNET;
+using Neko.Drawing;
 using Neko.Sources;
 
 namespace Neko.Gui;
@@ -40,7 +41,7 @@ public abstract class HeaderImage
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, Vector4.Zero);
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Vector4.Zero);
 
-        ImGui.ImageButton(image!.Texture.ImGuiHandle,
+        ImGui.ImageButton(image!.GetTexture(0).ImGuiHandle,
             size,
             Vector2.Zero,
             Vector2.One,
@@ -75,7 +76,7 @@ public abstract class HeaderImage
     {
         return NotReady()
             ? null
-            : new Vector2(image!.Texture.Width, image!.Texture.Height);
+            : new Vector2(image!.GetTexture(0).Width, image!.GetTexture(0).Height);
     }
 
     public void DrawFullWidth()
@@ -84,7 +85,7 @@ public abstract class HeaderImage
             return;
 
         var width = ImGui.GetWindowSize().X - ImGui.GetWindowContentRegionMin().X - (ImGui.GetStyle().WindowPadding.X * 2);
-        Draw(new Vector2(width, width / image!.Texture.Width * image!.Texture.Height));
+        Draw(new Vector2(width, width / image!.GetTexture(0).Width * image!.GetTexture(0).Height));
     }
 
     private bool NotReady()
@@ -161,8 +162,10 @@ public abstract class HeaderImage
 
         protected override async Task<NekoImage> DownloadHeader()
         {
-            var img = await Download.DownloadImage(Plugin.ControlServer + "/count_total", ct: cts.Token);
-            await img.LoadImage();
+            var img = new NekoImage(async (_)
+                => await Download.DownloadImage(Plugin.ControlServer + "/count_total", ct: cts.Token));
+            await img.Await(NekoImage.State.Downloaded);
+            await img.DecodeAndLoadGPUAsync();
             return img;
         }
     }
@@ -177,8 +180,10 @@ public abstract class HeaderImage
         protected override async Task<NekoImage> DownloadHeader()
         {
             lastCount = Plugin.Config.LocalDownloadCount;
-            var img = await Download.DownloadImage($"{Plugin.ControlServer}/count/{Plugin.Config.LocalDownloadCount}", ct: cts.Token);
-            await img.LoadImage();
+            var img = new NekoImage(async (_)
+                => await Download.DownloadImage($"{Plugin.ControlServer}/count/{Plugin.Config.LocalDownloadCount}", ct: cts.Token));
+            await img.Await(NekoImage.State.Downloaded);
+            await img.DecodeAndLoadGPUAsync();
             return img;
         }
 

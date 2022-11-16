@@ -4,15 +4,22 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
+using Neko.Drawing;
 
 namespace Neko.Sources;
 
 public static class Download
 {
+    public struct Response
+    {
+        public byte[] Data;
+        public string Url;
+    }
+
     /// <summary>
-    /// Download an Image and Store it in a <see cref="NekoImage"/>
+    /// 
     /// </summary>
-    public static async Task<NekoImage> DownloadImage(HttpRequestMessage request, Type? caller = default, CancellationToken ct = default)
+    public static async Task<Response> DownloadImage(HttpRequestMessage request, Type? called = default, CancellationToken ct = default)
     {
         DebugHelper.RandomThrow(DebugHelper.ThrowChance.DownloadImage);
         await DebugHelper.RandomDelay(DebugHelper.Delay.DownloadImage, ct);
@@ -35,19 +42,15 @@ public static class Download
         if (!request.RequestUri?.ToString().StartsWith(Plugin.ControlServer) ?? false)
             PluginLog.Log($"Downloaded {Helper.SizeSuffix(bytes.LongLength, 1)} from {request.RequestUri}");
 
+        if (called != null)
+            Telemetry.RegisterDownload(called);
+
         ct.ThrowIfCancellationRequested();
-        NekoImage? image = new(bytes, request.RequestUri?.ToString() ?? "");
 
-        if (caller != null)
-        {
-            image.Creator = caller;
-            Telemetry.RegisterDownload(caller);
-        }
-
-        return image;
+        return new Response { Data = bytes, Url = request.RequestUri?.ToString() ?? "" };
     }
 
-    public static async Task<NekoImage> DownloadImage(string url, Type? caller = default, CancellationToken ct = default)
+    public static async Task<Response> DownloadImage(string url, Type? called = default, CancellationToken ct = default)
     {
         HttpRequestMessage request = new(HttpMethod.Get, url)
         {
@@ -60,7 +63,7 @@ public static class Download
                     }
                 }
         };
-        return await DownloadImage(request, caller, ct).ConfigureAwait(false);
+        return await DownloadImage(request, called, ct);
     }
 
     /// <summary>

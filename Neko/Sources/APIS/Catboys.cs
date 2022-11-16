@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
@@ -25,11 +26,14 @@ public class Catboys : IImageSource
     }
 #pragma warning restore
 
-    public async Task<NekoImage> Next(CancellationToken ct = default)
+    public NekoImage Next(CancellationToken ct = default)
     {
         const string url = "https://api.catboys.com/img";
-        var response = await Download.ParseJson<CatboysJson>(url, ct);
-        return await Download.DownloadImage(response.url, typeof(Catboys), ct);
+        return new NekoImage(async (_) =>
+        {
+            var response = await Download.ParseJson<CatboysJson>(url, ct);
+            return await Download.DownloadImage(response.url, typeof(Catboys), ct);
+        });
     }
 
     public override string ToString() => "Catboys";

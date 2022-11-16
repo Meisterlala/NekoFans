@@ -22,8 +22,9 @@ public static class ImageDecode
         {
             var frame = img.Frames[i];
             var frameData = new byte[frame.Width * frame.Height * 4];
+            var frameDelay = img.Frames[i].Metadata.GetGifMetadata().FrameDelay * 10; // convert to ms
             frame.CopyPixelDataTo(frameData);
-            frames.Add(new NekoImage.Frame(frameData, img.Frames[i].Metadata.GetGifMetadata().FrameDelay));
+            frames.Add(new NekoImage.Frame(frameData, frameDelay));
         }
 
         return new DecodeInfo

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
@@ -46,10 +47,13 @@ public class NekosBest : IImageSource
         urls = new($"https://nekos.best/api/v2/{categoryName}?amount=20", this, 15);
     }
 
-    public async Task<NekoImage> Next(CancellationToken ct = default)
+    public NekoImage Next(CancellationToken ct = default)
     {
-        var url = await urls.GetURL(ct);
-        return await Download.DownloadImage(url, typeof(NekosBest), ct);
+        return new NekoImage(async (_) =>
+        {
+            var url = await urls.GetURL(ct);
+            return await Download.DownloadImage(url, typeof(NekosBest), ct);
+        });
     }
 
     public override string ToString() => $"nekos.best {categoryName} {urls}";

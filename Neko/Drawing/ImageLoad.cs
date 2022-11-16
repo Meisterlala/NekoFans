@@ -54,15 +54,15 @@ public static class ImageLoad
 
     public static List<TextureWrap> LoadFrames(NekoImage image)
     {
-        Debug.Assert(image.CurrentState >= NekoImage.State.Decoded, "Image not decoded yet");
-        Debug.Assert(image.Width.HasValue && image.Height.HasValue, "Image has no width or height");
-        Debug.Assert(image.Frames != null, "Image has no frames");
-        Debug.Assert(image.CurrentState != NekoImage.State.LoadedGPU, "Image is already loaded into GPU VRAM");
+        DebugHelper.Assert(image.CurrentState >= NekoImage.State.Decoded, "Image not decoded yet");
+        DebugHelper.Assert(image.Width.HasValue && image.Height.HasValue, "Image has no width or height");
+        DebugHelper.Assert(image.Frames != null, "Image has no frames");
+        DebugHelper.Assert(image.CurrentState != NekoImage.State.LoadedGPU, "Image is already loaded into GPU VRAM");
 
         var res = new List<TextureWrap>();
         foreach (var frame in image.Frames)
         {
-            Debug.Assert(frame.Data != null, "Frame has no data");
+            DebugHelper.Assert(frame.Data != null, "Frame has no data");
             res.Add(LoadTexture(frame.Data, image.Width!.Value, image.Height!.Value));
         }
         return res;

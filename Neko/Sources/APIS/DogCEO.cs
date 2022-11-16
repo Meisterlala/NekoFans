@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
@@ -30,10 +31,13 @@ public class DogCEO : IImageSource
             ? (new($"https://dog.ceo/api/breeds/image/random/{URL_COUNT}", this))
             : (new($"https://dog.ceo/api/breed/{BreedPath(b)}/images/random/{URL_COUNT}", this));
     }
-    public async Task<NekoImage> Next(CancellationToken ct = default)
+    public NekoImage Next(CancellationToken ct = default)
     {
-        var url = await URLs.GetURL(ct);
-        return await Download.DownloadImage(url, typeof(DogCEO), ct);
+        return new NekoImage(async (_) =>
+        {
+            var url = await URLs.GetURL(ct);
+            return await Download.DownloadImage(url, typeof(DogCEO), ct);
+        });
     }
 
     public string Name => "Dog CEO";

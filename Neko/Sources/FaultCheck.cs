@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
+using Neko.Drawing;
 
 namespace Neko.Sources;
 
@@ -34,12 +35,12 @@ public sealed class FaultCheck : IImageSource
 
     private FaultCheck(IImageSource source) => Source = source;
 
-    public async Task<NekoImage> Next(CancellationToken ct = default)
+    public NekoImage Next(CancellationToken ct = default)
     {
         if (HasFaulted || Source.Faulted)
         {
             PluginLog.LogWarning("Image Task faulted to many times and is disabled");
-            return await NekoImage.Embedded.ImageError.Load();
+            return Embedded.ImageError.Image!;
         }
 
         // If either the caller passed a token, which is cancelled, or the token of this class is cancelled
@@ -48,7 +49,7 @@ public sealed class FaultCheck : IImageSource
 
         try
         {
-            return await Source.Next(childToken);
+            return Source.Next(childToken);
         }
         catch (OperationCanceledException) { throw; }
         catch (Exception ex)
