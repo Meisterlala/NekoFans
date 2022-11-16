@@ -11,10 +11,11 @@ public class Mock : IImageSource
 {
     public static readonly List<MockImage> MockImages = new()
     {
-        new("/home/ninja/Pictures/neko/n1.jpg"),
-        new("/home/ninja/Pictures/neko/n2.jpg"),
-        new("/home/ninja/Pictures/neko/n3.jpg"),
-        new("/home/ninja/Pictures/neko/n4.jpg"),
+        new("X:\\1.jpg"),
+        new("X:\\2.png"),
+        new("X:\\3.gif"),
+        new("X:\\4.gif"),
+        new("X:\\different_frames.gif"),
     };
 
 #pragma warning disable CA2211 // Non-constant fields should not be visible
@@ -44,23 +45,23 @@ public class Mock : IImageSource
         FileName = fileName;
     }
 
-    public Task<NekoImage> Next(CancellationToken ct = default)
+    public async Task<NekoImage> Next(CancellationToken ct = default)
     {
 #if !DEBUG
         throw new Exception("Mock is only available in debug builds");
 #pragma warning disable CS0162
 #endif
-        DebugHelper.RandomDelay(DebugHelper.Delay.Mock, ct);
+        await DebugHelper.RandomDelay(DebugHelper.Delay.Mock, ct);
         var image = new NekoImage(Data, FileName);
         lock (IndexLock)
         {
             Index++;
-            if (Index >= 5)
+            if (Index >= 10)
                 DebugHelper.RandomThrow(DebugHelper.ThrowChance.Mock);
             image.DebugInfo = $"Mock Image {Index}";
             image.Description = $"Mock Image\nFile: {FileName}\nImage Index {Index}";
         }
-        return Task.FromResult(image);
+        return await Task.FromResult(image);
     }
 
     public static CombinedSource LoadSources()

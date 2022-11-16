@@ -14,8 +14,6 @@
     <PreserveCompilationContext>false</PreserveCompilationContext>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <OutputPath Condition="'$(OS)' == 'Windows_NT'">$(AppData)\XIVLauncher\devPlugins\Neko</OutputPath>
-    <OutputPath Condition="'$(OS)' == 'Unix'">$(HOME)/.xlcore/devPlugins/Neko</OutputPath>
     <Configurations>Debug;Release;Network;Delays;Throw</Configurations>
   </PropertyGroup>
 
@@ -78,6 +76,18 @@
       <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="SharpDX">
+      <HintPath>$(DalamudLibPath)SharpDX.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="SharpDX.DXGI">
+      <HintPath>$(DalamudLibPath)SharpDX.DXGI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="SharpDX.Direct3D11">
+      <HintPath>$(DalamudLibPath)SharpDX.Direct3D11.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
    
   <!-- Needed for creating a .zip -->
@@ -103,6 +113,14 @@
     <PackageReference Include="TextCopy"> 
         <Version>6.1.0</Version>
         <GeneratePathProperty>true</GeneratePathProperty>
-      </PackageReference>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- Used to Decode Images -->
+  <ItemGroup>
+    <PackageReference Include="SixLabors.ImageSharp"> 
+        <Version>2.1.*</Version>
+        <GeneratePathProperty>true</GeneratePathProperty>
+    </PackageReference>
   </ItemGroup>
 </Project>

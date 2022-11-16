@@ -305,6 +305,8 @@ public class ConfigWindow
         ImGui.PopStyleColor();
     }
 
+    private static int CurrentSampler;
+
     private static void DrawDev()
     {
         if (ImGui.CollapsingHeader("Image Queue"))

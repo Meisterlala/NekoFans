@@ -75,6 +75,8 @@ public class Plugin : IDalamudPlugin
         ShowMainGui();
         ShowConfigGui();
 #endif
+
+
     }
 
     public void Dispose()

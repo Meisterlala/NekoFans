@@ -27,6 +27,9 @@ public class NekoQueue
     private CancellationTokenSource tokenSource;
     public bool StopQueue;
 
+    // TODO: Remove
+    private int failCountGlobal = 20;
+
     public NekoQueue()
     {
         tokenSource = new();
@@ -247,6 +250,11 @@ public class NekoQueue
         {
             PluginLog.LogWarning(ex, "Loading of an image failed");
         }
+
+        // TODO: remove
+        failCountGlobal--;
+        if (failCountGlobal < 0)
+            StopQueue = true;
 
         // Remove from queue
         lock (queue)

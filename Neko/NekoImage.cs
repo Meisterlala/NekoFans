@@ -5,6 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
 using ImGuiScene;
+using Neko.Drawing;
+
 
 namespace Neko;
 
@@ -24,6 +26,7 @@ public enum ImageStatus
 /// </summary>
 public class NekoImage
 {
+
     private enum Architecture // Support for multi CPU computers
     {
         Workstation32Bit, Workstation64Bit, Server32Bit, Server64Bit
@@ -184,7 +187,16 @@ public class NekoImage
         {
             // Load Image to GPU
             // This will cause a System.AccessViolationException if a GC colletion happens
-            _texture = await Plugin.PluginInterface.UiBuilder.LoadImageAsync(_data);
+            // _texture = await Plugin.PluginInterface.UiBuilder.LoadImageAsync(_data);
+            
+            // Quick and dirty refactor
+            // TODO: Refactor class
+            var img = new Drawing.NekoImage();
+            img.LoadData(_data);
+            img.Decode();
+            img.LoadGPU();
+            //_texture = img.Frames![0].Texture;
+            _texture = Plugin.PluginInterface.UiBuilder.LoadImageRaw(img.Frames![0].Data, img.Width.Value, img.Height.Value, 4);
 
             if (_texture == null) // This should never happen
                 throw new Exception("Image null");
