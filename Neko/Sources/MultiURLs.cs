@@ -15,11 +15,11 @@ namespace Neko.Sources;
 public class MultiURLs<T> : MultiURLsGeneric<T, string>
     where T : IJsonToList<string>
 {
-    public MultiURLs(string url, IImageSource caller, int maxCount = 25) : base(url, caller, maxCount)
+    public MultiURLs(string url, ImageSource caller, int maxCount = 25) : base(url, caller, maxCount)
     {
     }
 
-    public MultiURLs(Func<HttpRequestMessage> requestGen, IImageSource caller, int maxCount = 25) : base(requestGen, caller, maxCount)
+    public MultiURLs(Func<HttpRequestMessage> requestGen, ImageSource caller, int maxCount = 25) : base(requestGen, caller, maxCount)
     {
     }
 }
@@ -42,18 +42,18 @@ public class MultiURLsGeneric<TJson, TQueueElement>
     protected int taskRunning;
     protected int _urlCount;
     protected bool initilized;
-    protected IImageSource caller;
+    protected ImageSource caller;
 
     protected readonly CancellationTokenSource cts = new();
 
-    public MultiURLsGeneric(string url, IImageSource caller, int maxCount = URLThreshold)
+    public MultiURLsGeneric(string url, ImageSource caller, int maxCount = URLThreshold)
     {
         this.maxCount = maxCount;
         this.caller = caller;
         parseJson = () => Download.ParseJson<TJson>(url, cts.Token);
     }
 
-    public MultiURLsGeneric(Func<HttpRequestMessage> requestGen, IImageSource caller, int maxCount = URLThreshold)
+    public MultiURLsGeneric(Func<HttpRequestMessage> requestGen, ImageSource caller, int maxCount = URLThreshold)
     {
         this.maxCount = maxCount;
         this.caller = caller;
@@ -106,7 +106,6 @@ public class MultiURLsGeneric<TJson, TQueueElement>
         }
         catch (AggregateException ex)
         {
-            FaultCheck.IncreaseFaultCount(caller);
             PluginLog.LogWarning(ex.InnerExceptions[0], "Could not get more URLs to images");
         }
         finally
@@ -119,9 +118,6 @@ public class MultiURLsGeneric<TJson, TQueueElement>
     {
         initilized = true;
         var list = result.ToList();
-        if (list.Count == 0)
-            FaultCheck.IncreaseFaultCount(caller);
-
         foreach (var item in list)
         {
             Interlocked.Increment(ref _urlCount);

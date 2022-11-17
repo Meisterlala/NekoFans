@@ -466,14 +466,17 @@ public class ImageSourcesGUI
                     if (!entry.IsDirty)
                         continue;
 
-                    PluginLog.LogVerbose("Changin Twitter Search text from: \"" + entry.Query.searchText + "\" to: \"" + entry.QueryDirty.searchText + "\"");
+                    if (entry.Query.searchText != entry.QueryDirty.searchText)
+                        PluginLog.LogVerbose("Changing Twitter Search text from: \"" + entry.Query.searchText + "\" to: \"" + entry.QueryDirty.searchText + "\"");
+
+                    PluginLog.LogVerbose((entry.Query.enabled ? "Enabling" : "Disabling") + " Twitter Search text: \"" + entry.QueryDirty.searchText + "\"");
 
                     // Remove the old source
                     if (entry.ImageSource != null)
                         Plugin.ImageSource.RemoveSource(entry.ImageSource);
                     entry.ImageSource = null;
 
-                    // Eemove the old query and add the new one
+                    // Remove the old query and add the new one
                     var query = entry.QueryDirty.Clone();
                     var oldIndex = Plugin.Config.Sources.Twitter.queries.FindIndex((q) => q == entry.Query);
                     if (oldIndex != -1)

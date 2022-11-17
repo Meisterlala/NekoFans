@@ -3,18 +3,16 @@ using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
-public class NekosLife : IImageSource
+public class NekosLife : ImageSource
 {
     public class Config : IImageConfig
     {
         public bool enabled = true;
 
-        public IImageSource? LoadConfig() => enabled ? new NekosLife() : null;
+        public ImageSource? LoadConfig() => enabled ? new NekosLife() : null;
     }
 
-    public bool Faulted { get; set; }
-
-    public string Name => "Nekos.life";
+    public override string Name => "Nekos.life";
 
 #pragma warning disable
     public class NekosLifeJson
@@ -23,17 +21,19 @@ public class NekosLife : IImageSource
     }
 #pragma warning restore
 
-    public NekoImage Next(CancellationToken ct = default)
+    public override NekoImage Next(CancellationToken ct = default)
     {
         const string url = "https://nekos.life/api/v2/img/neko";
-        return new NekoImage(async (_) =>
+        return new NekoImage(async (img) =>
         {
+            img.URLDownloadWebsite = url;
             var response = await Download.ParseJson<NekosLifeJson>(url, ct);
+            img.URLDownloadWebsite = response.url;
             return await Download.DownloadImage(response.url, typeof(NekosLife), ct);
-        });
+        }, this);
     }
 
     public override string ToString() => "Nekos.life";
 
-    public bool Equals(IImageSource? other) => other != null && other.GetType() == typeof(NekosLife);
+    public override bool SameAs(ImageSource other) => true;
 }

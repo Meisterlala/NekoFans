@@ -12,7 +12,7 @@ using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
-public abstract class Twitter : IImageSource
+public abstract class Twitter : ImageSource
 {
     // This is a bad idea, but there really isnt a easy way to avoid doing this.
     // The proper solution is to require user authentication to a server, which holds
@@ -29,9 +29,8 @@ public abstract class Twitter : IImageSource
     private readonly CancellationTokenSource cts = new();
 
     public readonly Config.Query ConfigQuery;
-    public bool Faulted { get; set; }
 
-    public virtual string Name => "Twitter";
+    public override string Name => "Twitter";
 
     protected Twitter(Config.Query query)
     {
@@ -53,16 +52,12 @@ public abstract class Twitter : IImageSource
                 }
         };
 
-    public abstract NekoImage Next(CancellationToken ct = default);
-
     public abstract (string, string?) Status(CancellationToken ct = default);
-
-    public abstract override string ToString();
 
     // The Status is a touple of a string that is always displayed, and a optional help message
     public (string, string?) TweetStatus() => Status(cts.Token);
 
-    public bool Equals(IImageSource? other) => other != null && other is Twitter t && t.ConfigQuery == ConfigQuery;
+    public override bool SameAs(ImageSource other) => other is Twitter t && t.ConfigQuery == ConfigQuery;
 
     public class Config : IImageConfig
     {
@@ -83,7 +78,7 @@ public abstract class Twitter : IImageSource
             public Query Clone() => new() { searchText = new(searchText), enabled = enabled };
         }
 
-        public IImageSource? LoadConfig()
+        public ImageSource? LoadConfig()
         {
             // Load Default entries
             if (queries.Count == 0)
@@ -216,7 +211,7 @@ public abstract class Twitter : IImageSource
                 img.Description = searchResult.TweetDescription();
                 img.URLOpenOnClick = searchResult.URLTweetID();
                 return response;
-            });
+            }, this);
         }
 
         public override (string, string?) Status(CancellationToken ct = default)
@@ -456,7 +451,7 @@ public abstract class Twitter : IImageSource
                 img.Description = nextTweet.TweetDescription(usernameReadable, username);
                 img.URLOpenOnClick = nextTweet.URLTweetID(username);
                 return response;
-            });
+            }, this);
         }
 
         public override (string, string?) Status(CancellationToken ct = default)
@@ -734,7 +729,7 @@ public abstract class Twitter : IImageSource
         private readonly Func<string, string> NextTokenAppend;
 
         // Only allow construction with a request Generator
-        public TwitterMultiURLs(Func<string, string> nextTokenAppend, Func<HttpRequestMessage> requestGen, IImageSource caller, int maxCount = URLThreshold)
+        public TwitterMultiURLs(Func<string, string> nextTokenAppend, Func<HttpRequestMessage> requestGen, ImageSource caller, int maxCount = URLThreshold)
             : base(requestGen, caller, maxCount) => NextTokenAppend = nextTokenAppend;
 
         ~TwitterMultiURLs() => cts.Cancel();

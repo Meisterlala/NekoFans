@@ -9,7 +9,7 @@ using Neko.Sources;
 
 namespace Neko.Gui;
 
-public abstract class HeaderImage
+public abstract class HeaderImage : ImageSource
 {
     protected abstract TimeSpan RetryTimer { get; }
     protected abstract TimeSpan UpdateTimer { get; }
@@ -157,13 +157,21 @@ public abstract class HeaderImage
 
     public class Total : HeaderImage
     {
+        public override string Name => "Total Header Image";
+        public override string ToString() => Name;
+
         protected override TimeSpan RetryTimer => TimeSpan.FromMinutes(2);
         protected override TimeSpan UpdateTimer => TimeSpan.FromMinutes(1);
 
+        public override bool SameAs(ImageSource other) => true;
+
+        public override NekoImage Next(CancellationToken ct = default) => throw new NotImplementedException();
+
         protected override async Task<NekoImage> DownloadHeader()
         {
+            FaultCountMax = 20;
             var img = new NekoImage(async (_)
-                => await Download.DownloadImage(Plugin.ControlServer + "/count_total", ct: cts.Token));
+                => await Download.DownloadImage(Plugin.ControlServer + "/count_total", ct: cts.Token), this);
             await img.Await(NekoImage.State.Downloaded);
             await img.DecodeAndLoadGPUAsync();
             return img;
@@ -172,16 +180,24 @@ public abstract class HeaderImage
 
     public class Individual : HeaderImage
     {
+        public override string Name => "Individual Header Image";
+        public override string ToString() => Name;
+
         protected override TimeSpan RetryTimer => TimeSpan.FromMinutes(1);
         protected override TimeSpan UpdateTimer => TimeSpan.FromSeconds(1);
 
+        public override bool SameAs(ImageSource other) => true;
+
         private int lastCount;
+
+        public override NekoImage Next(CancellationToken ct = default) => throw new NotImplementedException();
 
         protected override async Task<NekoImage> DownloadHeader()
         {
+            FaultCountMax = 20;
             lastCount = Plugin.Config.LocalDownloadCount;
             var img = new NekoImage(async (_)
-                => await Download.DownloadImage($"{Plugin.ControlServer}/count/{Plugin.Config.LocalDownloadCount}", ct: cts.Token));
+                => await Download.DownloadImage($"{Plugin.ControlServer}/count/{Plugin.Config.LocalDownloadCount}", ct: cts.Token), this);
             await img.Await(NekoImage.State.Downloaded);
             await img.DecodeAndLoadGPUAsync();
             return img;

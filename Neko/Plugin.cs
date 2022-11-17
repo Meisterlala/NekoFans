@@ -63,10 +63,10 @@ public class Plugin : IDalamudPlugin
         ImageSource = Config.LoadSources(); // Load ImageSources from config
 
         // Load Embedded Images
-        Task.Run(async () =>
+        Task.Run(() =>
         {
-            await Embedded.ImageLoading.Load();
-            await Embedded.ImageError.Load();
+            Embedded.ImageLoading.Image.RequestLoadGPU();
+            Embedded.ImageError.Image.RequestLoadGPU();
         });
 
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigGui;

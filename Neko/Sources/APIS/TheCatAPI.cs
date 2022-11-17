@@ -5,7 +5,7 @@ using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
-public class TheCatAPI : IImageSource
+public class TheCatAPI : ImageSource
 {
     public class Config : IImageConfig
     {
@@ -13,12 +13,10 @@ public class TheCatAPI : IImageSource
         public Breed breed = Breed.All;
         public int selected;
 
-        public IImageSource? LoadConfig() => enabled ? new TheCatAPI(breed) : null;
+        public ImageSource? LoadConfig() => enabled ? new TheCatAPI(breed) : null;
     }
 
-    public bool Faulted { get; set; }
-
-    public string Name => "TheCatAPI";
+    public override string Name => "TheCatAPI";
 
     private const int URL_COUNT = 10;
     private readonly MultiURLs<TheCatAPIJson> URLs;
@@ -39,13 +37,14 @@ public class TheCatAPI : IImageSource
         URLs = new(baseUrl + $"&breed_ids={info.ID}", this);
     }
 
-    public NekoImage Next(CancellationToken ct = default)
+    public override NekoImage Next(CancellationToken ct = default)
     {
-        return new NekoImage(async (_) =>
+        return new NekoImage(async (img) =>
         {
             var url = await URLs.GetURL(ct);
+            img.URLDownloadWebsite = url;
             return await Download.DownloadImage(url, typeof(TheCatAPI), ct);
-        });
+        }, this);
     }
 
     public static BreedInfo GetBreedInfo(Breed b)
@@ -59,7 +58,7 @@ public class TheCatAPI : IImageSource
 
     public override string ToString() => $"TheCatAPI\tBreed: {Plugin.Config.Sources.TheCatAPI.breed}\t{URLs}";
 
-    public bool Equals(IImageSource? other) => other != null && other is TheCatAPI cat && cat.breed == breed;
+    public override bool SameAs(ImageSource other) => other is TheCatAPI cat && cat.breed == breed;
 
 #pragma warning disable
 

@@ -6,19 +6,17 @@ using Neko.Drawing;
 namespace Neko.Sources;
 
 /// <summary>
-/// Combines multible <see cref="IImageSource"/> to one.
+/// Combines multible <see cref="ImageSource"/> to one.
 /// A random Image source is choosen, when <see cref="Next"/> is called
 /// </summary>
-public class CombinedSource : IImageSource
+public class CombinedSource : ImageSource
 {
-    public bool Faulted { get; set; }
+    public override string Name => "Combined Source";
 
-    public string Name => "Combined Source";
-
-    private readonly List<IImageSource> sources = new();
+    private readonly List<ImageSource> sources = new();
     private readonly Random random = new();
 
-    public CombinedSource(params IImageSource[] source)
+    public CombinedSource(params ImageSource[] source)
     {
         foreach (var s in source)
         {
@@ -26,7 +24,7 @@ public class CombinedSource : IImageSource
         }
     }
 
-    public NekoImage Next(CancellationToken ct = default)
+    public override NekoImage Next(CancellationToken ct = default)
     {
         var nonFaulted = sources.FindAll(s => !s.Faulted);
 
@@ -43,7 +41,7 @@ public class CombinedSource : IImageSource
         return nonFaulted[i].Next(ct);
     }
 
-    public void AddSource(IImageSource? source)
+    public void AddSource(ImageSource? source)
     {
         if (source == null)
             return;
@@ -57,9 +55,7 @@ public class CombinedSource : IImageSource
         if (source is CombinedSource cs)
         {
             exisiting = combined.Find(c => c.sources.Exists(
-                s => s is FaultCheck fc
-                ? cs.Contains(a => fc.UnWrap().GetType() == a.GetType())
-                : cs.Contains((a) => s.GetType() == a.GetType())));
+                s => cs.Contains((a) => s.GetType() == a.GetType())));
             if (exisiting != null)
             {
                 exisiting.sources.AddRange(cs.sources);
@@ -72,28 +68,22 @@ public class CombinedSource : IImageSource
         }
         else
         {
-            var wrapped = source is FaultCheck faultCheck
-              ? faultCheck
-              : FaultCheck.Wrap(source);
-
             exisiting = combined.Find(c => c.sources.Exists(
-                s => s is FaultCheck fc
-                ? fc.UnWrap().GetType() == wrapped.UnWrap().GetType()
-                : s.GetType() == wrapped.UnWrap().GetType()));
+                s => s.GetType() == source.GetType()));
             // Chek if there is a source, which contains the same type
             if (exisiting != null)
             {
-                exisiting.sources.Add(wrapped);
+                exisiting.sources.Add(source);
                 exisiting.Faulted = false;
             }
             else
             {
-                sources.Add(wrapped);
+                sources.Add(source);
             }
         }
     }
 
-    public bool RemoveSource(IImageSource source)
+    public bool RemoveSource(ImageSource source)
     {
         bool HasBeenRemoved()
         {
@@ -102,8 +92,6 @@ public class CombinedSource : IImageSource
             foreach (var s in sources)
             {
                 if (s is CombinedSource cs && cs.RemoveSource(source))
-                    return true;
-                if (s is FaultCheck fc && fc.UnWrap() == source)
                     return true;
             }
             return false;
@@ -122,12 +110,9 @@ public class CombinedSource : IImageSource
 
     public void RemoveAll(Type type)
     {
-        if (type == typeof(FaultCheck))
-            throw new Exception("Cant remove FaultCheck type");
         // Remove type from List
-        sources.RemoveAll((e) =>
-            e.GetType() == type
-            || (e is FaultCheck fc && fc.UnWrap().GetType() == type));
+        sources.RemoveAll((e)
+            => e.GetType() == type);
         // Remove Combindes Sources children recursivly
         sources.ForEach((e) =>
         {
@@ -139,7 +124,7 @@ public class CombinedSource : IImageSource
             e is CombinedSource cs && cs.Count() == 0);
     }
 
-    public void RemoveAll(Predicate<IImageSource> match)
+    public void RemoveAll(Predicate<ImageSource> match)
     {
         sources.RemoveAll(match);
         sources.ForEach((e) =>
@@ -158,13 +143,13 @@ public class CombinedSource : IImageSource
         && ((CombinedSource)e).Contains(source));
     }
 
-    public bool Contains(Predicate<IImageSource> predicate)
+    public bool Contains(Predicate<ImageSource> predicate)
     {
-        return sources.Exists((e) => (e is FaultCheck fc && predicate(fc.UnWrap())) || predicate(e))
+        return sources.Exists(predicate)
         || sources.Exists((e) => e is CombinedSource cs && cs.Contains(predicate));
     }
 
-    public bool Contains(IImageSource source) => Contains((e) => e.Equals(source));
+    public bool Contains(ImageSource source) => Contains((e) => e.SameAs(source));
 
     public bool ContainsNonFaulted() => Contains((e) => !e.Faulted);
 
@@ -177,28 +162,24 @@ public class CombinedSource : IImageSource
                 list.Add(t);
             else if (s is CombinedSource c)
                 list.AddRange(c.GetAll<T>());
-            else if (s is FaultCheck f && f.UnWrap() is T unwrapped)
-                list.Add(unwrapped);
         }
         return list;
     }
 
-    public List<IImageSource> GetAll(Predicate<IImageSource> predicate)
+    public List<ImageSource> GetAll(Predicate<ImageSource> predicate)
     {
-        var list = new List<IImageSource>();
+        var list = new List<ImageSource>();
         foreach (var s in sources)
         {
             if (predicate(s))
                 list.Add(s);
             else if (s is CombinedSource c)
                 list.AddRange(c.GetAll(predicate));
-            else if (s is FaultCheck f && predicate(f.UnWrap()))
-                list.Add(s);
         }
         return list;
     }
 
-    public List<IImageSource> GetAll(Type t) => GetAll((e) => e.GetType() == t);
+    public List<ImageSource> GetAll(Type t) => GetAll((e) => e.GetType() == t);
 
     public int Count()
     {
@@ -225,7 +206,7 @@ public class CombinedSource : IImageSource
         });
 
         // Add source and print log
-        void AddIfDoesntContain(IImageSource source, bool wrapInCS = false)
+        void AddIfDoesntContain(ImageSource source, bool wrapInCS = false)
         {
             if (!Contains(source))
             {
@@ -258,7 +239,7 @@ public class CombinedSource : IImageSource
         {
             if (s.GetType() == typeof(CombinedSource))
             {
-                var c = s.ToString() ?? ""; // toString
+                var c = s.ToStringWithFaulted() ?? "UNKNOWN"; // toString
                 var lines = c.Split('\n'); // Split by lines
                 for (var i = 1; i < lines.Length; i++) // Ignore first line
                 {
@@ -280,11 +261,10 @@ public class CombinedSource : IImageSource
         return res[..^1];
     }
 
-    public IImageSource? LoadConfig(object _) => throw new NotImplementedException();
+    public ImageSource? LoadConfig(object _) => throw new NotImplementedException();
 
-    public bool Equals(IImageSource? other) =>
-        other != null
-        && other is CombinedSource cs
+    public override bool SameAs(ImageSource other) =>
+        other is CombinedSource cs
         && cs.sources.TrueForAll(Contains)
         && sources.TrueForAll(cs.Contains);
 
@@ -292,14 +272,14 @@ public class CombinedSource : IImageSource
     {
         sources.ForEach((e) =>
         {
-            if (e is FaultCheck fc)
-            {
-                fc.ResetFaultCount();
-            }
-            else if (e is CombinedSource cs)
+            if (e is CombinedSource cs)
             {
                 cs.Faulted = false;
                 cs.ResetFaultySources();
+            }
+            else
+            {
+                e.FaultedReset();
             }
         });
     }

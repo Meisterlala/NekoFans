@@ -4,7 +4,7 @@ using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
-public class WaifuPics : IImageSource
+public class WaifuPics : ImageSource
 {
     [Flags]
     public enum CategoriesSFW
@@ -24,7 +24,7 @@ public class WaifuPics : IImageSource
         public CategoriesSFW sfwCategories = CategoriesSFW.Neko;
         public CategoriesNSFW nsfwCategories = CategoriesNSFW.None;
 
-        public IImageSource? LoadConfig()
+        public ImageSource? LoadConfig()
         {
             if (!enabled)
                 return null;
@@ -53,8 +53,6 @@ public class WaifuPics : IImageSource
         }
     }
 
-    public bool Faulted { get; set; }
-
     private readonly string url;
     private readonly string type;
     private readonly string category;
@@ -66,20 +64,22 @@ public class WaifuPics : IImageSource
         this.category = category;
     }
 
-    public NekoImage Next(CancellationToken ct = default)
+    public override NekoImage Next(CancellationToken ct = default)
     {
-        return new NekoImage(async (_) =>
+        return new NekoImage(async (img) =>
         {
+            img.URLDownloadWebsite = url;
             var json = await Download.ParseJson<WaifuPicsJson>(url, ct);
+            img.URLDownloadWebsite = json.url;
             return await Download.DownloadImage(json.url, typeof(WaifuPics), ct);
-        });
+        }, this);
     }
 
     public override string ToString() => $"Waifu Pics ({type.ToUpper()}) {category}";
 
-    public string Name => "Waifu Pics";
+    public override string Name => "Waifu Pics";
 
-    public bool Equals(IImageSource? other) => other != null && other is WaifuPics w && w.type == type && w.category == category;
+    public override bool SameAs(ImageSource other) => other is WaifuPics w && w.type == type && w.category == category;
 
 #pragma warning disable
     public class WaifuPicsJson

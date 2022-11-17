@@ -306,24 +306,24 @@ public class ConfigWindow
         if (ImGui.CollapsingHeader("Currently Displayed"))
         {
             if (Plugin.GuiMain?.ImageCurrent != null)
-                ImGui.Text("ImageCurrent: \n" + Plugin.GuiMain?.ImageCurrent?.ToString());
+                ImGui.Text(Plugin.GuiMain?.ImageCurrent?.ToString());
             else
-                ImGui.Text("ImageCurrent: None");
-            ImGui.Separator();
+                ImGui.Text("No image is currently displayed");
             if (Plugin.GuiMain?.ImageNext != null)
-                ImGui.Text("ImageNext   : \n" + Plugin.GuiMain?.ImageNext?.ToString());
-            else
-                ImGui.Text("ImageNext   : None");
+            {
+                ImGui.Spacing(); ImGui.Separator();
+                ImGui.Text("Next Image: \n" + Plugin.GuiMain?.ImageNext?.ToString());
+            }
         }
 
         if (ImGui.CollapsingHeader("Image Queue"))
-            ImGui.TextWrapped(Plugin.GuiMain?.Queue.ToString() ?? "GuiMain not loaded");
+            ImGui.Text(Plugin.GuiMain?.Queue.ToString() ?? "GuiMain not loaded");
         if (ImGui.CollapsingHeader("Image Sources"))
-            ImGui.TextWrapped(Plugin.ImageSource.ToString());
+            ImGui.Text(Plugin.ImageSource.ToString());
         if (ImGui.CollapsingHeader("Slideshow Status"))
-            ImGui.TextWrapped(Plugin.GuiMain?.Slideshow.ToString() ?? "GuiMain not loaded");
+            ImGui.Text(Plugin.GuiMain?.Slideshow.ToString() ?? "GuiMain not loaded");
         if (ImGui.CollapsingHeader("Plugin Config"))
-            ImGui.TextWrapped(Plugin.Config.ToString());
+            ImGui.Text(Plugin.Config.ToString());
     }
 
     private static Key[]? Keys;

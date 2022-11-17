@@ -6,14 +6,14 @@ using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
-public class NekosBest : IImageSource
+public class NekosBest : ImageSource
 {
     public class Config : IImageConfig
     {
         public bool enabled = true;
         public Category categories = Category.Neko;
 
-        public IImageSource? LoadConfig()
+        public ImageSource? LoadConfig()
         {
             if (!enabled)
                 return null;
@@ -35,8 +35,6 @@ public class NekosBest : IImageSource
         }
     }
 
-    public bool Faulted { get; set; }
-
     private readonly string categoryName;
     private readonly MultiURLs<NekosBestJson> urls;
 
@@ -46,20 +44,20 @@ public class NekosBest : IImageSource
         urls = new($"https://nekos.best/api/v2/{categoryName}?amount=20", this, 15);
     }
 
-    public NekoImage Next(CancellationToken ct = default)
+    public override NekoImage Next(CancellationToken ct = default)
     {
-        return new NekoImage(async (_) =>
+        return new NekoImage(async (img) =>
         {
             var url = await urls.GetURL(ct);
+            img.URLDownloadWebsite = url;
             return await Download.DownloadImage(url, typeof(NekosBest), ct);
-        });
+        }, this);
     }
 
     public override string ToString() => $"nekos.best {categoryName} {urls}";
+    public override string Name => "nekos.best";
 
-    public string Name => "nekos.best";
-
-    public bool Equals(IImageSource? other) => other != null && other is NekosBest nb && nb.categoryName == categoryName;
+    public override bool SameAs(ImageSource other) => other is NekosBest nb && nb.categoryName == categoryName;
 
 #pragma warning disable
     public class NekosBestJson : IJsonToList<string>

@@ -132,4 +132,11 @@ public static class Helper
             interval += $"{span.Milliseconds}ms";
         return interval;
     }
+
+    public static string EndWithEllipsis(string text, int maxLength)
+    {
+        return text.Length <= maxLength
+            ? text
+            : text[..(maxLength - 3)] + "...";
+    }
 }

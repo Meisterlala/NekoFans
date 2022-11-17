@@ -5,7 +5,7 @@ using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
-public class Waifuim : IImageSource
+public class Waifuim : ImageSource
 {
     public class Config : IImageConfig
     {
@@ -14,7 +14,7 @@ public class Waifuim : IImageSource
         public bool sfw = true;
         public int ContentComboboxIndex;
 
-        public IImageSource? LoadConfig()
+        public ImageSource? LoadConfig()
         {
             return !enabled
             ? null
@@ -24,9 +24,7 @@ public class Waifuim : IImageSource
         }
     }
 
-    public bool Faulted { get; set; }
-
-    public string Name => "waifu.im";
+    public override string Name => "waifu.im";
 
     private readonly MultiURLs<WaifuImJson> URLs;
     private readonly bool nsfw;
@@ -39,18 +37,19 @@ public class Waifuim : IImageSource
             : (new("https://api.waifu.im/random/?is_nsfw=false&gif=false&many=true", this));
     }
 
-    public NekoImage Next(CancellationToken ct = default)
+    public override NekoImage Next(CancellationToken ct = default)
     {
-        return new NekoImage(async (_) =>
+        return new NekoImage(async (img) =>
         {
             var url = await URLs.GetURL(ct);
+            img.URLDownloadWebsite = url;
             return await Download.DownloadImage(url, typeof(Waifuim), ct);
-        });
+        }, this);
     }
 
     public override string ToString() => $"waifu.im ({(nsfw ? "NSFW" : "SFW")})\t{URLs}";
 
-    public bool Equals(IImageSource? other) => other != null && other is Waifuim w && w.nsfw == nsfw;
+    public override bool SameAs(ImageSource other) => other is Waifuim w && w.nsfw == nsfw;
 
 #pragma warning disable
     public class WaifuImJson : IJsonToList<string>

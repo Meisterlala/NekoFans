@@ -47,6 +47,9 @@ public class MainWindow
             NextNeko();
         });
         NextNeko();
+
+        // Dont gray out the image on the first load
+        imageGrayed = false;
     }
 
     public void Draw()
@@ -171,7 +174,7 @@ public class MainWindow
 
             // Open in Browser with b
             if (Plugin.Config.Hotkeys.OpenInBrowser.IsPressed())
-                Helper.OpenInBrowser(displayedNeko.URLOpenOnClick ?? "");
+                Helper.OpenInBrowser(displayedNeko.URLOpenOnClick ?? displayedNeko.URLDownloadWebsite ?? "");
 
             ImGui.PopStyleColor(3);
             ImGui.EndChild();
@@ -212,7 +215,7 @@ public class MainWindow
         imageGrayed = true;
         Task.Run(async () =>
         {
-            await ImageNext.Await(NekoImage.State.LoadedGPU);
+            await ImageNext.Await((state) => state is NekoImage.State.LoadedGPU or NekoImage.State.Error);
             ImageCurrent = ImageNext;
             imageGrayed = false;
             ImageNext = null;

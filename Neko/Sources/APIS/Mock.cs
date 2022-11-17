@@ -7,7 +7,7 @@ using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
-public class Mock : IImageSource
+public class Mock : ImageSource
 {
     public static readonly List<MockImage> MockImages = new()
     {
@@ -26,9 +26,7 @@ public class Mock : IImageSource
 #endif
 #pragma warning restore CA2211
 
-    public bool Faulted { get; set; }
-
-    public string Name => "Mock";
+    public override string Name => "Mock";
 
     private readonly byte[] Data;
     private readonly string FileName;
@@ -45,15 +43,14 @@ public class Mock : IImageSource
         FileName = fileName;
     }
 
-    public NekoImage Next(CancellationToken ct = default)
+    public override NekoImage Next(CancellationToken ct = default)
     {
 #if !DEBUG
         throw new Exception("Mock is only available in debug builds");
 #pragma warning disable CS0162
 #endif
-
         // await DebugHelper.RandomDelay(DebugHelper.Delay.Mock, ct);
-        var image = new NekoImage(Data);
+        var image = new NekoImage(Data, this);
         lock (IndexLock)
         {
             Index++;
@@ -85,7 +82,7 @@ public class Mock : IImageSource
 
     public override string ToString() => $"Mock from {FileName}";
 
-    public bool Equals(IImageSource? other) => other != null && other.GetType() == typeof(Mock) && !SourcesUpdated;
+    public override bool SameAs(ImageSource other) => !SourcesUpdated;
 
     public class MockImage
     {

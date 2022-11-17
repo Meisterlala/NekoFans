@@ -6,7 +6,7 @@ using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
-public class DogCEO : IImageSource
+public class DogCEO : ImageSource
 {
     public class Config : IImageConfig
     {
@@ -14,10 +14,8 @@ public class DogCEO : IImageSource
         public Breed breed = Breed.all;
         public int selected;
 
-        public IImageSource? LoadConfig() => enabled ? new DogCEO(breed) : null;
+        public ImageSource? LoadConfig() => enabled ? new DogCEO(breed) : null;
     }
-
-    public bool Faulted { get; set; }
 
     private const int URL_COUNT = 10; // max 50
     private readonly MultiURLs<DogCEOJson> URLs;
@@ -30,16 +28,18 @@ public class DogCEO : IImageSource
             ? (new($"https://dog.ceo/api/breeds/image/random/{URL_COUNT}", this))
             : (new($"https://dog.ceo/api/breed/{BreedPath(b)}/images/random/{URL_COUNT}", this));
     }
-    public NekoImage Next(CancellationToken ct = default)
+
+    public override NekoImage Next(CancellationToken ct = default)
     {
-        return new NekoImage(async (_) =>
+        return new NekoImage(async (img) =>
         {
             var url = await URLs.GetURL(ct);
+            img.URLDownloadWebsite = url;
             return await Download.DownloadImage(url, typeof(DogCEO), ct);
-        });
+        }, this);
     }
 
-    public string Name => "Dog CEO";
+    public override string Name => "Dog CEO";
 
     public override string ToString()
     {
@@ -63,7 +63,7 @@ public class DogCEO : IImageSource
         return name.Replace("_", "/");
     }
 
-    public bool Equals(IImageSource? other) => other != null && other is DogCEO d && d.breed == breed;
+    public override bool SameAs(ImageSource other) => other is DogCEO d && d.breed == breed;
 
 #pragma warning disable
     public class DogCEOJson : IJsonToList<string>

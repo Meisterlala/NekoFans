@@ -46,7 +46,7 @@ public class NekoImage
     public string? Description { get; set; }
     public string? URLDownloadWebsite { get; set; }
     public string? URLOpenOnClick { get; set; }
-    public Type? Creator { get; set; }
+    public Sources.ImageSource ImageSource { get; }
 
     public byte[]? EncodedData { get; private set; }
     public List<Frame>? Frames { get; private set; }
@@ -75,9 +75,10 @@ public class NekoImage
         }
     }
 
-    public NekoImage(Func<NekoImage, Task<Sources.Download.Response>> downloadTask)
+    public NekoImage(Func<NekoImage, Task<Sources.Download.Response>> downloadTask, Sources.ImageSource source)
     {
         CurrentState = State.Downloading;
+        ImageSource = source;
         Task.Run(async () =>
         {
             try
@@ -91,13 +92,16 @@ public class NekoImage
             }
             catch (Exception ex)
             {
-                CurrentState = State.Error;
-                PluginLog.LogError(ex, "Error while downloading image");
+                OnError(ex);
             }
         });
     }
 
-    public NekoImage(byte[] data) => LoadData(data);
+    public NekoImage(byte[] data, Sources.ImageSource source)
+    {
+        ImageSource = source;
+        LoadData(data);
+    }
 
     ~NekoImage()
     {
@@ -126,18 +130,17 @@ public class NekoImage
             _ => "[Unknown]",
         };
 
-        if (CurrentState == State.Downloading)
-            res += $" {URLDownloadWebsite}";
         if (RAMUsage != 0)
             res += $" Data: {Helper.SizeSuffix(RAMUsage)}";
         if (VRAMUsage != 0)
             res += $" Texture: {Helper.SizeSuffix(VRAMUsage)}";
         if (Frames?.Count > 1)
             res += $"\nFrames: {Frames.Count}";
-        if (Creator != null)
-            res += $"\nCreator: {Creator.Name}";
+        if (!string.IsNullOrEmpty(URLDownloadWebsite))
+            res += $"\nURL: {Helper.EndWithEllipsis(URLDownloadWebsite, 75)}";
         if (DebugInfo?.Length > 0)
             res += $"\nDebugInfo: {DebugInfo}";
+        res += $"\nSource: {ImageSource}";
 
         return res;
     }
@@ -186,6 +189,16 @@ public class NekoImage
             }
         }, ct);
 
+    public Task Await(Predicate<State> predicate, CancellationToken ct = default)
+    => Task.Run(() =>
+    {
+        while (!predicate(CurrentState))
+        {
+            ct.ThrowIfCancellationRequested();
+            Thread.Sleep(10);
+        }
+    }, ct);
+
     public Task RequestLoadGPU(CancellationToken ct = default)
     {
         return CurrentState == State.LoadedGPU
@@ -223,5 +236,12 @@ public class NekoImage
 
         DebugHelper.Assert(frame.Texture != null, "Frame has no texture");
         return frame.Texture!;
+    }
+
+    private void OnError(Exception ex)
+    {
+        CurrentState = State.Error;
+        ImageSource.FaultedIncrement();
+        PluginLog.LogError(ex, "Error while loading image");
     }
 }
