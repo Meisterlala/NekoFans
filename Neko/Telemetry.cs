@@ -108,7 +108,7 @@ public static class Telemetry
             HttpResponseMessage response;
             try
             {
-                response = await Plugin.HttpClient.SendAsync(request);
+                response = await Plugin.HttpClient.SendAsync(request).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
             }
             catch (HttpRequestException ex)

@@ -17,6 +17,10 @@ public static class NSFW
     }
 
     private static NSFW_MODE mode = NSFW_MODE.Unknown!;
+
+    /// <summary>
+    /// Indicates if NSFW images should be displayed.
+    /// </summary>
     public static bool AllowNSFW
     {
         get
@@ -59,7 +63,7 @@ public static class NSFW
     {
         if (mode == NSFW_MODE.Unknown)
             return;
-        else if (mode == NSFW_MODE.Enabled)
+        if (mode == NSFW_MODE.Enabled)
             PluginLog.Log("Detected NSFW Plugin. NSFW Images are now avalible.");
         else
             PluginLog.Log("NSFW Plugin was disabled. NSFW Images are unavalible");

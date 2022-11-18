@@ -78,6 +78,9 @@ public class NekoQueue
     public NekoImage? Pop()
     {
         NekoImage popped;
+        // Remove Error images from the queue
+        queue.RemoveAll(x => x.CurrentState == NekoImage.State.Error);
+
         // If the Queue is empty load new images, unless the queue is stopped
         if (queue.Count == 0)
         {
@@ -96,7 +99,7 @@ public class NekoQueue
         }
 
         // Check for NSFW mode (check for changes)
-        var _ = NSFW.AllowNSFW;
+        _ = NSFW.AllowNSFW;
 
         // Check if there are faulted images in the preloaded Queue
         // If there are: just use the first image.
@@ -108,18 +111,16 @@ public class NekoQueue
         {
             var item = queue[i];
             if (item.CurrentState == NekoImage.State.Error)
-            {
                 break;
-            }
-            else if (item.CurrentState == NekoImage.State.LoadedGPU)
+
+            if (item.CurrentState == NekoImage.State.LoadedGPU)
             {
                 index = i;
                 break;
             }
-            else if (item.CurrentState is NekoImage.State.Decoded or NekoImage.State.Downloaded)
-            {
+
+            if (item.CurrentState is NekoImage.State.Decoded or NekoImage.State.Downloaded)
                 index = i;
-            }
         }
         // Remove from queue
         popped = queue[index];
@@ -128,11 +129,9 @@ public class NekoQueue
         // Refill Queue
         UpdateQueueLength();
 
-        // Started Loading
-        if (popped.CurrentState != NekoImage.State.LoadedGPU)
-        {
-            popped.DecodeAndLoadGPUAsync();
-        }
+        // Start Loading if needed
+        if (!popped.IsDecodingAndLoading)
+            popped.RequestLoadGPU(tokenSource.Token);
 
         return popped;
     }
@@ -148,8 +147,20 @@ public class NekoQueue
     {
         if (queue.Count >= TargetDownloadCount) return; // Base case
 
-        var next = Plugin.ImageSource.Next(tokenSource.Token);
-        queue.Add(next);
+        try
+        {
+            var next = Plugin.ImageSource.Next(tokenSource.Token);
+            queue.Add(next);
+        }
+        catch (Sources.CombinedSource.OutOfImagesException ex)
+        {
+            Dalamud.Logging.PluginLog.LogError(ex, "Error while getting next image from the queue");
+            StopQueue = true;
+        }
+        catch (System.Exception ex)
+        {
+            Dalamud.Logging.PluginLog.LogFatal(ex, "Unexpected error while getting next image from the queue");
+        }
 
         FillQueue(); // Recursivly fill
     }
@@ -163,35 +174,12 @@ public class NekoQueue
         LoadImages();
     }
 
-    /*
-        private void HandleTaskExceptions<T>(Task<T> task, QueueItem item)
-        {
-            foreach (var ex in task.Exception?.Flatten().InnerExceptions ?? new(Array.Empty<Exception>()))
-            {
-                PluginLog.LogWarning(ex, "Loading of an image failed");
-            }
-
-            // TODO: remove
-            failCountGlobal--;
-            if (failCountGlobal < 0)
-                StopQueue = true;
-
-            // Remove from queue
-            lock (queue)
-            {
-                if (!queue.Remove(item))
-                    PluginLog.LogDebug("Could not remove item from queue");
-                // Refill Queue
-                FillQueue();
-                LoadImages();
-            }
-        }
-    */
     private void LoadImages()
     {
         for (var i = 0; i < TargetPreloadCount && i < queue.Count; i++)
         {
-            queue[i].RequestLoadGPU();
+            // Load the image, but dont wait for it to finish
+            queue[i].RequestLoadGPU(tokenSource.Token);
         }
     }
 }

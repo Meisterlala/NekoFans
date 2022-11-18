@@ -41,9 +41,9 @@ public class Waifuim : ImageSource
     {
         return new NekoImage(async (img) =>
         {
-            var url = await URLs.GetURL(ct);
+            var url = await URLs.GetURL(ct).ConfigureAwait(false);
             img.URLDownloadWebsite = url;
-            return await Download.DownloadImage(url, typeof(Waifuim), ct);
+            return await Download.DownloadImage(url, typeof(Waifuim), ct).ConfigureAwait(false);
         }, this);
     }
 

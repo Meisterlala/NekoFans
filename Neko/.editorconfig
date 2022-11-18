@@ -136,7 +136,7 @@ csharp_indent_switch_labels = true
 # Default severity for all IDE code style rules with category 'Style'
 dotnet_analyzer_diagnostic.category-Style.severity = suggestion
 dotnet_analyzer_diagnostic.category-CodeQuality.severity = suggestion
-dotnet_analyzer_diagnostic.category-Documentation.severity = warning
+dotnet_analyzer_diagnostic.category-Documentation.severity = suggestion
 dotnet_analyzer_diagnostic.category-Naming.severity = warning
 dotnet_analyzer_diagnostic.category-Usage.severity = warning
 dotnet_analyzer_diagnostic.category-Performance.severity = warning
@@ -156,8 +156,32 @@ dotnet_diagnostic.CA1307.severity = suggestion
 # CA1711: Identifiers should not have incorrect suffix
 dotnet_diagnostic.CA1711.severity = suggestion
 
-# CA1309: Use ordinal string comparison
-dotnet_diagnostic.CA1309.severity = suggestion
+# --------
+# Documentation rules
+# -------- 
+dotnet_diagnostic.rcs1228.severity = suggestion
+dotnet_diagnostic.rcs1181.severity = suggestion
+dotnet_diagnostic.rcs1232.severity = suggestion
+dotnet_diagnostic.rcs1253.severity = none
+
+# --------
+# Meziantou.Analyzer
+# --------
+dotnet_diagnostic.MA0003.severity = none
+dotnet_diagnostic.MA0006.severity = none
+dotnet_diagnostic.MA0007.severity = none
+dotnet_diagnostic.MA0011.severity = none
+dotnet_diagnostic.MA0016.severity = none
+dotnet_diagnostic.MA0021.severity = none
+dotnet_diagnostic.MA0023.severity = none
+dotnet_diagnostic.MA0048.severity = none
+dotnet_diagnostic.MA0051.severity = none
+dotnet_diagnostic.MA0055.severity = none
+dotnet_diagnostic.MA0056.severity = none
+dotnet_diagnostic.MA0069.severity = none
+dotnet_diagnostic.MA0074.severity = none
+dotnet_diagnostic.MA0075.severity = none
+dotnet_diagnostic.MA0076.severity = none
 
 # --------
 # Ignore Warnings

@@ -48,9 +48,9 @@ public class NekosBest : ImageSource
     {
         return new NekoImage(async (img) =>
         {
-            var url = await urls.GetURL(ct);
+            var url = await urls.GetURL(ct).ConfigureAwait(false);
             img.URLDownloadWebsite = url;
-            return await Download.DownloadImage(url, typeof(NekosBest), ct);
+            return await Download.DownloadImage(url, typeof(NekosBest), ct).ConfigureAwait(false);
         }, this);
     }
 

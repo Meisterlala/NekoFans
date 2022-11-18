@@ -1,6 +1,5 @@
 using System.Net.Http;
 using System.Reflection;
-using System.Threading.Tasks;
 using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Plugin;
@@ -62,12 +61,7 @@ public class Plugin : IDalamudPlugin
         Config = Configuration.Load(); // Load Configuration
         ImageSource = Config.LoadSources(); // Load ImageSources from config
 
-        // Load Embedded Images
-        Task.Run(() =>
-        {
-            Embedded.ImageLoading.Image.RequestLoadGPU();
-            Embedded.ImageError.Image.RequestLoadGPU();
-        });
+        Embedded.LoadAll(); // Load all embedded resources
 
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigGui;
         PluginInterface.UiBuilder.Draw += DrawUI;

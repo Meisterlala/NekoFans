@@ -18,7 +18,7 @@ public class PicRe : ImageSource
     {
         const string url = "https://pic.re/images";
         return new NekoImage(async (_)
-            => await Download.DownloadImage(url, typeof(PicRe), ct), this)
+            => await Download.DownloadImage(url, typeof(PicRe), ct).ConfigureAwait(false), this)
         {
             URLDownloadWebsite = url
         };

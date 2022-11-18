@@ -21,7 +21,7 @@ public static class Download
     public static async Task<Response> DownloadImage(HttpRequestMessage request, Type? called = default, CancellationToken ct = default)
     {
         DebugHelper.RandomThrow(DebugHelper.ThrowChance.DownloadImage);
-        await DebugHelper.RandomDelay(DebugHelper.Delay.DownloadImage, ct);
+        await DebugHelper.RandomDelay(DebugHelper.Delay.DownloadImage, ct).ConfigureAwait(false);
 
         byte[]? bytes;
         try
@@ -62,7 +62,7 @@ public static class Download
                     }
                 }
         };
-        return await DownloadImage(request, called, ct);
+        return await DownloadImage(request, called, ct).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -71,7 +71,7 @@ public static class Download
     public static async Task<T> ParseJson<T>(HttpRequestMessage request, CancellationToken ct = default)
     {
         DebugHelper.RandomThrow(DebugHelper.ThrowChance.ParseJson);
-        await DebugHelper.RandomDelay(DebugHelper.Delay.ParseJson, ct);
+        await DebugHelper.RandomDelay(DebugHelper.Delay.ParseJson, ct).ConfigureAwait(false);
 
         // Download .json file to stream
         System.IO.Stream? stream;
@@ -102,7 +102,7 @@ public static class Download
             DebugHelper.LogNetwork(() => $"Error Downloading Json from {request.RequestUri}:\n{JsonSerializer.Serialize(response.Content.ReadAsStringAsync(ct).Result, new JsonSerializerOptions() { WriteIndented = true })}");
             var exception = new HttpRequestException($"Could not Download .json from: {request.RequestUri} ({response.StatusCode})", ex);
             exception.Data.Add("StatusCode", response.StatusCode);
-            exception.Data.Add("Content", response.Content.ReadAsStringAsync(ct).Result);
+            exception.Data.Add("Content", await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false));
             throw exception;
         }
 
@@ -122,7 +122,7 @@ public static class Download
         catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
-            PluginLog.LogDebug(response.Content.ReadAsStringAsync(ct).Result);
+            PluginLog.LogDebug(await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false));
             throw new Exception("Could not Parse .json File from: " + request.RequestUri, ex);
         }
 

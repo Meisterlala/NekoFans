@@ -28,9 +28,9 @@ public class Catboys : ImageSource
         const string url = "https://api.catboys.com/img";
         return new NekoImage(async (img) =>
         {
-            var response = await Download.ParseJson<CatboysJson>(url, ct);
+            var response = await Download.ParseJson<CatboysJson>(url, ct).ConfigureAwait(false);
             img.URLDownloadWebsite = response.url;
-            return await Download.DownloadImage(response.url, typeof(Catboys), ct);
+            return await Download.DownloadImage(response.url, typeof(Catboys), ct).ConfigureAwait(false);
         }, this);
     }
 

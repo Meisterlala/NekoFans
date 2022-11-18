@@ -41,9 +41,9 @@ public class TheCatAPI : ImageSource
     {
         return new NekoImage(async (img) =>
         {
-            var url = await URLs.GetURL(ct);
+            var url = await URLs.GetURL(ct).ConfigureAwait(false);
             img.URLDownloadWebsite = url;
-            return await Download.DownloadImage(url, typeof(TheCatAPI), ct);
+            return await Download.DownloadImage(url, typeof(TheCatAPI), ct).ConfigureAwait(false);
         }, this);
     }
 

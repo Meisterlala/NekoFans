@@ -14,6 +14,7 @@ namespace Neko.Sources.APIS;
 
 public abstract class Twitter : ImageSource
 {
+#pragma warning disable RCS1181
     // This is a bad idea, but there really isnt a easy way to avoid doing this.
     // The proper solution is to require user authentication to a server, which holds
     // the text below. The name of the variables is a lie, so it wont be found by 
@@ -73,7 +74,7 @@ public abstract class Twitter : ImageSource
             public static bool operator !=(Query q1, Query q2) => q1.searchText != q2.searchText || q1.enabled != q2.enabled;
 
             public override bool Equals(object? obj) => obj is Query q && q == this;
-            public override int GetHashCode() => searchText.GetHashCode() ^ enabled.GetHashCode();
+            public override int GetHashCode() => searchText.GetHashCode();
 
             public Query Clone() => new() { searchText = new(searchText), enabled = enabled };
         }
@@ -115,7 +116,7 @@ public abstract class Twitter : ImageSource
 
     public struct ImageResponse
     {
-        private static readonly Regex removeTco = new(@"(\W*https:\/\/t.co\/\w+)+\W*$", RegexOptions.Compiled);
+        private static readonly Regex removeTco = new(@"(\W*https:\/\/t.co\/\w+)+\W*$", RegexOptions.Compiled, TimeSpan.FromSeconds(5));
 
         public string Text;
         public string TweetID;
@@ -206,8 +207,8 @@ public abstract class Twitter : ImageSource
         {
             return new NekoImage(async (img) =>
             {
-                var searchResult = await URLs.GetURL(ct);
-                var response = await Download.DownloadImage(searchResult.Media.Url, typeof(Search), ct);
+                var searchResult = await URLs.GetURL(ct).ConfigureAwait(false);
+                var response = await Download.DownloadImage(searchResult.Media.Url, typeof(Search), ct).ConfigureAwait(false);
                 img.Description = searchResult.TweetDescription();
                 img.URLOpenOnClick = searchResult.URLTweetID();
                 return response;
@@ -226,7 +227,7 @@ public abstract class Twitter : ImageSource
                     {
                         try
                         {
-                            var response = await Download.ParseJson<CountJson>(AuthorizedRequest(URL), ct);
+                            var response = await Download.ParseJson<CountJson>(AuthorizedRequest(URL), ct).ConfigureAwait(false);
                             return (response.Meta!.TotalTweetCount.ToString(), $"Found {response.Meta.TotalTweetCount} tweets matching:\n\"{search}\"");
                         }
                         catch (HttpRequestException e)
@@ -238,7 +239,7 @@ public abstract class Twitter : ImageSource
                                 var result = JsonSerializer.Deserialize(content, context)!;
 
                                 // Adjust position messages to account for hidden search text
-                                Regex adjustPosition = new(@"\(at position (\d+)\)", RegexOptions.Compiled);
+                                Regex adjustPosition = new(@"\(at position (\d+)\)", RegexOptions.Compiled, TimeSpan.FromSeconds(5));
                                 var error = adjustPosition.Replace(result.Errors![0].Message, (m) => $"(at position {int.Parse(m.Groups[1].Value) - URLQueryBegin.Length + 6})");
 
                                 return ("ERROR", $"{result.Title}\n({result.Detail})\n\n{error}");
@@ -406,7 +407,7 @@ public abstract class Twitter : ImageSource
 
     public class UserTimeline : Twitter
     {
-        private static readonly Regex extractUsername = new(@"^\s*@(\w+)\s*$", RegexOptions.Compiled);
+        private static readonly Regex extractUsername = new(@"^\s*@(\w+)\s*$", RegexOptions.Compiled, TimeSpan.FromSeconds(5));
         private static string TimelineURL(string ID) => $"https://api.twitter.com/2/users/{ID}/tweets?expansions=attachments.media_keys&tweet.fields=created_at,possibly_sensitive&user.fields=username&media.fields=url,media_key";
 
         private string userID = "";
@@ -419,7 +420,7 @@ public abstract class Twitter : ImageSource
         public UserTimeline(Config.Query query) : base(query)
         {
             if (!ValidUsername(query.searchText))
-                throw new ArgumentException("Invalid username");
+                throw new ArgumentException("Invalid username", nameof(query));
             username = extractUsername.Match(query.searchText).Groups[1].Value;
             URLs = new((string token) => $"&pagination_token={token}", () => AuthorizedRequest(TimelineURL(userID)), this, URLThreshold);
         }
@@ -441,13 +442,13 @@ public abstract class Twitter : ImageSource
                 {
                     userIDTask ??= GetUserID(ct);
                 }
-                await userIDTask;
+                await userIDTask.ConfigureAwait(false);
 
                 if (string.IsNullOrEmpty(userID) || usernameReadable == null)
                     throw new Exception("Failed to get user ID");
 
-                var nextTweet = await URLs.GetURL(ct);
-                var response = await Download.DownloadImage(nextTweet.Media.Url, typeof(UserTimeline), ct);
+                var nextTweet = await URLs.GetURL(ct).ConfigureAwait(false);
+                var response = await Download.DownloadImage(nextTweet.Media.Url, typeof(UserTimeline), ct).ConfigureAwait(false);
                 img.Description = nextTweet.TweetDescription(usernameReadable, username);
                 img.URLOpenOnClick = nextTweet.URLTweetID(username);
                 return response;
@@ -486,7 +487,7 @@ public abstract class Twitter : ImageSource
         public static async Task<UserLookupJson.SuccessRespone> GetIDFromUsername(string username, CancellationToken ct = default)
         {
             var URL = $"https://api.twitter.com/2/users/by/username/{username}";
-            var response = await Download.ParseJson<UserLookupJson>(AuthorizedRequest(URL), ct);
+            var response = await Download.ParseJson<UserLookupJson>(AuthorizedRequest(URL), ct).ConfigureAwait(false);
 
             return response.Errors != null
                 ? throw new Exception($"Twitter API returned the Error:\n{response.Errors[0].Detail}")
@@ -497,7 +498,7 @@ public abstract class Twitter : ImageSource
 
         private async Task GetUserID(CancellationToken ct = default)
         {
-            var response = await GetIDFromUsername(username, ct);
+            var response = await GetIDFromUsername(username, ct).ConfigureAwait(false);
             userID = response.Id;
             usernameReadable = response.Name;
         }

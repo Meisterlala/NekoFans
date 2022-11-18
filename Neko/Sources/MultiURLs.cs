@@ -11,7 +11,7 @@ namespace Neko.Sources;
 /// Stores a List of URLs, which are provided from an API.
 /// This is used when the API returns a list of many URLs to images
 /// </summary>
-/// <typeparam name="TJson">Json to parse into</typeparam>
+/// <typeparam name="T">Json to parse into</typeparam>
 public class MultiURLs<T> : MultiURLsGeneric<T, string>
     where T : IJsonToList<string>
 {
@@ -68,7 +68,7 @@ public class MultiURLsGeneric<TJson, TQueueElement>
     public virtual async Task<TQueueElement> GetURL(CancellationToken ct = default)
     {
         DebugHelper.RandomThrow(DebugHelper.ThrowChance.GetURL);
-        await DebugHelper.RandomDelay(DebugHelper.Delay.GetURL, ct);
+        await DebugHelper.RandomDelay(DebugHelper.Delay.GetURL, ct).ConfigureAwait(false);
 
         TQueueElement? element;
         do
@@ -86,7 +86,7 @@ public class MultiURLsGeneric<TJson, TQueueElement>
 
             // Wait for more
             if (getNewURLs != null && _urlCount <= 0)
-                await getNewURLs;
+                await getNewURLs.ConfigureAwait(false);
 
             // Try to get a URL from Queue
         } while (!URLs.TryDequeue(out element));
@@ -95,13 +95,13 @@ public class MultiURLsGeneric<TJson, TQueueElement>
         return element;
     }
 
-    private Task StartTask() => Task.Run(async () => await parseJson().ContinueWith(OnTaskComplete, cts.Token), cts.Token);
+    private Task StartTask() => Task.Run(async () => await parseJson().ContinueWith(OnTaskComplete, cts.Token).ConfigureAwait(false), cts.Token);
 
     private void OnTaskComplete(Task<TJson> task)
     {
         try
         {
-            DebugHelper.RandomDelay(DebugHelper.Delay.MultiURL);
+            DebugHelper.RandomDelay(DebugHelper.Delay.MultiURL, cts.Token);
             OnTaskSuccessfull(task.Result);
         }
         catch (AggregateException ex)

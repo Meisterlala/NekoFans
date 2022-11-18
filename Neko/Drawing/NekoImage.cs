@@ -18,7 +18,7 @@ public class NekoImage
         public Frame(byte[] data, int frameDelay)
         {
             Data = data;
-            FrameDelay = frameDelay;
+            FrameDelay = frameDelay; // In ms
         }
 
         ~Frame()
@@ -38,7 +38,10 @@ public class NekoImage
         Downloading,
         Downloaded,
         Decoded,
-        LoadedGPU, // Decoded and loaded into GPU VRAM
+        /// <summary>
+        /// Decoded and loaded into GPU VRAM
+        /// </summary>
+        LoadedGPU,
     }
 
     public State CurrentState { get; private set; } = State.Error;
@@ -50,9 +53,19 @@ public class NekoImage
 
     public byte[]? EncodedData { get; private set; }
     public List<Frame>? Frames { get; private set; }
-    public int CycleTime { get; private set; } // in ms: When the animation should loop
+    /// <summary>
+    /// in ms: When the animation should loop
+    /// </summary>
+    public int CycleTime { get; private set; }
     public int? Width { get; private set; }
     public int? Height { get; private set; }
+
+    /// <summary>
+    /// 0 when the image is not currently loading
+    /// 1 when the image is currently loading or finished loading
+    /// </summary>
+    private int DecodingAndLoading;
+    public bool IsDecodingAndLoading => DecodingAndLoading == 1;
 
     public long RAMUsage =>
         CurrentState == State.Downloading || EncodedData == null
@@ -83,8 +96,11 @@ public class NekoImage
         {
             try
             {
+                DebugHelper.RandomThrow(DebugHelper.ThrowChance.DownloadImage);
+                await DebugHelper.RandomDelay(DebugHelper.Delay.DownloadImage).ConfigureAwait(false);
+
                 var task = downloadTask(this);
-                var response = await task;
+                var response = await task.ConfigureAwait(false);
 
                 EncodedData = response.Data;
                 URLDownloadWebsite = response.Url;
@@ -147,7 +163,11 @@ public class NekoImage
 
     private void Decode()
     {
-        DebugHelper.Assert(CurrentState == State.Downloaded, "Image is not downloaded");
+        DebugHelper.RandomThrow(DebugHelper.ThrowChance.DecodeImage);
+        DebugHelper.RandomDelay(DebugHelper.Delay.DecodeImage).Wait();
+
+        DebugHelper.Assert(CurrentState == State.Downloaded, "Image is not downloaded. Current state: " + CurrentState);
+
         var decoded = ImageDecode.DecodeImageFrames(EncodedData!);
         Frames = decoded.Frames;
         Width = decoded.Width;
@@ -160,12 +180,18 @@ public class NekoImage
             CycleTime += f.FrameDelay;
         }
 
+        // Clear downloaded data
+        EncodedData = Array.Empty<byte>();
+
         CurrentState = State.Decoded;
     }
 
     private void LoadGPU()
     {
-        DebugHelper.Assert(CurrentState == State.Decoded, "Image is not decoded");
+        DebugHelper.RandomThrow(DebugHelper.ThrowChance.LoadGPU);
+        DebugHelper.RandomDelay(DebugHelper.Delay.LoadGPU).Wait();
+
+        DebugHelper.Assert(CurrentState == State.Decoded, "Image is not decoded. Current state: " + CurrentState);
         DebugHelper.Assert(Frames != null, "Image has no frames");
 
         var textures = ImageLoad.LoadFrames(this);
@@ -176,44 +202,54 @@ public class NekoImage
         CurrentState = State.LoadedGPU;
     }
 
-    public Task DecodeAndLoadGPUAsync(CancellationToken ct = default)
-        => Task.Run(() => { Decode(); LoadGPU(); }, ct);
-
-    public Task Await(State state, CancellationToken ct = default)
+    private Task DecodeAndLoadGPUAsync(CancellationToken ct = default)
         => Task.Run(() =>
         {
-            while (CurrentState != state)
+            try
             {
-                ct.ThrowIfCancellationRequested();
-                Thread.Sleep(10);
+                Decode();
+                LoadGPU();
+            }
+            catch (Exception ex)
+            {
+                OnError(ex);
             }
         }, ct);
 
-    public Task Await(Predicate<State> predicate, CancellationToken ct = default)
-    => Task.Run(() =>
+    public Task Await(State state, CancellationToken ct = default)
+        => Await((s) => s == state, ct);
+
+    public async Task Await(Predicate<State> predicate, CancellationToken ct = default)
     {
         while (!predicate(CurrentState))
         {
             ct.ThrowIfCancellationRequested();
-            Thread.Sleep(10);
+            await Task.Delay(10, ct).ConfigureAwait(false);
         }
-    }, ct);
+    }
 
-    public Task RequestLoadGPU(CancellationToken ct = default)
+    public void RequestLoadGPU(CancellationToken ct = default)
     {
-        return CurrentState == State.LoadedGPU
-            ? Task.CompletedTask
-            : Task.Run(async () =>
+        // If the image is already loaded, do nothing
+        if (CurrentState is State.LoadedGPU or State.Error)
+            return;
+
+        // If it is not currently decoding/loading, start decoding/loading
+        if (Interlocked.CompareExchange(ref DecodingAndLoading, 1, 0) == 0)
+        {
+            Task.Run(async () =>
             {
+                // Wait for the image to be downloaded
                 if (CurrentState == State.Downloading)
-                    await Await(State.Downloaded, ct);
-                await DecodeAndLoadGPUAsync(ct);
+                    await Await(State.Downloaded, ct).ConfigureAwait(false);
+                await DecodeAndLoadGPUAsync(ct).ConfigureAwait(false);
             }, ct);
+        }
     }
 
     public TextureWrap GetTexture(double time)
     {
-        DebugHelper.Assert(CurrentState >= State.LoadedGPU, "Image not loaded into GPU VRAM yet");
+        DebugHelper.Assert(CurrentState == State.LoadedGPU, "Image not loaded into GPU VRAM yet. Current state: " + CurrentState);
         DebugHelper.Assert(Width.HasValue && Height.HasValue, "Image has no width or height");
         DebugHelper.Assert(Frames != null, "Image has no frames");
         DebugHelper.Assert(Frames!.Count == 1 || CycleTime > 0, "Image has multible Frames but no cycle time");
@@ -242,6 +278,6 @@ public class NekoImage
     {
         CurrentState = State.Error;
         ImageSource.FaultedIncrement();
-        PluginLog.LogError(ex, "Error while loading image");
+        PluginLog.LogWarning(ex, "Error while loading image");
     }
 }

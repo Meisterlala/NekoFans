@@ -111,25 +111,17 @@ public class Hotkey
     private static bool KeyPressed(Dalamud.Game.ClientState.Keys.VirtualKey key)
     {
         if (key == Dalamud.Game.ClientState.Keys.VirtualKey.LBUTTON)
-        {
             return ImGui.IsMouseClicked(ImGuiMouseButton.Left);
-        }
-        else if (key == Dalamud.Game.ClientState.Keys.VirtualKey.RBUTTON)
-        {
+        if (key == Dalamud.Game.ClientState.Keys.VirtualKey.RBUTTON)
             return ImGui.IsMouseClicked(ImGuiMouseButton.Right);
-        }
-        else if (key == Dalamud.Game.ClientState.Keys.VirtualKey.MBUTTON)
-        {
+        if (key == Dalamud.Game.ClientState.Keys.VirtualKey.MBUTTON)
             return ImGui.IsMouseClicked(ImGuiMouseButton.Middle);
-        }
-        else
+
+        if (Plugin.KeyState[key])
         {
-            if (Plugin.KeyState[key])
-            {
-                Plugin.KeyState[key] = false;
-                return true;
-            }
-            return false;
+            Plugin.KeyState[key] = false;
+            return true;
         }
+        return false;
     }
 }

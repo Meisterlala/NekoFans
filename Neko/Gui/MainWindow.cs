@@ -65,10 +65,27 @@ public class MainWindow
         }
     }
 
+    /// <summary>
+    /// This draws the window containing the image
+    /// </summary>
     public void DrawNeko()
     {
-        if (!Embedded.ImageLoading.Ready) return;
-        // Debug.Assert(nekoCurrent != null, "There is no image loaded");
+        // Select which image to display and wait for embedded images to load
+        NekoImage displayedNeko;
+        if (ImageCurrent?.CurrentState == NekoImage.State.LoadedGPU)
+        {
+            displayedNeko = ImageCurrent;
+        }
+        else if (ImageCurrent?.CurrentState == NekoImage.State.Error)
+        {
+            if (!Embedded.ImageError.Ready) return;
+            displayedNeko = Embedded.ImageError;
+        }
+        else
+        {
+            if (!Embedded.ImageLoading.Ready) return;
+            displayedNeko = Embedded.ImageLoading;
+        }
 
         var fontScale = ImGui.GetIO().FontGlobalScale;
         var size = new Vector2(100 * fontScale, 100 * fontScale);
@@ -100,13 +117,6 @@ public class MainWindow
             // Save visible State
             Visible = visible;
 
-            // Load Neko or fallback to Error
-            var displayedNeko = ImageCurrent?.CurrentState == NekoImage.State.LoadedGPU
-                 ? ImageCurrent
-                 : ImageCurrent?.CurrentState == NekoImage.State.Error
-                 ? Embedded.ImageError
-                 : Embedded.ImageLoading;
-
             // Get Window Size
             var windowSize = ImGui.GetWindowSize();
             if (Plugin.Config.GuiMainShowTitleBar)
@@ -115,7 +125,7 @@ public class MainWindow
                 windowSize -= new Vector2(10f, 10f);
 
             // Align Image
-            DebugHelper.Assert(displayedNeko.Width.HasValue && displayedNeko.Height.HasValue, "Image has no Width or Height");
+            DebugHelper.Assert(displayedNeko.Width.HasValue && displayedNeko.Height.HasValue, "Image has no Width or Height: " + displayedNeko);
             var (startPos, endPos) = Common.AlignImage(new Vector2(displayedNeko.Width!.Value, displayedNeko.Height!.Value), windowSize, Plugin.Config.Alignment);
 
             // Calculate image start position
@@ -183,6 +193,9 @@ public class MainWindow
             ImGui.PopStyleColor();
     }
 
+    /// <summary>
+    /// Advance to the next image
+    /// </summary>
     private void NextNeko()
     {
         // Restart the timer for the slideshow
@@ -215,7 +228,7 @@ public class MainWindow
         imageGrayed = true;
         Task.Run(async () =>
         {
-            await ImageNext.Await((state) => state is NekoImage.State.LoadedGPU or NekoImage.State.Error);
+            await ImageNext.Await((state) => state is NekoImage.State.LoadedGPU or NekoImage.State.Error).ConfigureAwait(false);
             ImageCurrent = ImageNext;
             imageGrayed = false;
             ImageNext = null;

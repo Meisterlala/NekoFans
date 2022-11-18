@@ -24,6 +24,8 @@ public abstract class HeaderImage : ImageSource
     private Task<NekoImage>? updateTask;
     private NekoImage? image;
 
+    public override NekoImage Next(CancellationToken ct = default) => throw new NotSupportedException();
+
     protected abstract Task<NekoImage> DownloadHeader();
 
     ~HeaderImage()
@@ -98,7 +100,8 @@ public abstract class HeaderImage : ImageSource
             WaitForImage();
             return true;
         }
-        return false;
+
+        return image.CurrentState != NekoImage.State.LoadedGPU;
     }
 
     protected virtual void UpdateHeader()
@@ -111,7 +114,7 @@ public abstract class HeaderImage : ImageSource
 
         isUpdating = true;
         updateTask = DownloadHeader();
-        updateTask.ContinueWith(OnTaskComplete);
+        updateTask.ContinueWith(OnTaskComplete, cts.Token);
     }
 
     private void WaitForImage()
@@ -120,7 +123,7 @@ public abstract class HeaderImage : ImageSource
         if (updateTask == null)
         {
             updateTask = DownloadHeader();
-            updateTask.ContinueWith(OnTaskComplete);
+            updateTask.ContinueWith(OnTaskComplete, cts.Token);
         }
 
         // Wait for Image Task
@@ -165,16 +168,14 @@ public abstract class HeaderImage : ImageSource
 
         public override bool SameAs(ImageSource other) => true;
 
-        public override NekoImage Next(CancellationToken ct = default) => throw new NotImplementedException();
-
         protected override async Task<NekoImage> DownloadHeader()
         {
             FaultCountMax = 20;
             var img = new NekoImage(async (_)
-                => await Download.DownloadImage(Plugin.ControlServer + "/count_total", ct: cts.Token), this);
-            await img.Await(NekoImage.State.Downloaded);
-            await img.DecodeAndLoadGPUAsync();
-            return img;
+                => await Download.DownloadImage(Plugin.ControlServer + "/count_total", ct: cts.Token).ConfigureAwait(false), this);
+            img.RequestLoadGPU(cts.Token);
+            await img.Await((s) => s is NekoImage.State.LoadedGPU or NekoImage.State.Error, cts.Token).ConfigureAwait(false);
+            return img.CurrentState == NekoImage.State.Error ? throw new Exception("Failed to download total header image") : img;
         }
     }
 
@@ -190,17 +191,15 @@ public abstract class HeaderImage : ImageSource
 
         private int lastCount;
 
-        public override NekoImage Next(CancellationToken ct = default) => throw new NotImplementedException();
-
         protected override async Task<NekoImage> DownloadHeader()
         {
             FaultCountMax = 20;
             lastCount = Plugin.Config.LocalDownloadCount;
             var img = new NekoImage(async (_)
-                => await Download.DownloadImage($"{Plugin.ControlServer}/count/{Plugin.Config.LocalDownloadCount}", ct: cts.Token), this);
-            await img.Await(NekoImage.State.Downloaded);
-            await img.DecodeAndLoadGPUAsync();
-            return img;
+                => await Download.DownloadImage($"{Plugin.ControlServer}/count/{Plugin.Config.LocalDownloadCount}", ct: cts.Token).ConfigureAwait(false), this);
+            img.RequestLoadGPU(cts.Token);
+            await img.Await((s) => s is NekoImage.State.LoadedGPU or NekoImage.State.Error, cts.Token).ConfigureAwait(false);
+            return img.CurrentState == NekoImage.State.Error ? throw new Exception("Failed to download total header image") : img;
         }
 
         protected override void UpdateHeader()

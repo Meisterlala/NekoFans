@@ -8,6 +8,12 @@
         "resolved": "2.1.8",
         "contentHash": "YqagNXs9InxmqkXzq7kLveImxnodkBEicAhydMXVp7dFjC7xb76U6zGgAax4/BWIWfZeWzr5DJyQSev31kj81A=="
       },
+      "Meziantou.Analyzer": {
+        "type": "Direct",
+        "requested": "[1.0.*, )",
+        "resolved": "1.0.750",
+        "contentHash": "YVEAW6bEaZj/M0Y2KqiA+YY2IN7cAqWvYKnp07WscZ+yfruV1Xl0MQY8LvTXgeapOcfsrk2ps8jA2QvdTawOxQ=="
+      },
       "SixLabors.ImageSharp": {
         "type": "Direct",
         "requested": "[2.1.*, )",
@@ -20,7 +26,7 @@
       },
       "TextCopy": {
         "type": "Direct",
-        "requested": "[6.1.0, )",
+        "requested": "[6.1.*, )",
         "resolved": "6.1.0",
         "contentHash": "7CxK3AOMTvACGGpRz9ZSVt0k+Ohx9tSPxGtauYKh8IdjTGZ7XzclyQh3m94E5Zk3pvWbZ3j/HjHpSHCuRUtDjA==",
         "dependencies": {

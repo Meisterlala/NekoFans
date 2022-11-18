@@ -59,7 +59,7 @@
         "${workspaceFolder}/Neko/Neko.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary",
-        "/p:DefineConstants=\"RANDOM_THROW;DEBUG\"",
+        "/p:DefineConstants=\"THROW;DEBUG\"",
       ],
       "problemMatcher": "$msCompile",
       "group": {
@@ -75,7 +75,7 @@
         "${workspaceFolder}/Neko/Neko.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary",
-        "/p:DefineConstants=\"RANDOM_DELAY;DEBUG\"",
+        "/p:DefineConstants=\"DELAY;DEBUG\"",
       ],
       "problemMatcher": "$msCompile",
       "group": {

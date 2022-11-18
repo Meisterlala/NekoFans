@@ -47,7 +47,10 @@ public class Configuration : IPluginConfiguration
     public bool GuiMainLocked;
 
     public bool SlideshowEnabled;
-    public double SlideshowIntervalSeconds = 60 * 5; // 5 minutes
+    /// <summary>
+    /// 5 minutes
+    /// </summary>
+    public double SlideshowIntervalSeconds = 60 * 5;
 
     public int QueueDownloadCount = 5;
     public int QueuePreloadCount = 2;

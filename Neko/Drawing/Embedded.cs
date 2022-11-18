@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -15,18 +16,14 @@ public class Embedded : ImageSource
 
     public override string Name => "Embedded";
     public override string ToString() => $"Embedded Image: {Filename}";
-    public bool Ready => Image.CurrentState == NekoImage.State.LoadedGPU;
-    public readonly NekoImage Image;
+    public bool Ready => Image?.CurrentState == NekoImage.State.LoadedGPU;
+    public NekoImage? Image { get; private set; }
 
     private readonly string Filename;
     private Download.Response? LoadedBytes;
     private readonly object LoadingLock = new();
 
-    public Embedded(string filename)
-    {
-        Filename = filename;
-        Image = Next();
-    }
+    public Embedded(string filename) => Filename = filename;
 
     public override NekoImage Next(CancellationToken ct = default)
     {
@@ -64,7 +61,48 @@ public class Embedded : ImageSource
         }, this);
     }
 
+    /// <summary>
+    /// Load all embedded images. This should only be called once.
+    /// </summary>
+    public static void LoadAll()
+    {
+        // Load Embedded Images without waiting for them to finish
+        Task.Run(async () =>
+        {
+            // Find all embedded images
+            List<Embedded> embedded = new();
+            foreach (var field in typeof(Embedded).GetFields())
+            {
+                if (field.FieldType != typeof(Embedded) || !field.IsStatic) continue;
+                embedded.Add((Embedded)field.GetValue(null)!);
+            }
+
+            foreach (var emb in embedded)
+            {
+                var errors = 0;
+                do
+                {
+                    // Load image
+                    emb.Image = emb.Next();
+                    emb.Image.RequestLoadGPU();
+                    // Wait until it is loaded
+                    await emb.Image.Await((s) => s is NekoImage.State.LoadedGPU or NekoImage.State.Error).ConfigureAwait(false);
+
+                    if (errors > 0)
+                        PluginLog.LogVerbose("Retrying to load embedded image: {0}", emb.Filename);
+                    if (errors > 5)
+                    {
+                        PluginLog.LogFatal($"Error loading embedded image: {emb.Filename}");
+                        break;
+                    }
+                    errors++;
+                } while (emb.Image.CurrentState == NekoImage.State.Error);
+            }
+        });
+    }
+
     public override bool SameAs(ImageSource other) => other is Embedded e && e.Filename == Filename;
 
-    public static implicit operator NekoImage(Embedded e) => e.Image;
+    public static implicit operator NekoImage(Embedded e)
+        => e.Image ?? throw new Exception("Embedded image was not loaded yet");
 }

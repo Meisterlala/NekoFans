@@ -27,9 +27,9 @@ public class NekosLife : ImageSource
         return new NekoImage(async (img) =>
         {
             img.URLDownloadWebsite = url;
-            var response = await Download.ParseJson<NekosLifeJson>(url, ct);
+            var response = await Download.ParseJson<NekosLifeJson>(url, ct).ConfigureAwait(false);
             img.URLDownloadWebsite = response.url;
-            return await Download.DownloadImage(response.url, typeof(NekosLife), ct);
+            return await Download.DownloadImage(response.url, typeof(NekosLife), ct).ConfigureAwait(false);
         }, this);
     }
 

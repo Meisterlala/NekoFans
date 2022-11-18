@@ -12,7 +12,7 @@ namespace Neko.Gui;
 /// <summary>
 /// The "Image Sources" tab in the Config Menu
 /// </summary>
-public class ImageSourcesGUI
+public class ImageSourcesWindow
 {
     private class ImageSourceConfig
     {
@@ -469,7 +469,8 @@ public class ImageSourcesGUI
                     if (entry.Query.searchText != entry.QueryDirty.searchText)
                         PluginLog.LogVerbose("Changing Twitter Search text from: \"" + entry.Query.searchText + "\" to: \"" + entry.QueryDirty.searchText + "\"");
 
-                    PluginLog.LogVerbose((entry.Query.enabled ? "Enabling" : "Disabling") + " Twitter Search text: \"" + entry.QueryDirty.searchText + "\"");
+                    if (entry.Query.enabled != entry.QueryDirty.enabled)
+                        PluginLog.LogVerbose((entry.QueryDirty.enabled ? "Enabling" : "Disabling") + " Twitter Search text: \"" + entry.QueryDirty.searchText + "\"");
 
                     // Remove the old source
                     if (entry.ImageSource != null)

@@ -17,7 +17,10 @@ public class DogCEO : ImageSource
         public ImageSource? LoadConfig() => enabled ? new DogCEO(breed) : null;
     }
 
-    private const int URL_COUNT = 10; // max 50
+    /// <summary>
+    /// max 50
+    /// </summary>
+    private const int URL_COUNT = 10;
     private readonly MultiURLs<DogCEOJson> URLs;
     private readonly Breed breed;
 
@@ -33,23 +36,19 @@ public class DogCEO : ImageSource
     {
         return new NekoImage(async (img) =>
         {
-            var url = await URLs.GetURL(ct);
+            var url = await URLs.GetURL(ct).ConfigureAwait(false);
             img.URLDownloadWebsite = url;
-            return await Download.DownloadImage(url, typeof(DogCEO), ct);
+            return await Download.DownloadImage(url, typeof(DogCEO), ct).ConfigureAwait(false);
         }, this);
     }
 
     public override string Name => "Dog CEO";
 
-    public override string ToString()
-    {
-        var breed = Plugin.Config.Sources.DogCEO.breed;
-        return $"Dog CEO\tBreed: {BreedName(breed)}\t{URLs}";
-    }
+    public override string ToString() => $"Dog CEO\tBreed: {BreedName(Plugin.Config.Sources.DogCEO.breed)}\t{URLs}";
 
     public static string BreedName(Breed b)
     {
-        var textInfo = new CultureInfo("en-US", false).TextInfo;
+        var textInfo = new CultureInfo("en-US", useUserOverride: false).TextInfo;
         var name = Enum.GetName(typeof(Breed), b)?.Trim() ?? "Unknown";
         name = name.Replace("_", " (");
         if (name.Contains('('))

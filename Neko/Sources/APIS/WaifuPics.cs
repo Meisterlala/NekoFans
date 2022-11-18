@@ -69,9 +69,9 @@ public class WaifuPics : ImageSource
         return new NekoImage(async (img) =>
         {
             img.URLDownloadWebsite = url;
-            var json = await Download.ParseJson<WaifuPicsJson>(url, ct);
+            var json = await Download.ParseJson<WaifuPicsJson>(url, ct).ConfigureAwait(false);
             img.URLDownloadWebsite = json.url;
-            return await Download.DownloadImage(json.url, typeof(WaifuPics), ct);
+            return await Download.DownloadImage(json.url, typeof(WaifuPics), ct).ConfigureAwait(false);
         }, this);
     }
 

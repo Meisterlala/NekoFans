@@ -24,9 +24,9 @@ public class ShibeOnline : ImageSource
     {
         return new NekoImage(async (img) =>
         {
-            var url = await URLs.GetURL(ct);
+            var url = await URLs.GetURL(ct).ConfigureAwait(false);
             img.URLDownloadWebsite = url;
-            return await Download.DownloadImage(url, typeof(ShibeOnline), ct);
+            return await Download.DownloadImage(url, typeof(ShibeOnline), ct).ConfigureAwait(false);
         }, this);
     }
 

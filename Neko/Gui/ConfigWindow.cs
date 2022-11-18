@@ -15,16 +15,34 @@ public class ConfigWindow
 
     public static readonly Vector4 RedColor = new(0.38f, 0.1f, 0.1f, 0.55f);
 
-    private readonly ImageSourcesGUI imageSourcesGUI = new();
+    private readonly ImageSourcesWindow imageSourcesGUI = new();
     private readonly HeaderImage.Total headerImage = new();
 
     private int QueueDonwloadCount;
     private int QueuePreloadCount;
+    private readonly string Title;
 
     public ConfigWindow()
     {
         QueueDonwloadCount = Plugin.Config.QueueDownloadCount;
         QueuePreloadCount = Plugin.Config.QueuePreloadCount;
+        Title = "Neko Fans Configuration";
+
+        // Add debug info to the title
+        if (Plugin.PluginInterface.IsDev)
+            Title += " (Dev)";
+#if DEBUG
+        Title += " (Debug)";
+#endif
+#if THROW
+        Title += " (Random)";
+#endif
+#if DELAY
+        Title += " (Delay)";
+#endif
+#if NETWORK
+        Title += " (Network)";
+#endif
     }
 
     public void Draw()
@@ -38,7 +56,7 @@ public class ConfigWindow
             ImGui.SetNextWindowSize(size * 2, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowSizeConstraints(size, size * 20);
 
-            if (!ImGui.Begin("Neko Fans Configuration", ref Visible)) return;
+            if (!ImGui.Begin(Title, ref Visible)) return;
 
             // The Tab Bar
             if (ImGui.BeginTabBar("##tabBar"))
@@ -254,7 +272,7 @@ public class ConfigWindow
         ImGui.SetCursorPosX((windowWidth - childSize.X) / 2);
 
         ImGui.PushStyleColor(ImGuiCol.ChildBg, RedColor);
-        ImGui.BeginChild("Align", childSize, true);
+        ImGui.BeginChild("Align", childSize, border: true);
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0);
 
         var buttonSize = new Vector2(50, 50);
@@ -403,7 +421,7 @@ public class ConfigWindow
         var containsDuplicate = false;
         foreach (var (key, desc) in keybinds)
         {
-            if (keybinds.Count(x => x.Item1.Key == key.Key) > 1)
+            if (keybinds.Where(x => x.Item1.Key == key.Key).Skip(1).Any())
             {
                 containsDuplicate = true;
                 break;

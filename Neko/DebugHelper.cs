@@ -28,32 +28,40 @@ public static class DebugHelper
     public static class ThrowChance
     {
         public const double DownloadImage = 0.1;
+        public const double DecodeImage = 0.1;
+        public const double LoadGPU = 0.1;
         public const double ParseJson = 0.1;
         public const double GetURL = 0.1;
         public const double Mock = 0;
     }
 
-    public static void RandomThrow(double chance = 0.3)
+    public static void RandomThrow(double chance = 0.3, [CallerArgumentExpression("chance")] string? chanceString = null)
     {
 #if THROW
         if (ThrowRandom.NextDouble() <= chance)
         {
             throw new Exception("\n"
-               + "┌───────────────────┐\n"
-               + "│         Random Throw\n"
-               + $"│        Chance: {chance:P}\n"
-               + "└───────────────────┘");
+               + "|||||||||||||||||||||||||||||||||||||||||||||||\n"
+               + "|| Random Throw\n"
+               + $"|| From: {chanceString}\n"
+               + $"|| Chance: {chance:P}\n"
+               + "|||||||||||||||||||||||||||||||||||||||||||||||");
         }
 #endif
     }
 
+    /// <summary>
+    /// time to wait before continuing execution
+    /// </summary>
     public static class Delay
     {
-        public const int DownloadImage = 1000 * 2;
-        public const int ParseJson = 1000 * 2;
-        public const int GetURL = 1000 * 1;
+        public const int DownloadImage = 5000;
+        public const int DecodeImage = 200;
+        public const int LoadGPU = 2000;
+        public const int ParseJson = 2000;
+        public const int GetURL = 1000;
         public const int Mock = 150;
-        public const int MultiURL = 1000 * 2;
+        public const int MultiURL = 2000;
 
         public const double mean = 1.0;
         public const double stdDev = 0.3;

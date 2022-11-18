@@ -111,7 +111,7 @@
   <!-- Used to manipulate Clipboard -->
   <ItemGroup>
     <PackageReference Include="TextCopy"> 
-        <Version>6.1.0</Version>
+        <Version>6.1.*</Version>
         <GeneratePathProperty>true</GeneratePathProperty>
     </PackageReference>
   </ItemGroup>
@@ -121,6 +121,14 @@
     <PackageReference Include="SixLabors.ImageSharp"> 
         <Version>2.1.*</Version>
         <GeneratePathProperty>true</GeneratePathProperty>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- Meziantou.Analyzer for better code -->
+  <ItemGroup>
+    <PackageReference Include="Meziantou.Analyzer" Version="1.0.*">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>None</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 </Project>
