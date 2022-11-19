@@ -10,31 +10,68 @@ public class Waifuim : ImageSource
     public class Config : IImageConfig
     {
         public bool enabled;
-        public bool nsfw;
-        public bool sfw = true;
-        public int ContentComboboxIndex;
+        public Category categories = Category.SFW | Category.SFWGIF;
 
         public ImageSource? LoadConfig()
         {
-            return !enabled
-            ? null
-            : sfw && nsfw && NSFW.AllowNSFW
-            ? new CombinedSource(new Waifuim(false), new Waifuim(true))
-            : new Waifuim(nsfw && NSFW.AllowNSFW);
+            if (!enabled)
+                return null;
+            var com = new CombinedSource();
+            foreach (var f in Helper.GetFlags(categories))
+            {
+                if (CategoryInfo.TryGetValue(f, out var info))
+                {
+                    if (info.NSFW && !NSFW.AllowNSFW)
+                        continue;
+                    com.AddSource(new Waifuim(info));
+                }
+                else
+                {
+                    Dalamud.Logging.PluginLog.LogError($"Waifuim: Unknown category {f}");
+                }
+            }
+            return com.Count() > 0 ? com : null;
         }
     }
 
+    [Flags]
+    public enum Category
+    {
+        None = 0,
+
+        SFW = 1 << 0,
+        SFWGIF = 1 << 1,
+        NSFW = 1 << 2,
+        NSFWGIF = 1 << 3,
+    }
+
+    public struct Info
+    {
+        public string DisplayName;
+        public bool NSFW;
+        public bool GIF;
+    }
+
+    public static readonly Dictionary<Category, Info> CategoryInfo = new()
+    {
+        { Category.SFW,     new Info { DisplayName = "SFW",      NSFW = false, GIF = false } },
+        { Category.SFWGIF,  new Info { DisplayName = "SFW GIF",  NSFW = false, GIF = true  } },
+        { Category.NSFW,    new Info { DisplayName = "NSFW",     NSFW = true,  GIF = false } },
+        { Category.NSFWGIF, new Info { DisplayName = "NSFW GIF", NSFW = true,  GIF = true  } },
+    };
+
     public override string Name => "waifu.im";
+    public override string ToString() => $"waifu.im {CurrentInfo.DisplayName}\t{URLs}";
 
     private readonly MultiURLs<WaifuImJson> URLs;
-    private readonly bool nsfw;
+    private readonly Info CurrentInfo;
 
-    public Waifuim(bool nsfw)
+    public Waifuim(Info i)
     {
-        this.nsfw = nsfw && NSFW.AllowNSFW; // NSFW Check
-        URLs = this.nsfw
-            ? (new("https://api.waifu.im/random/?is_nsfw=true&gif=false&many=true", this))
-            : (new("https://api.waifu.im/random/?is_nsfw=false&gif=false&many=true", this));
+        CurrentInfo = i;
+        var nsfw = CurrentInfo.NSFW && NSFW.AllowNSFW ? "true" : "false";
+        var gif = CurrentInfo.GIF ? "true" : "false";
+        URLs = new($"https://api.waifu.im/random/?is_nsfw={nsfw}&gif={gif}&many=true", this);
     }
 
     public override NekoImage Next(CancellationToken ct = default)
@@ -47,9 +84,7 @@ public class Waifuim : ImageSource
         }, this);
     }
 
-    public override string ToString() => $"waifu.im ({(nsfw ? "NSFW" : "SFW")})\t{URLs}";
-
-    public override bool SameAs(ImageSource other) => other is Waifuim w && w.nsfw == nsfw;
+    public override bool SameAs(ImageSource other) => other is Waifuim w && w.CurrentInfo.NSFW == CurrentInfo.NSFW && w.CurrentInfo.GIF == CurrentInfo.GIF;
 
 #pragma warning disable
     public class WaifuImJson : IJsonToList<string>

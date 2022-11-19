@@ -72,8 +72,7 @@ public class ImageSourcesWindow
         if (Plugin.Config.ShowHeaders)
             DrawHeader();
         // ------------ Mock Images for debugging --------------
-        if (Plugin.PluginInterface.IsDevMenuOpen)
-            DrawMock();
+        DrawMock();
         //  ------------ nekos.life --------------
         SourceCheckbox(SourceList[0], ref Plugin.Config.Sources.NekosLife.enabled);
         if (Plugin.Config.Sources.NekosLife.enabled)
@@ -88,8 +87,8 @@ public class ImageSourcesWindow
         SourceCheckbox(SourceList[3], ref Plugin.Config.Sources.Catboys.enabled);
         //  ------------ waifu.im --------------
         SourceCheckbox(SourceList[4], ref Plugin.Config.Sources.Waifuim.enabled);
-        if (Plugin.Config.Sources.Waifuim.enabled && NSFW.AllowNSFW) // NSFW Check
-            DrawWaifuim();
+        if (Plugin.Config.Sources.Waifuim.enabled)
+            DrawWaifuim(SourceList[4]);
         //  ------------ Waifu.pics --------------
         SourceCheckbox(SourceList[5], ref Plugin.Config.Sources.WaifuPics.enabled);
         if (Plugin.Config.Sources.WaifuPics.enabled)
@@ -244,7 +243,10 @@ public class ImageSourcesWindow
         var preview = "";
         foreach (var f in Helper.GetFlags(nb.categories))
         {
-            preview += (Enum.GetName(typeof(NekosBest.Category), f) ?? "unknown") + ", ";
+            if (NekosBest.CategoryInfo.TryGetValue(f, out var info))
+            {
+                preview += $"{info.DisplayName}, ";
+            }
         }
         preview = preview.Length > 3 ? preview[..^2] : "No categories selected";
 
@@ -272,14 +274,46 @@ public class ImageSourcesWindow
         ImGui.Unindent(INDENT);
     }
 
-    private static void DrawWaifuim()
+    private static void DrawWaifuim(ImageSourceConfig source)
     {
         ImGui.Indent(INDENT);
-        if (ImGui.Combo("Content##Waifuim", ref Plugin.Config.Sources.Waifuim.ContentComboboxIndex, new string[] { "SFW", "NSFW", "Both" }, 3))
+        var wai = Plugin.Config.Sources.Waifuim;
+        var preview = "";
+        foreach (var f in Helper.GetFlags(wai.categories))
         {
-            Plugin.Config.Sources.Waifuim.sfw = Plugin.Config.Sources.Waifuim.ContentComboboxIndex is 0 or 2;
-            Plugin.Config.Sources.Waifuim.nsfw = Plugin.Config.Sources.Waifuim.ContentComboboxIndex is 1 or 2;
-            Plugin.UpdateImageSource();
+            if (Waifuim.CategoryInfo.TryGetValue(f, out var info))
+            {
+                if (!info.NSFW || NSFW.AllowNSFW)
+                {
+                    preview += $"{info.DisplayName}, ";
+                }
+            }
+        }
+        preview = preview.Length > 3 ? preview[..^2] : "No categories selected";
+
+        var enums = (Waifuim.Category[])Enum.GetValues(typeof(Waifuim.Category));
+
+        if (ImGui.BeginCombo("Categories##Waifuim", preview, ImGuiComboFlags.HeightLarge))
+        {
+            foreach (var e in enums)
+            {
+                if (Waifuim.CategoryInfo.TryGetValue(e, out var info))
+                {
+                    if (!info.NSFW || NSFW.AllowNSFW)
+                    {
+                        EnumSelectable(source, info.DisplayName, e, ref wai.categories);
+                    }
+                }
+            }
+            ImGui.EndCombo();
+        }
+        if (preview.Length > 35)
+            Common.ToolTip(preview);
+
+        if (wai.categories == Waifuim.Category.None)
+        {
+            ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), "WARNING:"); ImGui.SameLine();
+            ImGui.TextWrapped("No categories selected. Please select at least one image category.");
         }
         ImGui.Unindent(INDENT);
     }

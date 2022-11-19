@@ -280,9 +280,12 @@ public class ConfigWindow
         ImGui.SameLine(); Common.HelpMarker("This will reload all Image Sources from the state saved in the configuration file.");
 
         // Force Garbage Collection
-        if (Plugin.PluginInterface.IsDevMenuOpen && ImGui.Button("Force Garbage collection##Advanced"))
-            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
-        ImGui.SameLine(); Common.HelpMarker("This will lag the game. Only press this when you know what you are doing!");
+        if (Plugin.PluginInterface.IsDevMenuOpen)
+        {
+            if (ImGui.Button("Force Garbage collection##Advanced"))
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
+            ImGui.SameLine(); Common.HelpMarker("This will lag the game. Only press this when you know what you are doing!");
+        }
 
         ImGui.PopItemWidth();
     }
