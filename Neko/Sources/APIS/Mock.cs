@@ -11,12 +11,14 @@ public class Mock : ImageSource
 {
     public static readonly List<MockImage> MockImages = new()
     {
-        new("X:\\1.jpg"),
-        new("X:\\2.png"),
-        new("X:\\3.gif"),
-        new("X:\\4.gif"),
-        new("X:\\different_frames.gif"),
+   //     new("X:\\1.jpg"),
+  //      new("X:\\2.png"),
+ //       new("X:\\3.gif"),
+ //       new("X:\\4.gif"),
+ //       new("X:\\different_frames.gif"),
         new("X:\\slap_012.gif"),
+        new("X:\\really_big.gif"),
+        new("X:\\transparent.gif"),
     };
 
 #pragma warning disable CA2211 // Non-constant fields should not be visible

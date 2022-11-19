@@ -224,7 +224,10 @@ public class ConfigWindow
                                             "Increasing this will result in higher RAM usage. Recomended: 5");
         if (Plugin.GuiMain != null)
         {
-            ImGui.SameLine(); ImGui.TextDisabled(Helper.SizeSuffix(Plugin.GuiMain.Queue.RAMUsage()));
+            var usage = Plugin.GuiMain.Queue.RAMUsage();
+            if (Plugin.GuiMain.ImageCurrent != null)
+                usage += Plugin.GuiMain.ImageCurrent.RAMUsage;
+            ImGui.SameLine(); ImGui.TextDisabled(Helper.SizeSuffix(usage));
         }
 
         // Int in VRAM
@@ -240,7 +243,10 @@ public class ConfigWindow
                                             "Increasing this will result in higher VRAM usage. Recomended: 2");
         if (Plugin.GuiMain != null)
         {
-            ImGui.SameLine(); ImGui.TextDisabled(Helper.SizeSuffix(Plugin.GuiMain.Queue.VRAMUsage()));
+            var usage = Plugin.GuiMain.Queue.VRAMUsage();
+            if (Plugin.GuiMain.ImageCurrent != null)
+                usage += Plugin.GuiMain.ImageCurrent.VRAMUsage;
+            ImGui.SameLine(); ImGui.TextDisabled(Helper.SizeSuffix(usage));
         }
         ImGui.PopItemWidth();
 
@@ -272,6 +278,11 @@ public class ConfigWindow
         if (ImGui.Button("Reload Image Sources from config##Advanced"))
             Plugin.ReloadSources();
         ImGui.SameLine(); Common.HelpMarker("This will reload all Image Sources from the state saved in the configuration file.");
+
+        // Force Garbage Collection
+        if (Plugin.PluginInterface.IsDevMenuOpen && ImGui.Button("Force Garbage collection##Advanced"))
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
+        ImGui.SameLine(); Common.HelpMarker("This will lag the game. Only press this when you know what you are doing!");
 
         ImGui.PopItemWidth();
     }

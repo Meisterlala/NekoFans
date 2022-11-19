@@ -213,6 +213,16 @@ public class NekoImage
         CurrentState = State.LoadedGPU;
     }
 
+    private void ClearData(){
+        DebugHelper.Assert(CurrentState == State.LoadedGPU, "Image is not loaded into GPU. Current state: " + CurrentState);
+        DebugHelper.Assert(Frames != null, "Image has no frames");
+
+        foreach (var frame in Frames!)
+        {
+            frame.ClearData();
+        }
+    }
+
     private Task DecodeAndLoadGPUAsync(CancellationToken ct = default)
         => Task.Run(() =>
         {
@@ -220,6 +230,7 @@ public class NekoImage
             {
                 Decode();
                 LoadGPU();
+                ClearData();
             }
             catch (Exception ex)
             {
