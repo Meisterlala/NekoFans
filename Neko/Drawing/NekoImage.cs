@@ -213,7 +213,8 @@ public class NekoImage
         CurrentState = State.LoadedGPU;
     }
 
-    private void ClearData(){
+    private void ClearData()
+    {
         DebugHelper.Assert(CurrentState == State.LoadedGPU, "Image is not loaded into GPU. Current state: " + CurrentState);
         DebugHelper.Assert(Frames != null, "Image has no frames");
 

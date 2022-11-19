@@ -135,7 +135,7 @@ public abstract class Twitter : ImageSource
             Media = media;
         }
 
-        public string TweetDescription()
+        public readonly string TweetDescription()
         {
             if (AuthorName == null || AuthorUsername == null)
                 throw new Exception("AuthorName or AuthorUsername is null");
@@ -168,10 +168,10 @@ public abstract class Twitter : ImageSource
             return TweetDescription();
         }
 
-        public string URLTweetID()
+        public readonly string URLTweetID()
             => $"https://twitter.com/{AuthorUsername}/status/{TweetID}";
 
-        public string URLTweetID(string authorUsername)
+        public readonly string URLTweetID(string authorUsername)
             => $"https://twitter.com/{authorUsername}/status/{TweetID}";
     }
 
