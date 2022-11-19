@@ -156,7 +156,7 @@ public class ImageSourcesWindow
         var preview = "";
         foreach (var f in Helper.GetFlags(nl.categories))
         {
-            if (NekosLife.CategorieInfo.TryGetValue(f, out var info))
+            if (NekosLife.CategoryInfo.TryGetValue(f, out var info))
             {
                 if (info.NSFW && !NSFW.AllowNSFW)
                     continue;
@@ -165,10 +165,10 @@ public class ImageSourcesWindow
         }
         preview = preview.Length > 3 ? preview[..^2] : "No categories selected";
 
-        var dic = NekosLife.CategorieInfo;
-        var enums = (NekosLife.Categories[])Enum.GetValues(typeof(NekosLife.Categories));
+        var dic = NekosLife.CategoryInfo;
+        var enums = (NekosLife.Category[])Enum.GetValues(typeof(NekosLife.Category));
 
-        if (ImGui.BeginCombo("Categories##NekosLife", preview))
+        if (ImGui.BeginCombo("Categories##NekosLife", preview, ImGuiComboFlags.HeightLarge))
         {
             foreach (var e in enums)
             {
@@ -184,7 +184,7 @@ public class ImageSourcesWindow
         if (preview.Length > 35)
             Common.ToolTip(preview);
 
-        if (nl.categories == NekosLife.Categories.None)
+        if (nl.categories == NekosLife.Category.None)
         {
             ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), "WARNING:"); ImGui.SameLine();
             ImGui.TextWrapped("No categories selected. Please select at least one image category.");
@@ -244,23 +244,27 @@ public class ImageSourcesWindow
         var preview = "";
         foreach (var f in Helper.GetFlags(nb.categories))
         {
-            preview += (Enum.GetName(typeof(NekosBest.Config.Category), f) ?? "unknown") + ", ";
+            preview += (Enum.GetName(typeof(NekosBest.Category), f) ?? "unknown") + ", ";
         }
-
         preview = preview.Length > 3 ? preview[..^2] : "No categories selected";
 
-        if (ImGui.BeginCombo("Categories##NekosBest", preview))
+        var enums = (NekosBest.Category[])Enum.GetValues(typeof(NekosBest.Category));
+
+        if (ImGui.BeginCombo("Categories##NekosBest", preview, ImGuiComboFlags.HeightLarge))
         {
-            EnumSelectable(source, "Waifu", NekosBest.Config.Category.Waifu, ref nb.categories);
-            EnumSelectable(source, "Neko", NekosBest.Config.Category.Neko, ref nb.categories);
-            EnumSelectable(source, "Kitsune", NekosBest.Config.Category.Kitsune, ref nb.categories);
-            EnumSelectable(source, "Husbando", NekosBest.Config.Category.Husbando, ref nb.categories);
+            foreach (var e in enums)
+            {
+                if (NekosBest.CategoryInfo.TryGetValue(e, out var info))
+                {
+                    EnumSelectable(source, info.DisplayName, e, ref nb.categories);
+                }
+            }
             ImGui.EndCombo();
         }
         if (preview.Length > 35)
             Common.ToolTip(preview);
 
-        if (nb.categories == NekosBest.Config.Category.None)
+        if (nb.categories == NekosBest.Category.None)
         {
             ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), "WARNING:"); ImGui.SameLine();
             ImGui.TextWrapped("No categories selected. Please select at least one image category.");
@@ -734,8 +738,8 @@ public class ImageSourcesWindow
     {
         if (ImGui.Selectable(name + "##" + source.Name, combined.HasFlag(single), ImGuiSelectableFlags.DontClosePopups))
         {
-            var comb = Convert.ToInt32(combined);
-            var sing = Convert.ToInt32(single);
+            var comb = Convert.ToInt64(combined);
+            var sing = Convert.ToInt64(single);
             if (combined.HasFlag(single))
                 comb &= ~sing;
             else

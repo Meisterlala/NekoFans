@@ -43,7 +43,7 @@ public static class Helper
     {
         return from T t in
                    from Enum value in Enum.GetValues(input.GetType())
-                   where input.HasFlag(value) && Convert.ToInt32(value) > 0
+                   where input.HasFlag(value) && Convert.ToInt64(value) > 0
                    select value
                select t;
     }

@@ -10,31 +10,34 @@ public class NekosLife : ImageSource
     public class Config : IImageConfig
     {
         public bool enabled = true;
-        public Categories categories = Categories.Neko | Categories.Pat;
+        public Category categories = Category.Neko | Category.Pat;
 
         public ImageSource? LoadConfig()
         {
-            if (!enabled || categories == Categories.None)
+            if (!enabled || categories == Category.None)
                 return null;
 
             var flags = Helper.GetFlags(categories);
-            var sources = new List<ImageSource>();
+            var comb = new CombinedSource();
             foreach (var flag in flags)
             {
-                if (CategorieInfo.TryGetValue(flag, out var info))
+                if (CategoryInfo.TryGetValue(flag, out var info))
                 {
                     if (info.NSFW && !NSFW.AllowNSFW)
                         continue;
-                    sources.Add(new NekosLife(info.APIName));
+                    comb.AddSource(new NekosLife(info.APIName));
+                }
+                else
+                {
+                    Dalamud.Logging.PluginLog.LogError($"NekosLife: Unknown category {flag}");
                 }
             }
-            var combined = new CombinedSource(sources.ToArray());
-            return combined.Count() > 0 ? combined : null;
+            return comb.Count() > 0 ? comb : null;
         }
     }
 
     [Flags]
-    public enum Categories
+    public enum Category
     {
         None = 0,
         /* Images */
@@ -62,21 +65,21 @@ public class NekosLife : ImageSource
         public bool NSFW;
     }
 
-    public static readonly Dictionary<Categories, Info> CategorieInfo = new() {
-        { Categories.Neko,    new Info{ DisplayName = "Neko",             APIName= "neko"} },
-        { Categories.Lizard,  new Info{ DisplayName = "Lizard",           APIName= "lizard"} },
-        { Categories.Meow,    new Info{ DisplayName = "Meow",             APIName= "meow"} },
-        { Categories.Cuddle,  new Info{ DisplayName = "Cuddle GIF",       APIName= "cuddle"} },
-        { Categories.Feed,    new Info{ DisplayName = "Feed GIF",         APIName= "feed"} },
-        { Categories.FoxGirl, new Info{ DisplayName = "Fox Girl",         APIName= "fox_girl"} },
-        { Categories.Hug,     new Info{ DisplayName = "Hug GIF",          APIName= "hug"} },
-        { Categories.Kiss,    new Info{ DisplayName = "Kiss GIF",         APIName= "kiss"} },
-        { Categories.Ngif,    new Info{ DisplayName = "Neko GIF (NSFW)",  APIName= "ngif", NSFW = true} },
-        { Categories.Pat,     new Info{ DisplayName = "Pat GIF",          APIName= "pat"} },
-        { Categories.Slap,    new Info{ DisplayName = "Slap GIF",         APIName= "slap"} },
-        { Categories.Smug,    new Info{ DisplayName = "Smug GIF",         APIName= "smug"} },
-        { Categories.Spank,   new Info{ DisplayName = "Spank GIF (NSFW)", APIName= "spank", NSFW = true} },
-        { Categories.Tickle,  new Info{ DisplayName = "Tickle GIF",       APIName= "tickle"} },
+    public static readonly Dictionary<Category, Info> CategoryInfo = new() {
+        { Category.Neko,    new Info{ DisplayName = "Neko",             APIName = "neko"} },
+        { Category.Lizard,  new Info{ DisplayName = "Lizard",           APIName = "lizard"} },
+        { Category.Meow,    new Info{ DisplayName = "Meow",             APIName = "meow"} },
+        { Category.Cuddle,  new Info{ DisplayName = "Cuddle GIF",       APIName = "cuddle"} },
+        { Category.Feed,    new Info{ DisplayName = "Feed GIF",         APIName = "feed"} },
+        { Category.FoxGirl, new Info{ DisplayName = "Fox Girl",         APIName = "fox_girl"} },
+        { Category.Hug,     new Info{ DisplayName = "Hug GIF",          APIName = "hug"} },
+        { Category.Kiss,    new Info{ DisplayName = "Kiss GIF",         APIName = "kiss"} },
+        { Category.Ngif,    new Info{ DisplayName = "Neko GIF (NSFW)",  APIName = "ngif", NSFW = true} },
+        { Category.Pat,     new Info{ DisplayName = "Pat GIF",          APIName = "pat"} },
+        { Category.Slap,    new Info{ DisplayName = "Slap GIF",         APIName = "slap"} },
+        { Category.Smug,    new Info{ DisplayName = "Smug GIF",         APIName = "smug"} },
+        { Category.Spank,   new Info{ DisplayName = "Spank GIF (NSFW)", APIName = "spank", NSFW = true} },
+        { Category.Tickle,  new Info{ DisplayName = "Tickle GIF",       APIName = "tickle"} },
     };
 
     public override string Name => "Nekos.life";

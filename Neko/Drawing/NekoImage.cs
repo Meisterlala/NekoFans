@@ -9,7 +9,7 @@ namespace Neko.Drawing;
 
 public class NekoImage
 {
-    public class Frame
+    public class Frame : IDisposable
     {
         public byte[]? Data { get; private set; }
         public int FrameDelay { get; }
@@ -21,15 +21,16 @@ public class NekoImage
             FrameDelay = frameDelay; // In ms
         }
 
-        ~Frame()
+        public void ClearData()
+            => Data = null;
+
+        public void Dispose()
         {
             Texture?.Dispose();
             Texture = null;
             Data = null;
+            GC.SuppressFinalize(this);
         }
-
-        public void ClearData()
-            => Data = null;
     }
 
     public enum State
@@ -124,13 +125,18 @@ public class NekoImage
 
     ~NekoImage()
     {
-        PluginLog.LogVerbose($"Disposing NekoImage: {this}");
-
         CurrentState = State.Error;
         EncodedData = null;
 
-        Frames?.Clear();
-        Frames = null;
+        if (Frames != null)
+        {
+            foreach (var frame in Frames)
+            {
+                frame.Dispose();
+            }
+            Frames?.Clear();
+            Frames = null;
+        }
     }
 
     public void LoadData(byte[] data)
