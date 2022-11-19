@@ -38,11 +38,14 @@ public static class Helper
             SizeSuffixes[mag]);
     }
 
-    public static IEnumerable<Enum> GetFlags(Enum input)
+    public static IEnumerable<T> GetFlags<T>(T input)
+        where T : Enum
     {
-        return from Enum value in Enum.GetValues(input.GetType())
-               where input.HasFlag(value) && Convert.ToInt32(value) > 0
-               select value;
+        return from T t in
+                   from Enum value in Enum.GetValues(input.GetType())
+                   where input.HasFlag(value) && Convert.ToInt32(value) > 0
+                   select value
+               select t;
     }
 
     public static void CopyToClipboard(string text)

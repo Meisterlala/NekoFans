@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -108,9 +109,20 @@ public class ConfigWindow
         ImGui.PushItemWidth(-200 * ImGui.GetIO().FontGlobalScale);
 
         // Background opacity slider
-        if (ImGui.SliderFloat("Background opacity", ref Plugin.Config.GuiMainOpacity, 0, 1))
+        if (ImGui.SliderFloat("Background opacity", ref Plugin.Config.GuiMainOpacity, 0, 100, "%3.0f%%"))
+        {
+            Plugin.Config.GuiMainOpacity = Math.Clamp(Plugin.Config.GuiMainOpacity, 0, 100);
             Plugin.Config.Save();
+        }
         ImGui.SameLine(); Common.HelpMarker("CTRL+click to input value.");
+
+        // Gif Animation Speed
+        if (ImGui.SliderFloat("GIF animation speed", ref Plugin.Config.GIFSpeed, 0, 300, "%3.0f%%"))
+        {
+            Plugin.Config.GIFSpeed = Math.Clamp(Plugin.Config.GIFSpeed, 0, 300);
+            Plugin.Config.Save();
+        }
+        ImGui.SameLine(); Common.HelpMarker("How fast animimated GIFs should move. Default: 100%\nCTRL+click to input value.");
 
         // Allow resizing
         if (ImGui.Checkbox("Allow resizing", ref Plugin.Config.GuiMainAllowResize))

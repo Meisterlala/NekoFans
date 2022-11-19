@@ -16,6 +16,7 @@ public class Mock : ImageSource
         new("X:\\3.gif"),
         new("X:\\4.gif"),
         new("X:\\different_frames.gif"),
+        new("X:\\slap_012.gif"),
     };
 
 #pragma warning disable CA2211 // Non-constant fields should not be visible

@@ -39,6 +39,9 @@ public class Configuration : IPluginConfiguration
     public int Version { get; set; } = 1;
 
     public SourceConfig Sources = new();
+    /// <summary>
+    /// Value between 0 and 100 in percent
+    /// </summary>
     public float GuiMainOpacity;
     public bool GuiMainShowResize;
     public bool GuiMainShowTitleBar = true;
@@ -51,6 +54,11 @@ public class Configuration : IPluginConfiguration
     /// 5 minutes
     /// </summary>
     public double SlideshowIntervalSeconds = 60 * 5;
+
+    /// <summary>
+    /// Value between 0 and 300 in percent
+    /// </summary>
+    public float GIFSpeed = 100f;
 
     public int QueueDownloadCount = 5;
     public int QueuePreloadCount = 2;

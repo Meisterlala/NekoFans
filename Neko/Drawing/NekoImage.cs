@@ -67,6 +67,9 @@ public class NekoImage
     private int DecodingAndLoading;
     public bool IsDecodingAndLoading => DecodingAndLoading == 1;
 
+    private int CurrentFrameIndex;
+    private double LastFrameChange;
+
     public long RAMUsage =>
         CurrentState == State.Downloading || EncodedData == null
         ? 0
@@ -76,15 +79,15 @@ public class NekoImage
     {
         get
         {
-            if (Frames == null || Frames.Count == 0)
-                return 0;
-
-            long res = 0;
-            foreach (var frame in Frames)
+            if (Frames == null
+            || Frames.Count == 0
+            || CurrentState != State.LoadedGPU)
             {
-                res += frame.Data?.Length ?? 0;
+                return 0;
             }
-            return res;
+            DebugHelper.Assert(Frames.Count > 0, "No frames in image");
+            DebugHelper.Assert(Width.HasValue && Height.HasValue, "Image has no width or height");
+            return Width!.Value * Height!.Value * 4L * Frames.Count!;
         }
     }
 
@@ -121,6 +124,8 @@ public class NekoImage
 
     ~NekoImage()
     {
+        PluginLog.LogVerbose($"Disposing NekoImage: {this}");
+
         CurrentState = State.Error;
         EncodedData = null;
 
@@ -251,25 +256,19 @@ public class NekoImage
     {
         DebugHelper.Assert(CurrentState == State.LoadedGPU, "Image not loaded into GPU VRAM yet. Current state: " + CurrentState);
         DebugHelper.Assert(Width.HasValue && Height.HasValue, "Image has no width or height");
-        DebugHelper.Assert(Frames != null, "Image has no frames");
-        DebugHelper.Assert(Frames!.Count == 1 || CycleTime > 0, "Image has multible Frames but no cycle time");
+        DebugHelper.Assert(Frames != null || Frames!.Count != 0, "Image has no frames");
 
-        var frame = Frames[0];
-        if (Frames.Count > 1)
+        if (Frames!.Count == 1)
+            return Frames[0].Texture!;
+
+        var delay = Frames[CurrentFrameIndex].FrameDelay / (Plugin.Config.GIFSpeed / 100f);
+        if (Math.Abs(time - LastFrameChange) >= delay)
         {
-            var t = time % CycleTime;
-            var timeTotal = 0;
-            foreach (var f in Frames)
-            {
-                timeTotal += f.FrameDelay;
-                if (timeTotal > t)
-                {
-                    frame = f;
-                    break;
-                }
-            }
+            LastFrameChange = time;
+            CurrentFrameIndex = (CurrentFrameIndex + 1) % Frames.Count;
         }
 
+        var frame = Frames[CurrentFrameIndex];
         DebugHelper.Assert(frame.Texture != null, "Frame has no texture");
         return frame.Texture!;
     }

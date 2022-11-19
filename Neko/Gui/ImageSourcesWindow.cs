@@ -76,6 +76,8 @@ public class ImageSourcesWindow
             DrawMock();
         //  ------------ nekos.life --------------
         SourceCheckbox(SourceList[0], ref Plugin.Config.Sources.NekosLife.enabled);
+        if (Plugin.Config.Sources.NekosLife.enabled)
+            DrawNekosLife(SourceList[0]);
         //  ------------ nekos.best --------------
         SourceCheckbox(SourceList[1], ref Plugin.Config.Sources.NekosBest.enabled);
         if (Plugin.Config.Sources.NekosBest.enabled)
@@ -147,6 +149,49 @@ public class ImageSourcesWindow
 #endif
     }
 
+    private static void DrawNekosLife(ImageSourceConfig source)
+    {
+        ImGui.Indent(INDENT);
+        var nl = Plugin.Config.Sources.NekosLife;
+        var preview = "";
+        foreach (var f in Helper.GetFlags(nl.categories))
+        {
+            if (NekosLife.CategorieInfo.TryGetValue(f, out var info))
+            {
+                if (info.NSFW && !NSFW.AllowNSFW)
+                    continue;
+                preview += info.DisplayName + ", ";
+            }
+        }
+        preview = preview.Length > 3 ? preview[..^2] : "No categories selected";
+
+        var dic = NekosLife.CategorieInfo;
+        var enums = (NekosLife.Categories[])Enum.GetValues(typeof(NekosLife.Categories));
+
+        if (ImGui.BeginCombo("Categories##NekosLife", preview))
+        {
+            foreach (var e in enums)
+            {
+                if (dic.TryGetValue(e, out var info))
+                {
+                    if (info.NSFW && !NSFW.AllowNSFW)
+                        continue;
+                    EnumSelectable(source, info.DisplayName, e, ref nl.categories);
+                }
+            }
+            ImGui.EndCombo();
+        }
+        if (preview.Length > 35)
+            Common.ToolTip(preview);
+
+        if (nl.categories == NekosLife.Categories.None)
+        {
+            ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), "WARNING:"); ImGui.SameLine();
+            ImGui.TextWrapped("No categories selected. Please select at least one image category.");
+        }
+        ImGui.Unindent(INDENT);
+    }
+
     private static void DrawWaifuPics(ImageSourceConfig source)
     {
         ImGui.Indent(INDENT);
@@ -168,16 +213,16 @@ public class ImageSourcesWindow
 
         if (ImGui.BeginCombo("Categories##WaifuPics", preview))
         {
-            EnumSelectable(source, "Waifu##WaifuPics", WaifuPics.CategoriesSFW.Waifu, ref wp.sfwCategories);
-            EnumSelectable(source, "Neko##WaifuPics", WaifuPics.CategoriesSFW.Neko, ref wp.sfwCategories);
-            EnumSelectable(source, "Shinobi##WaifuPics", WaifuPics.CategoriesSFW.Shinobu, ref wp.sfwCategories);
-            EnumSelectable(source, "Megumin##WaifuPics", WaifuPics.CategoriesSFW.Megumin, ref wp.sfwCategories);
-            EnumSelectable(source, "Awoo##WaifuPics", WaifuPics.CategoriesSFW.Awoo, ref wp.sfwCategories);
+            EnumSelectable(source, "Waifu", WaifuPics.CategoriesSFW.Waifu, ref wp.sfwCategories);
+            EnumSelectable(source, "Neko", WaifuPics.CategoriesSFW.Neko, ref wp.sfwCategories);
+            EnumSelectable(source, "Shinobi", WaifuPics.CategoriesSFW.Shinobu, ref wp.sfwCategories);
+            EnumSelectable(source, "Megumin", WaifuPics.CategoriesSFW.Megumin, ref wp.sfwCategories);
+            EnumSelectable(source, "Awoo", WaifuPics.CategoriesSFW.Awoo, ref wp.sfwCategories);
             if (NSFW.AllowNSFW) // NSFW Check
             {
-                EnumSelectable(source, "NSFW Waifu##WaifuPics", WaifuPics.CategoriesNSFW.Waifu, ref wp.nsfwCategories);
-                EnumSelectable(source, "NSFW Neko##WaifuPics", WaifuPics.CategoriesNSFW.Neko, ref wp.nsfwCategories);
-                EnumSelectable(source, "NSFW Trap##WaifuPics", WaifuPics.CategoriesNSFW.Trap, ref wp.nsfwCategories);
+                EnumSelectable(source, "NSFW Waifu", WaifuPics.CategoriesNSFW.Waifu, ref wp.nsfwCategories);
+                EnumSelectable(source, "NSFW Neko", WaifuPics.CategoriesNSFW.Neko, ref wp.nsfwCategories);
+                EnumSelectable(source, "NSFW Trap", WaifuPics.CategoriesNSFW.Trap, ref wp.nsfwCategories);
             }
             ImGui.EndCombo();
         }
@@ -206,10 +251,10 @@ public class ImageSourcesWindow
 
         if (ImGui.BeginCombo("Categories##NekosBest", preview))
         {
-            EnumSelectable(source, "Waifu##NekosBest", NekosBest.Config.Category.Waifu, ref nb.categories);
-            EnumSelectable(source, "Neko##NekosBest", NekosBest.Config.Category.Neko, ref nb.categories);
-            EnumSelectable(source, "Kitsune##NekosBest", NekosBest.Config.Category.Kitsune, ref nb.categories);
-            EnumSelectable(source, "Husbando##NekosBest", NekosBest.Config.Category.Husbando, ref nb.categories);
+            EnumSelectable(source, "Waifu", NekosBest.Config.Category.Waifu, ref nb.categories);
+            EnumSelectable(source, "Neko", NekosBest.Config.Category.Neko, ref nb.categories);
+            EnumSelectable(source, "Kitsune", NekosBest.Config.Category.Kitsune, ref nb.categories);
+            EnumSelectable(source, "Husbando", NekosBest.Config.Category.Husbando, ref nb.categories);
             ImGui.EndCombo();
         }
         if (preview.Length > 35)

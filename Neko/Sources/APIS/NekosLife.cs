@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Threading;
 using Neko.Drawing;
 
@@ -8,22 +10,86 @@ public class NekosLife : ImageSource
     public class Config : IImageConfig
     {
         public bool enabled = true;
+        public Categories categories = Categories.Neko | Categories.Pat;
 
-        public ImageSource? LoadConfig() => enabled ? new NekosLife() : null;
+        public ImageSource? LoadConfig()
+        {
+            if (!enabled || categories == Categories.None)
+                return null;
+
+            var flags = Helper.GetFlags(categories);
+            var sources = new List<ImageSource>();
+            foreach (var flag in flags)
+            {
+                if (CategorieInfo.TryGetValue(flag, out var info))
+                {
+                    if (info.NSFW && !NSFW.AllowNSFW)
+                        continue;
+                    sources.Add(new NekosLife(info.APIName));
+                }
+            }
+            var combined = new CombinedSource(sources.ToArray());
+            return combined.Count() > 0 ? combined : null;
+        }
     }
+
+    [Flags]
+    public enum Categories
+    {
+        None = 0,
+        /* Images */
+        Neko = 1 << 0,
+        Lizard = 1 << 1,
+        Meow = 1 << 2,
+        /* GIFs */
+        Cuddle = 1 << 3,
+        Feed = 1 << 4,
+        FoxGirl = 1 << 5,
+        Hug = 1 << 6,
+        Kiss = 1 << 7,
+        Ngif = 1 << 8,
+        Pat = 1 << 9,
+        Slap = 1 << 10,
+        Smug = 1 << 11,
+        Spank = 1 << 12,
+        Tickle = 1 << 13,
+    }
+
+    public struct Info
+    {
+        public string DisplayName;
+        public string APIName;
+        public bool NSFW;
+    }
+
+    public static readonly Dictionary<Categories, Info> CategorieInfo = new() {
+        { Categories.Neko,    new Info{ DisplayName = "Neko",             APIName= "neko"} },
+        { Categories.Lizard,  new Info{ DisplayName = "Lizard",           APIName= "lizard"} },
+        { Categories.Meow,    new Info{ DisplayName = "Meow",             APIName= "meow"} },
+        { Categories.Cuddle,  new Info{ DisplayName = "Cuddle GIF",       APIName= "cuddle"} },
+        { Categories.Feed,    new Info{ DisplayName = "Feed GIF",         APIName= "feed"} },
+        { Categories.FoxGirl, new Info{ DisplayName = "Fox Girl",         APIName= "fox_girl"} },
+        { Categories.Hug,     new Info{ DisplayName = "Hug GIF",          APIName= "hug"} },
+        { Categories.Kiss,    new Info{ DisplayName = "Kiss GIF",         APIName= "kiss"} },
+        { Categories.Ngif,    new Info{ DisplayName = "Neko GIF (NSFW)",  APIName= "ngif", NSFW = true} },
+        { Categories.Pat,     new Info{ DisplayName = "Pat GIF",          APIName= "pat"} },
+        { Categories.Slap,    new Info{ DisplayName = "Slap GIF",         APIName= "slap"} },
+        { Categories.Smug,    new Info{ DisplayName = "Smug GIF",         APIName= "smug"} },
+        { Categories.Spank,   new Info{ DisplayName = "Spank GIF (NSFW)", APIName= "spank", NSFW = true} },
+        { Categories.Tickle,  new Info{ DisplayName = "Tickle GIF",       APIName= "tickle"} },
+    };
 
     public override string Name => "Nekos.life";
+    public override string ToString() => $"Nekos.life {Endpoint}";
+    private readonly string Endpoint;
 
-#pragma warning disable
-    public class NekosLifeJson
-    {
-        public string url { get; set; }
-    }
-#pragma warning restore
+    public override bool SameAs(ImageSource other) => other is NekosLife nl && nl.Endpoint == Endpoint;
+
+    public NekosLife(string endpoint) => Endpoint = endpoint;
 
     public override NekoImage Next(CancellationToken ct = default)
     {
-        const string url = "https://nekos.life/api/v2/img/neko";
+        var url = $"https://nekos.life/api/v2/img/{Endpoint}";
         return new NekoImage(async (img) =>
         {
             img.URLDownloadWebsite = url;
@@ -33,7 +99,10 @@ public class NekosLife : ImageSource
         }, this);
     }
 
-    public override string ToString() => "Nekos.life";
-
-    public override bool SameAs(ImageSource other) => true;
+#pragma warning disable
+    public class NekosLifeJson
+    {
+        public string url { get; set; }
+    }
+#pragma warning restore
 }

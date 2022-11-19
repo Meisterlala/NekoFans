@@ -92,7 +92,7 @@ public class MainWindow
 
         ImGui.SetNextWindowSize(size * 5, ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(size, size * 50);
-        ImGui.SetNextWindowBgAlpha(Plugin.Config.GuiMainOpacity);
+        ImGui.SetNextWindowBgAlpha(Plugin.Config.GuiMainOpacity / 100f);
 
         var flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse;
 

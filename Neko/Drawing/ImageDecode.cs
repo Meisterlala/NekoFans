@@ -22,7 +22,19 @@ public static class ImageDecode
         {
             var frame = img.Frames[i];
             var frameData = new byte[frame.Width * frame.Height * 4];
+
+            // According to the GIF spec, the frame delay should always be honored.
+            // So a frame delay of 0 should imidiatly display the next frame.
             var frameDelay = img.Frames[i].Metadata.GetGifMetadata().FrameDelay * 10; // convert to ms
+            // However, most programs ignore this and use a arbitrary delay instead.
+            // see https://bugzilla.mozilla.org/show_bug.cgi?id=139677
+            // We dont allow frame delays below 50ms.
+            // Frames with 0 delay are set to 100ms
+            if (frameDelay <= 0)
+                frameDelay = 100;
+            if (frameDelay < 50)
+                frameDelay = 50;
+
             frame.CopyPixelDataTo(frameData);
             frames.Add(new NekoImage.Frame(frameData, frameDelay));
         }
