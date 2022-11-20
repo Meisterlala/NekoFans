@@ -5,7 +5,7 @@
     "Punchline": "Frustrated in a dungeon? Look at a cute cat girl!",
     "Description": "Shows you an image of a random neko character. Click on the image to view the next one.\nYou can choose different image sources, allowing you to look at Catboys, Waifus, Cats, Dogs and more.\n\nSupported APIs:\nTwitter, nekos.best, Nekos.life, Catboys, Dog CEO, The Cat API, Pic.re, Waifu.im, Waifu.pics and shibe.online\n\nWarning: You might see naughty images",
     "InternalName": "Neko",
-    "AssemblyVersion": "1.1.9",
+    "AssemblyVersion": "1.2.0",
     "RepoUrl": "https://github.com/Meisterlala/NekoFans",
     "ApplicableVersion": "any",
     "Tags": [
@@ -26,11 +26,11 @@
     ],
     "IsHide": "False",
     "IsTestingExclusive": "False",
-    "LastUpdated": 1666428916,
-    "DownloadCount": 4,
-    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.1.9/NekoFans.zip",
-    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.1.9/NekoFans.zip",
-    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.1.9/NekoFans.zip"
+    "LastUpdated": 1668948872,
+    "DownloadCount": 0,
+    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.2.0/NekoFans.zip",
+    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.2.0/NekoFans.zip",
+    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.2.0/NekoFans.zip"
   },
   {
     "Author": "Meisterlala",
@@ -57,7 +57,7 @@
     "IsHide": "False",
     "IsTestingExclusive": "False",
     "LastUpdated": 1661525212,
-    "DownloadCount": 1512,
+    "DownloadCount": 1550,
     "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.1-NSFW/NekoFansLewd.zip",
     "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.1-NSFW/NekoFansLewd.zip",
     "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.1-NSFW/NekoFansLewd.zip"
