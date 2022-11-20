@@ -293,7 +293,7 @@ public class ImageSourcesWindow
 
         var enums = (Waifuim.Category[])Enum.GetValues(typeof(Waifuim.Category));
 
-        if (ImGui.BeginCombo("Categories##Waifuim", preview, ImGuiComboFlags.HeightLarge))
+        if (ImGui.BeginCombo("Content##Waifuim", preview, ImGuiComboFlags.HeightLarge))
         {
             foreach (var e in enums)
             {

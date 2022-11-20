@@ -54,10 +54,10 @@ public class Waifuim : ImageSource
 
     public static readonly Dictionary<Category, Info> CategoryInfo = new()
     {
-        { Category.SFW,     new Info { DisplayName = "SFW",      NSFW = false, GIF = false } },
-        { Category.SFWGIF,  new Info { DisplayName = "SFW GIF",  NSFW = false, GIF = true  } },
-        { Category.NSFW,    new Info { DisplayName = "NSFW",     NSFW = true,  GIF = false } },
-        { Category.NSFWGIF, new Info { DisplayName = "NSFW GIF", NSFW = true,  GIF = true  } },
+        { Category.SFW,     new Info { DisplayName = "Images",      NSFW = false, GIF = false } },
+        { Category.SFWGIF,  new Info { DisplayName = "GIFs",  NSFW = false, GIF = true  } },
+        { Category.NSFW,    new Info { DisplayName = "NSFW Images",     NSFW = true,  GIF = false } },
+        { Category.NSFWGIF, new Info { DisplayName = "NSFW GIFs", NSFW = true,  GIF = true  } },
     };
 
     public override string Name => "waifu.im";
