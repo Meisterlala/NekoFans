@@ -106,7 +106,7 @@ public class MultiURLsGeneric<TJson, TQueueElement>
         }
         catch (AggregateException ex)
         {
-            PluginLog.LogWarning(ex.InnerExceptions[0], "Could not get more URLs to images");
+            throw new Exception("Could not get more URLs to images", ex);
         }
         finally
         {
