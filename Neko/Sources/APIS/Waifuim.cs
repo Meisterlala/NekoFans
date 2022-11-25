@@ -71,7 +71,7 @@ public class Waifuim : ImageSource
         CurrentInfo = i;
         var nsfw = CurrentInfo.NSFW && NSFW.AllowNSFW ? "true" : "false";
         var gif = CurrentInfo.GIF ? "true" : "false";
-        URLs = new($"https://api.waifu.im/random/?is_nsfw={nsfw}&gif={gif}&many=true", this);
+        URLs = new($"https://api.waifu.im/search/?is_nsfw={nsfw}&gif={gif}&many=true", this);
     }
 
     public override NekoImage Next(CancellationToken ct = default)
