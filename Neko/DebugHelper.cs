@@ -27,10 +27,10 @@ public static class DebugHelper
 
     public static class ThrowChance
     {
-        public const double DownloadImage = 0.1;
-        public const double DecodeImage = 0.1;
-        public const double LoadGPU = 0.1;
-        public const double ParseJson = 0.1;
+        public const double DownloadImage = 0.2;
+        public const double DecodeImage = 0.0;
+        public const double LoadGPU = 0.0;
+        public const double ParseJson = 0.2;
         public const double GetURL = 0.1;
         public const double Mock = 0;
     }

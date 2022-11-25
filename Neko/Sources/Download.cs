@@ -100,7 +100,7 @@ public static class Download
             {
                 // Handle 429 (Too Many Requests) by waiting 5 seconds
                 PluginLog.LogVerbose("API retuned 429 (Too Many Requests). Waiting 5 seconds before failing and trying again.");
-                await Task.Delay(5000, ct).ConfigureAwait(false);
+                await Task.Delay(1000, ct).ConfigureAwait(false);
                 throw new Exception("Exceded Limits of the API. Please try again later.", ex);
             }
 

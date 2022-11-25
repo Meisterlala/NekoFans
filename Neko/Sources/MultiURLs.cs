@@ -86,7 +86,9 @@ public class MultiURLsGeneric<TJson, TQueueElement>
 
             // Wait for more
             if (getNewURLs != null && _urlCount <= 0)
-                await getNewURLs.ConfigureAwait(false);
+            {
+                await getNewURLs.WaitAsync(ct).ConfigureAwait(false);
+            }
 
             // Try to get a URL from Queue
         } while (!URLs.TryDequeue(out element));
@@ -106,7 +108,7 @@ public class MultiURLsGeneric<TJson, TQueueElement>
         }
         catch (AggregateException ex)
         {
-            throw new Exception("Could not get more URLs to images", ex);
+            throw new Exception("Could not get more URLs to images", ex.InnerException);
         }
         finally
         {
