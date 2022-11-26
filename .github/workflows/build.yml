@@ -68,6 +68,9 @@ jobs:
         with:
           name: PluginZip
 
+      - name: Display structure of downloaded artifacts
+        run: ls -R
+
       - name: Get tag name
         id: tag
         uses: WyriHaximus/github-action-get-previous-tag@v1
