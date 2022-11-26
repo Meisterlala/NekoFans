@@ -76,11 +76,12 @@ jobs:
         uses: WyriHaximus/github-action-get-previous-tag@v1
 
       - name: Create release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v0.1.13
         with:
           name: ${{ env.PROJECT_NAME }} ${{ steps.tag.outputs.tag }}
           tag_name: ${{ steps.tag.outputs.tag }}
           body: ${{ github.events.commits[0].message }}
+          fail_on_unmatched_files: true
           files: |
             ${{ steps.download.outputs.download-path }}\NekoFans.zip
             ${{ steps.download.outputs.download-path }}\NekoFansLewd.zip
