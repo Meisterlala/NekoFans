@@ -27,10 +27,10 @@
     "IsHide": "False",
     "IsTestingExclusive": "False",
     "LastUpdated": 1669393392,
-    "DownloadCount": null,
-    "DownloadLinkInstall": null,
-    "DownloadLinkTesting": null,
-    "DownloadLinkUpdate": null
+    "DownloadCount": 0,
+    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.2.1/NekoFans.zip",
+    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.2.1/NekoFans.zip",
+    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.2.1/NekoFans.zip"
   },
   {
     "Author": "Meisterlala",
