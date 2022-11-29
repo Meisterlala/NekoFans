@@ -39,8 +39,7 @@ public class Plugin : IDalamudPlugin
         DefaultRequestHeaders = {
             UserAgent =
              {
-                new("NekoFans", Assembly.GetExecutingAssembly().GetName().Version?.ToString()),
-                new("(a Plugin for Final Fantasy XIV)")
+                new($"NekoFans/{Assembly.GetExecutingAssembly().GetName().Version?.ToString()}(a Plugin for Final Fantasy XIV)"),
             },
         },
     };

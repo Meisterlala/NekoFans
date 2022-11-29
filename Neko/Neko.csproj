@@ -97,9 +97,9 @@
  
   <!-- Manifest -->
   <ItemGroup>
-    <None Include="Neko.json">
+    <Content Include="Neko.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
   </ItemGroup>
 
   <!-- Embedded Resources -->

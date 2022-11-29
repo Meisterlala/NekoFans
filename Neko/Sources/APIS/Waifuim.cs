@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading;
 using Neko.Drawing;
 
@@ -66,12 +67,22 @@ public class Waifuim : ImageSource
     private readonly MultiURLs<WaifuImJson> URLs;
     private readonly Info CurrentInfo;
 
+    private const string ApiVersion = "v4";
+
     public Waifuim(Info i)
     {
         CurrentInfo = i;
         var nsfw = CurrentInfo.NSFW && NSFW.AllowNSFW ? "true" : "false";
         var gif = CurrentInfo.GIF ? "true" : "false";
-        URLs = new($"https://api.waifu.im/search/?is_nsfw={nsfw}&gif={gif}&many=true", this);
+
+        HttpRequestMessage requestWithVersion()
+        {
+            HttpRequestMessage request = new(HttpMethod.Get, $"https://api.waifu.im/search/?is_nsfw={nsfw}&gif={gif}&many=true");
+            request.Headers.Add("Accept-Version", ApiVersion);
+            return request;
+        }
+
+        URLs = new(requestWithVersion, this);
     }
 
     public override NekoImage Next(CancellationToken ct = default)
