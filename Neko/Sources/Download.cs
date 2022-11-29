@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -96,12 +97,22 @@ public static class Download
         }
         catch (HttpRequestException ex)
         {
+            // Handle 429 (Too Many Requests) by waiting and retrying
             if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
             {
-                // Handle 429 (Too Many Requests) by waiting 5 seconds
-                PluginLog.LogVerbose("API retuned 429 (Too Many Requests). Waiting 5 seconds before failing and trying again.");
-                await Task.Delay(1000, ct).ConfigureAwait(false);
-                throw new Exception("Exceded Limits of the API. Please try again later.", ex);
+                var retryAfter = 2000; // in ms
+                // Respect timeout header for WAIFU.IM
+                if (response.Headers.TryGetValues("Retry-After", out var values) && values.Any())
+                {
+                    var val = values.First();
+                    if (double.TryParse(val, out var seconds))
+                        retryAfter = (int)(seconds * 1000);
+                }
+
+                // Wait 2 seconds and retry
+                PluginLog.LogVerbose($"API retuned 429 (Too Many Requests). Waiting {retryAfter / 1000.0} seconds before trying again.");
+                await Task.Delay(retryAfter, ct).ConfigureAwait(false);
+                return await ParseJson<T>(request, ct).ConfigureAwait(false);
             }
 
             DebugHelper.LogNetwork(() => $"Error Downloading Json from {request.RequestUri}:\n{JsonSerializer.Serialize(response.Content.ReadAsStringAsync(ct).Result, new JsonSerializerOptions() { WriteIndented = true })}");
