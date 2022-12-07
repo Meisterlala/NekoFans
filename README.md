@@ -15,6 +15,14 @@ This is a plugin to be used with the [FFXIVQuickLauncher](https://github.com/goa
 
 Some functions of the Plugin are provided by the [Neko Server](https://github.com/Meisterlala/NekoServer).
 
+<p align="center">
+  <img src="https://cdn.discordapp.com/emojis/851544845322551347.webp?size=44&quality=lossless" align="left" alt="Total image count">
+    Give this project a star ⭐, so more people will find it. 
+  <img src="https://cdn.discordapp.com/emojis/851511871625756694.webp?size=44&quality=lossless" align="right" alt="Total image count">
+  <br>
+</p>
+  <br>
+
 > Inspired by [Nya](https://github.com/Sirspam/Nya) for Beat Saber.
 
 ## Installing
