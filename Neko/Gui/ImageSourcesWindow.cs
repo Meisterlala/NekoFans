@@ -608,7 +608,10 @@ public class ImageSourcesWindow
             ImGui.SameLine(ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X - length);
             if (ImGui.Button("Remove##Twitter") && selectedTwitterEntry >= 0)
             {
-                Plugin.Config.Sources.Twitter.queries.RemoveAll(q => q == TwitterTableEntries[selectedTwitterEntry].Query);
+                if (!Plugin.Config.Sources.Twitter.queries.Remove(TwitterTableEntries[selectedTwitterEntry].Query))
+                {
+                    PluginLog.LogError("Failed to remove Twitter query: " + TwitterTableEntries[selectedTwitterEntry].Query.searchText);
+                }
                 TwitterTableEntries.RemoveAt(selectedTwitterEntry);
                 if (TwitterTableEntries.Count == 0)
                 {

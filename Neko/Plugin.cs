@@ -39,7 +39,8 @@ public class Plugin : IDalamudPlugin
         DefaultRequestHeaders = {
             UserAgent =
              {
-                new($"NekoFans/{Assembly.GetExecutingAssembly().GetName().Version?.ToString()}(a Plugin for Final Fantasy XIV)"),
+                new("NekoFans", Assembly.GetExecutingAssembly().GetName().Version?.ToString()),
+                new("(a Plugin for Final Fantasy XIV)")
             },
         },
     };
@@ -80,6 +81,9 @@ public class Plugin : IDalamudPlugin
     {
         CommandManager.RemoveHandler(CommandConfig);
         CommandManager.RemoveHandler(CommandMain);
+
+        // Stop loading images
+        GuiMain?.Slideshow?.Stop();
     }
 
     public static void UpdateImageSource() => ImageSource.UpdateFrom(Config.LoadSources());
