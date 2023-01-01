@@ -10,13 +10,14 @@ $nekolewdname = "NekoFansLewd.zip"
 
 $nekolewdtag = "1.0.1-NSFW"
 
+$header = "Authorization: Bearer $env:GITHUB_TOKEN"
 
 ##############
 # Neko Fans
 ##############
 
 # Fetch the release data from the Gibhub API
-$data = Invoke-WebRequest -Uri "https://api.github.com/repos/$($username)/$($repo)/releases/latest"
+$data = Invoke-WebRequest -Uri "https://api.github.com/repos/$($username)/$($repo)/releases/latest" -Headers $header
 $json = ConvertFrom-Json $data.content
 
 # Select Neko Fans zip
@@ -30,7 +31,7 @@ $download = $asset.browser_download_url
 $time = [Int](New-TimeSpan -Start (Get-Date "01/01/1970") -End ([DateTime]$json.published_at)).TotalSeconds
 
 # Get the config data from the repo.
-$configData = Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$($username)/$($repo)/$($branch)/Neko/Neko.json"
+$configData = Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$($username)/$($repo)/$($branch)/Neko/Neko.json" -Headers $header
 $config = ConvertFrom-Json $configData.content
 
 # Ensure that config is converted properly.
@@ -58,7 +59,7 @@ $pluginsOut += $config
 ##############
 
 # Fetch the release data from the Gibhub API
-$dataL = Invoke-WebRequest -Uri "https://api.github.com/repos/$($username)/$($repo)/releases/tags/$($nekolewdtag)"
+$dataL = Invoke-WebRequest -Uri "https://api.github.com/repos/$($username)/$($repo)/releases/tags/$($nekolewdtag)" -Headers $header
 $jsonL = ConvertFrom-Json $dataL.content
 
 # Select Neko Fans zip
@@ -72,7 +73,7 @@ $downloadL = $assetL.browser_download_url
 $timeL = [Int](New-TimeSpan -Start (Get-Date "01/01/1970") -End ([DateTime]$jsonL.published_at)).TotalSeconds
 
 # Get the config data from the repo.
-$configDataL = Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$($username)/$($repo)/$($branch)/NekoLewd/NekoLewd.json"
+$configDataL = Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$($username)/$($repo)/$($branch)/NekoLewd/NekoLewd.json" -Headers $header
 $configL = ConvertFrom-Json $configDataL.content
 
 # Ensure that config is converted properly.
