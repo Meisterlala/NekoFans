@@ -2,7 +2,7 @@
 
 # Neko Fans Plugin for FFXIV <img src="icon.png" align="right" width="240">
 
-[![Build](https://img.shields.io/github/workflow/status/Meisterlala/NekoFans/Build?label=Build)](https://github.com/Meisterlala/Nekofans/releases/latest/)
+[![Build](https://img.shields.io/github/actions/workflow/status/Meisterlala/NekoFans/build.yml?branch=master&label=Build)](https://github.com/Meisterlala/Nekofans/releases/latest/)
 [![Latest Version](https://img.shields.io/github/v/tag/Meisterlala/NekoFans?label=Version&sort=semver)](https://github.com/Meisterlala/Nekofans/releases/latest/)
 [![Neko Server Status](https://img.shields.io/website?down_message=offline&label=Neko%20Server&up_message=online&url=http%3A%2F%2Fapi.nekofans.net)](https://status.nekofans.net)
 [![Ko-fi](https://img.shields.io/badge/support_me_on_ko--fi-F16061?logo=kofi&logoColor=f5f5f5)](https://ko-fi.com/Meisterlala)
