@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v1
       - name: Run Powershell Script
         run: .\resources\generate-repo.ps1
-        with:
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Commit files
         continue-on-error: true
