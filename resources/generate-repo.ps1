@@ -10,7 +10,10 @@ $nekolewdname = "NekoFansLewd.zip"
 
 $nekolewdtag = "1.0.1-NSFW"
 
-$header = "Authorization: Bearer $env:GITHUB_TOKEN"
+# Authorization header for the Github API.
+$header = @{
+  "Authorization" = "Bearer $env:GITHUB_TOKEN"
+}
 
 ##############
 # Neko Fans
