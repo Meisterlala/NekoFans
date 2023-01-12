@@ -35,6 +35,13 @@ public class NekoQueue
         tokenSource.Cancel();
     }
 
+    public void Dispose()
+    {
+        tokenSource.Cancel();
+        tokenSource = new();
+        StopQueue = true;
+    }
+
     public override string ToString()
     {
         var res = $"Queue length: {TargetDownloadCount}   preloaded: {TargetPreloadCount}{(StopQueue ? "   Queue Stopped" : "")}";

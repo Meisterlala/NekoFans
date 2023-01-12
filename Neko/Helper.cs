@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using Dalamud.Logging;
 using TextCopy;
@@ -141,5 +142,26 @@ public static class Helper
         return text.Length <= maxLength
             ? text
             : text[..(maxLength - 3)] + "...";
+    }
+
+    public static HttpRequestMessage RequestClone(HttpRequestMessage req)
+    {
+        var clone = new HttpRequestMessage(req.Method, req.RequestUri)
+        {
+            Content = req.Content,
+            Version = req.Version
+        };
+
+        foreach (var prop in req.Options)
+        {
+            clone.Options.TryAdd(prop.Key, prop.Value);
+        }
+
+        foreach (var header in req.Headers)
+        {
+            clone.Headers.TryAddWithoutValidation(header.Key, header.Value);
+        }
+
+        return clone;
     }
 }

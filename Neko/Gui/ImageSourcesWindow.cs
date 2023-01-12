@@ -66,6 +66,8 @@ public class ImageSourcesWindow
 
     private readonly HeaderImage.Individual Header = new();
 
+    private static DateTime TwitterTimeout = DateTime.MinValue;
+
     public void Draw()
     {
         // ------------ Header --------------
@@ -105,6 +107,21 @@ public class ImageSourcesWindow
             DrawTheCatAPI();
         //  ------------ Twitter --------------
         SourceCheckbox(SourceList[9], ref Plugin.Config.Sources.Twitter.enabled);
+        if (Twitter.IsRateLimited)
+        {
+            ImGui.SameLine();
+            ImGui.TextColored(new Vector4(1f, 0, 0f, 1f), "API limit reached");
+            ImGui.SameLine();
+            Common.HelpMarker("The free Twitter API is limited to 2 million tweets per Month. This limit is shared between all users of this plugin and will usually be reset on the 26st of every month.");
+            // Make the Twitter config unable to open
+            if (Plugin.Config.Sources.Twitter.enabled)
+            {
+                Plugin.Config.Sources.Twitter.enabled = false;
+                Plugin.Config.Save();
+                Plugin.UpdateImageSource();
+            }
+        }
+
         if (Plugin.Config.Sources.Twitter.enabled)
             DrawTwitter();
 

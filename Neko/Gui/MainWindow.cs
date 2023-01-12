@@ -52,6 +52,17 @@ public class MainWindow
         imageGrayed = false;
     }
 
+    ~MainWindow()
+    {
+        Dispose();
+    }
+
+    public void Dispose()
+    {
+        Slideshow.Stop();
+        Queue.Dispose();
+    }
+
     public void Draw()
     {
         if (!Visible) return;

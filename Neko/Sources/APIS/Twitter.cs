@@ -60,6 +60,25 @@ public abstract class Twitter : ImageSource
 
     public override bool SameAs(ImageSource other) => other is Twitter t && t.ConfigQuery == ConfigQuery;
 
+    /// <summary>
+    /// Checks the header to see if the response is from Twitter rate limiting
+    /// </summary>
+    /// <param name="response">response Message</param>
+    /// <returns>True if the header is a response from Twitter</returns>
+    public static bool Is429Response(HttpResponseMessage response) =>
+        response.RequestMessage?.RequestUri?.Host == "api.twitter.com" &&
+        response.Headers.TryGetValues("x-rate-limit-remaining", out var remaining) &&
+        remaining != null &&
+        response.Headers.TryGetValues("x-rate-limit-reset", out var reset) &&
+        reset != null &&
+        response.Headers.TryGetValues("x-rate-limit-limit", out var limit) &&
+        limit != null;
+
+    /// <summary>
+    /// Checks if the API is rate limited
+    /// </summary>
+    public static bool IsRateLimited;
+
     public class Config : IImageConfig
     {
         public bool enabled;
@@ -207,6 +226,9 @@ public abstract class Twitter : ImageSource
         {
             return new NekoImage(async (img) =>
             {
+                if (IsRateLimited)
+                    throw new Exception("Twitter API rate limit exceeded");
+
                 var searchResult = await URLs.GetURL(ct).ConfigureAwait(false);
                 var response = await Download.DownloadImage(searchResult.Media.Url, typeof(Search), ct).ConfigureAwait(false);
                 img.Description = searchResult.TweetDescription();
@@ -438,6 +460,9 @@ public abstract class Twitter : ImageSource
         {
             return new NekoImage(async (img) =>
             {
+                if (IsRateLimited)
+                    throw new Exception("Twitter API rate limit exceeded");
+
                 lock (userIDTaskLock)
                 {
                     userIDTask ??= GetUserID(ct);

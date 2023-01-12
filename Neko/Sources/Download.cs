@@ -100,6 +100,8 @@ public static class Download
             // Handle 429 (Too Many Requests) by waiting and retrying
             if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
             {
+                DebugHelper.LogNetwork(() => "API retuned 429 (Too Many Requests)\n" + response.Headers.ToString());
+
                 var retryAfter = 2000; // in ms
                 // Respect timeout header for WAIFU.IM
                 if (response.Headers.TryGetValues("Retry-After", out var values) && values.Any())
@@ -109,10 +111,20 @@ public static class Download
                         retryAfter = (int)(seconds * 1000);
                 }
 
+                // Twitter API limit reached
+                if (APIS.Twitter.Is429Response(response))
+                {
+                    APIS.Twitter.IsRateLimited = true;
+                    throw new Exception("Twitter API limit reached. Wait a few days until the limit gets reset", ex);
+                }
+
+                PluginLog.LogInformation($"API retuned 429 (Too Many Requests). Waiting {retryAfter / 1000.0} seconds before trying again.");
                 // Wait 2 seconds and retry
-                PluginLog.LogVerbose($"API retuned 429 (Too Many Requests). Waiting {retryAfter / 1000.0} seconds before trying again.");
                 await Task.Delay(retryAfter, ct).ConfigureAwait(false);
-                return await ParseJson<T>(request, ct).ConfigureAwait(false);
+                ct.ThrowIfCancellationRequested();
+                // Clone request, because you cant send the same one twice
+                var newRequest = Helper.RequestClone(request);
+                return await ParseJson<T>(newRequest, ct).ConfigureAwait(false);
             }
 
             DebugHelper.LogNetwork(() => $"Error Downloading Json from {request.RequestUri}:\n{JsonSerializer.Serialize(response.Content.ReadAsStringAsync(ct).Result, new JsonSerializerOptions() { WriteIndented = true })}");

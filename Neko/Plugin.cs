@@ -83,7 +83,7 @@ public class Plugin : IDalamudPlugin
         CommandManager.RemoveHandler(CommandMain);
 
         // Stop loading images
-        GuiMain?.Slideshow?.Stop();
+        GuiMain?.Dispose();
     }
 
     public static void UpdateImageSource() => ImageSource.UpdateFrom(Config.LoadSources());
