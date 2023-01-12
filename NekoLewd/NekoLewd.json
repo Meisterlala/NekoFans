@@ -4,7 +4,7 @@
   "Punchline": "Frustrated in a dungeon? Look at a cute cat girl! Or look at sexy anime tiddies!",
   "Description": "This Plugin does nothing on its own. Neko Fans needs to be installed.\nYou now have access to NSFW images in Neko Fans.",
   "InternalName": "NekoLewd",
-  "AssemblyVersion": "1.0.1",
+  "AssemblyVersion": "1.0.2",
   "RepoUrl": "https://github.com/Meisterlala/NekoFans",
   "ApplicableVersion": "any",
   "Tags": [
@@ -18,6 +18,6 @@
   "CategoryTags": [
     "UI"
   ],
-  "DalamudApiLevel": 7,
+  "DalamudApiLevel": 8,
   "IconUrl": "https://raw.githubusercontent.com/Meisterlala/NekoFans/master/icon18.png"
 }

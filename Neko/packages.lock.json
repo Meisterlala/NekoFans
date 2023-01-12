@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net6.0-windows7.0": {
+    "net7.0-windows7.0": {
       "DalamudPackager": {
         "type": "Direct",
         "requested": "[2.1.8, )",
@@ -11,8 +11,8 @@
       "Meziantou.Analyzer": {
         "type": "Direct",
         "requested": "[1.0.*, )",
-        "resolved": "1.0.750",
-        "contentHash": "YVEAW6bEaZj/M0Y2KqiA+YY2IN7cAqWvYKnp07WscZ+yfruV1Xl0MQY8LvTXgeapOcfsrk2ps8jA2QvdTawOxQ=="
+        "resolved": "1.0.758",
+        "contentHash": "Cq+TwSCPewbY7/e/EJlX4UnzgEMzXxxJCb6b5GFALwxTlaFz+f7SWSovPYPkb4E7/uVP9hrffqvinZTUdzMVzg=="
       },
       "SixLabors.ImageSharp": {
         "type": "Direct",
