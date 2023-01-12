@@ -8,7 +8,7 @@ $branch = "master"
 $nekoname = "NekoFans.zip"
 $nekolewdname = "NekoFansLewd.zip"
 
-$nekolewdtag = "1.0.1-NSFW"
+$nekolewdtag = "1.0.2-NSFW"
 
 # Authorization header for the Github API.
 $header = @{
