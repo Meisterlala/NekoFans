@@ -26,11 +26,11 @@
     ],
     "IsHide": "False",
     "IsTestingExclusive": "False",
-    "LastUpdated": 1673532033,
+    "LastUpdated": 1673721064,
     "DownloadCount": 0,
-    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.2.3/NekoFans.zip",
-    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.2.3/NekoFans.zip",
-    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.2.3/NekoFans.zip"
+    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.3-NSFW/NekoFans.zip",
+    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.3-NSFW/NekoFans.zip",
+    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.3-NSFW/NekoFans.zip"
   },
   {
     "Author": "Meisterlala",
@@ -38,7 +38,7 @@
     "Punchline": "Frustrated in a dungeon? Look at a cute cat girl! Or look at sexy anime tiddies!",
     "Description": "This Plugin does nothing on its own. Neko Fans needs to be installed.\nYou now have access to NSFW images in Neko Fans.",
     "InternalName": "NekoLewd",
-    "AssemblyVersion": "1.0.2",
+    "AssemblyVersion": "1.0.3",
     "RepoUrl": "https://github.com/Meisterlala/NekoFans",
     "ApplicableVersion": "any",
     "Tags": [
@@ -56,10 +56,10 @@
     "IconUrl": "https://raw.githubusercontent.com/Meisterlala/NekoFans/master/icon18.png",
     "IsHide": "False",
     "IsTestingExclusive": "False",
-    "LastUpdated": 1673531987,
+    "LastUpdated": 1673721064,
     "DownloadCount": 0,
-    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.2-NSFW/NekoFansLewd.zip",
-    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.2-NSFW/NekoFansLewd.zip",
-    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.2-NSFW/NekoFansLewd.zip"
+    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.3-NSFW/NekoFansLewd.zip",
+    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.3-NSFW/NekoFansLewd.zip",
+    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.3-NSFW/NekoFansLewd.zip"
   }
 ]
