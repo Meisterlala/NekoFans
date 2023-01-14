@@ -18,7 +18,7 @@ public class Plugin : IDalamudPlugin
 {
     public string Name => "Neko Fans NSFW 18+ Patch";
 
-    [PluginService] public static DalamudPluginInterface PluginInterface { get; } = null!;
+    [PluginService] public static DalamudPluginInterface PluginInterface { get; set; } = null!;
 
     private readonly ICallGateProvider<bool> IPCProvider;
 

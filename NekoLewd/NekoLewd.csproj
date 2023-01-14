@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <TargetFramework>net7.0-windows</TargetFramework>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -12,8 +12,6 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <PreserveCompilationContext>false</PreserveCompilationContext>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath Condition="'$(OS)' == 'Windows_NT'">$(AppData)\XIVLauncher\devPlugins\Neko</OutputPath>
-    <OutputPath Condition="'$(OS)' == 'Unix'">$(HOME)/.xlcore/devPlugins/Neko</OutputPath>
   </PropertyGroup>
 
   <ProjectExtensions>
@@ -58,6 +56,6 @@
   </ItemGroup>
 
   <ItemGroup> 
-    <PackageReference Include="DalamudPackager" Version="2.1.8" /> 
+    <PackageReference Include="DalamudPackager" Version="2.*"/> 
   </ItemGroup>
 </Project>
