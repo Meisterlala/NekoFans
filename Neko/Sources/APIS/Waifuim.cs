@@ -67,7 +67,7 @@ public class Waifuim : ImageSource
     private readonly MultiURLs<WaifuImJson> URLs;
     private readonly Info CurrentInfo;
 
-    private const string ApiVersion = "v4";
+    private const string ApiVersion = "v5";
 
     public Waifuim(Info i)
     {
@@ -113,7 +113,7 @@ public class Waifuim : ImageSource
             public string file { get; set; }
             public string extension { get; set; }
             public int image_id { get; set; }
-            public int favourites { get; set; }
+            public int favorites { get; set; }
             public string dominant_color { get; set; }
             public string source { get; set; }
             public DateTime uploaded_at { get; set; }
