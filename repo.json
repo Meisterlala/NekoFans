@@ -3,9 +3,9 @@
     "Author": "Meisterlala",
     "Name": "Neko Fans",
     "Punchline": "Frustrated in a dungeon? Look at a cute cat girl!",
-    "Description": "Shows you an image of a random neko character. Click on the image to view the next one.\nYou can choose different image sources, allowing you to look at Catboys, Waifus, Cats, Dogs and more.\n\nSupported APIs:\nTwitter, nekos.best, Nekos.life, Catboys, Dog CEO, The Cat API, Pic.re, Waifu.im, Waifu.pics and shibe.online\n\nWarning: You might see naughty images",
+    "Description": "Shows you an image of a random neko character. Click on the image to view the next one.\nYou can choose different image sources, allowing you to look at Catboys, Waifus, Cats, Dogs and more.\n\nSupported APIs:\nnekos.best, Nekos.life, Catboys, Dog CEO, The Cat API, Pic.re, Waifu.im, Waifu.pics and shibe.online\n\nWarning: You might see naughty images",
     "InternalName": "Neko",
-    "AssemblyVersion": "1.2.3",
+    "AssemblyVersion": "1.3.0",
     "RepoUrl": "https://github.com/Meisterlala/NekoFans",
     "ApplicableVersion": "any",
     "Tags": [
@@ -26,11 +26,11 @@
     ],
     "IsHide": "False",
     "IsTestingExclusive": "False",
-    "LastUpdated": 1673721064,
-    "DownloadCount": 100,
-    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.3-NSFW/NekoFans.zip",
-    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.3-NSFW/NekoFans.zip",
-    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.3-NSFW/NekoFans.zip"
+    "LastUpdated": 1687955390,
+    "DownloadCount": 0,
+    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.3.0/NekoFans.zip",
+    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.3.0/NekoFans.zip",
+    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.3.0/NekoFans.zip"
   },
   {
     "Author": "Meisterlala",
@@ -57,7 +57,7 @@
     "IsHide": "False",
     "IsTestingExclusive": "False",
     "LastUpdated": 1673721064,
-    "DownloadCount": 1657,
+    "DownloadCount": 1684,
     "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.3-NSFW/NekoFansLewd.zip",
     "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.3-NSFW/NekoFansLewd.zip",
     "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.3-NSFW/NekoFansLewd.zip"
