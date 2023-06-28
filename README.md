@@ -69,4 +69,4 @@ You can change to look and feel of the plugin in the Configutaion Menu, which ca
 - [The Cat API](https://thecatapi.com/)
 - [WAIFU.IM](https://waifu.im/)
 - [Waifu.pics](https://waifu.im/)
-- [Twitter](https://twitter.com/)
+- [Twitter](https://twitter.com/) (no longer supported after API price increase)

@@ -106,6 +106,7 @@ public class ImageSourcesWindow
         if (Plugin.Config.Sources.TheCatAPI.enabled)
             DrawTheCatAPI();
         //  ------------ Twitter --------------
+        /*
         SourceCheckbox(SourceList[9], ref Plugin.Config.Sources.Twitter.enabled);
         if (Twitter.IsRateLimited)
         {
@@ -124,6 +125,7 @@ public class ImageSourcesWindow
 
         if (Plugin.Config.Sources.Twitter.enabled)
             DrawTwitter();
+        */
 
         CheckIfNoSource();
     }
