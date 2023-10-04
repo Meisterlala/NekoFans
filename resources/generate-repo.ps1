@@ -1,9 +1,7 @@
 $pluginsOut = @()
 
-
 $username = "Meisterlala"
 $repo = "NekoFans"
-$branch = "master"
 
 $nekoname = "NekoFans.zip"
 $nekolewdname = "NekoFansLewd.zip"
@@ -33,15 +31,17 @@ $download = $asset.browser_download_url
 # Get timestamp for the release.
 $time = [Int](New-TimeSpan -Start (Get-Date "01/01/1970") -End ([DateTime]$json.published_at)).TotalSeconds
 
-# Get the config data from the repo.
-$configData = Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$($username)/$($repo)/$($branch)/Neko/Neko.json" -Headers $header
-$config = ConvertFrom-Json $configData.content
+# Download the zip file.
+Invoke-WebRequest -Uri $download -OutFile "$env:Temp/NekoFans.zip"
+Expand-Archive -Path "$env:Temp/NekoFans.zip" -DestinationPath "$env:Temp/NekoFans" -Force
 
-# Ensure that config is converted properly.
-if ($null -eq $config) {
-  Write-Error "Config for plugin $($plugin) is null!"
-  ExitWithCode(1)
-}
+# Load the json from the release.zip
+$config = Get-Content -Path "$env:Temp/NekoFans/Neko.json" | Out-String | ConvertFrom-Json
+
+# remove tmp files
+Remove-Item -Path "$env:Temp/NekoFans.zip" -Force
+Remove-Item -Path "$env:Temp/NekoFans" -Force -Recurse
+
 
 # Add additional properties to the config.
 $config | Add-Member -Name "IsHide" -MemberType NoteProperty -Value "False"
@@ -51,6 +51,7 @@ $config | Add-Member -Name "DownloadCount" -MemberType NoteProperty -Value $coun
 $config | Add-Member -Name "DownloadLinkInstall" -MemberType NoteProperty -Value $download
 $config | Add-Member -Name "DownloadLinkTesting" -MemberType NoteProperty -Value $download
 $config | Add-Member -Name "DownloadLinkUpdate" -MemberType NoteProperty -Value $download
+$config | Add-Member -Name "IsThirdParty" -MemberType NoteProperty -Value "True" -Force
 
 
 # Add to the plugin array.
@@ -75,15 +76,17 @@ $downloadL = $assetL.browser_download_url
 # Get timestamp for the release.
 $timeL = [Int](New-TimeSpan -Start (Get-Date "01/01/1970") -End ([DateTime]$jsonL.published_at)).TotalSeconds
 
-# Get the config data from the repo.
-$configDataL = Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$($username)/$($repo)/$($branch)/NekoLewd/NekoLewd.json" -Headers $header
-$configL = ConvertFrom-Json $configDataL.content
+# Download the zip file.
+Invoke-WebRequest -Uri $downloadL -OutFile "$env:Temp/NekoLewd.zip"
+Expand-Archive -Path "$env:Temp/NekoLewd.zip" -DestinationPath "$env:Temp/NekoLewd" -Force
 
-# Ensure that config is converted properly.
-if ($null -eq $config) {
-  Write-Error "Config for plugin $($plugin) is null!"
-  ExitWithCode(1)
-}
+# Load the json from the release.zip
+$configL = Get-Content -Path "$env:Temp/NekoLewd/NekoLewd.json"  | Out-String | ConvertFrom-Json
+
+# remove tmp files
+Remove-Item -Path "$env:Temp/NekoLewd.zip" -Force
+Remove-Item -Path "$env:Temp/NekoLewd" -Force -Recurse
+
 
 # Add additional properties to the config.
 $configL | Add-Member -Name "IsHide" -MemberType NoteProperty -Value "False"

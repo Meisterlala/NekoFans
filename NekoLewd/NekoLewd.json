@@ -16,5 +16,6 @@
   "CategoryTags": [
     "UI"
   ],
-  "IconUrl": "https://raw.githubusercontent.com/Meisterlala/NekoFans/master/icon18.png"
+  "IconUrl": "https://raw.githubusercontent.com/Meisterlala/NekoFans/master/icon18.png",
+  "IsThirdParty": true
 }
