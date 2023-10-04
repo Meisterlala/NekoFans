@@ -23,11 +23,11 @@ jobs:
           submodules: recursive
 
       - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1.0.3
+        uses: microsoft/setup-msbuild@v1
 
       - name: Download Dalamud
         run: |
-          Invoke-WebRequest -Uri https://github.com/goatcorp/dalamud-distrib/raw/main/latest.zip -OutFile latest.zip
+          Invoke-WebRequest -Uri https://github.com/goatcorp/dalamud-distrib/raw/main/stg/latest.zip -OutFile latest.zip
           Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev\"
 
       - name: Build
