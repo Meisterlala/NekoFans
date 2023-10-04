@@ -100,7 +100,7 @@ public class Configuration : IPluginConfiguration
         }
         catch (System.Exception ex)
         {
-            PluginLog.LogWarning(ex, "Could not load Neko Fans config");
+            Plugin.Log.Warning(ex, "Could not load Neko Fans config");
             return new Configuration();
         }
     }

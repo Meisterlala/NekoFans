@@ -161,12 +161,12 @@ public class NekoQueue
         }
         catch (Sources.CombinedSource.OutOfImagesException ex)
         {
-            Dalamud.Logging.PluginLog.LogError(ex, "Error while getting next image from the queue");
+            Plugin.Log.Error(ex, "Error while getting next image from the queue");
             StopQueue = true;
         }
         catch (System.Exception ex)
         {
-            Dalamud.Logging.PluginLog.LogFatal(ex, "Unexpected error while getting next image from the queue");
+            Plugin.Log.Fatal(ex, "Unexpected error while getting next image from the queue");
         }
 
         FillQueue(); // Recursivly fill

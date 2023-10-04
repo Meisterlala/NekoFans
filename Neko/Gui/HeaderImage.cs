@@ -144,14 +144,14 @@ public abstract class HeaderImage : ImageSource
         {
             foreach (var ex in task.Exception?.Flatten().InnerExceptions ?? new(Array.Empty<Exception>()))
             {
-                PluginLog.LogWarning(ex, $"Error while downloading header image: {GetType().Name}. Fault count: {error_count}");
+                Plugin.Log.Warning(ex, $"Error while downloading header image: {GetType().Name}. Fault count: {error_count}");
             }
             Interlocked.Increment(ref error_count);
             lastFaulted = DateTime.Now;
         }
         else
         {
-            PluginLog.LogVerbose($"Updated header image: {GetType().Name}");
+            Plugin.Log.Verbose($"Updated header image: {GetType().Name}");
             image = task.Result;
             lastUpdate = DateTime.Now;
         }

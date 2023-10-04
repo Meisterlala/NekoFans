@@ -29,7 +29,7 @@ public class NekosLife : ImageSource
                 }
                 else
                 {
-                    Dalamud.Logging.PluginLog.LogError($"NekosLife: Unknown category {flag}");
+                    Plugin.Log.Error($"NekosLife: Unknown category {flag}");
                 }
             }
             return comb.Count() > 0 ? comb : null;

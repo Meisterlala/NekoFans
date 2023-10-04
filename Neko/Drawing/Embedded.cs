@@ -51,11 +51,11 @@ public class Embedded : ImageSource
                 }
                 catch (Exception)
                 {
-                    PluginLog.LogFatal("Could not load embedded image: {0}", resourceName);
+                    Plugin.Log.Fatal("Could not load embedded image: {0}", resourceName);
                     throw;
                 }
 
-                PluginLog.LogVerbose("Loaded embedded image: {0}", resourceName);
+                Plugin.Log.Verbose("Loaded embedded image: {0}", resourceName);
                 return Task.FromResult(LoadedBytes.Value);
             }
         }, this);
@@ -89,10 +89,10 @@ public class Embedded : ImageSource
                     await emb.Image.Await((s) => s is NekoImage.State.LoadedGPU or NekoImage.State.Error).ConfigureAwait(false);
 
                     if (errors > 0)
-                        PluginLog.LogVerbose("Retrying to load embedded image: {0}", emb.Filename);
+                        Plugin.Log.Verbose("Retrying to load embedded image: {0}", emb.Filename);
                     if (errors > 5)
                     {
-                        PluginLog.LogFatal($"Error loading embedded image: {emb.Filename}");
+                        Plugin.Log.Fatal($"Error loading embedded image: {emb.Filename}");
                         break;
                     }
                     errors++;

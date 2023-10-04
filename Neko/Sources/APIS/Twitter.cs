@@ -315,7 +315,7 @@ public abstract class Twitter : ImageSource
                     // Only show sensitive tweets if NSFW mode
                     if (tweet.PossiblySensitive && !NSFW.AllowNSFW)
                     {
-                        PluginLog.LogDebug($"Skipping tweet {tweet.Id} because it is marked as sensitive");
+                        Plugin.Log.Debug($"Skipping tweet {tweet.Id} because it is marked as sensitive");
                         continue;
                     }
 
@@ -323,7 +323,7 @@ public abstract class Twitter : ImageSource
                     var x = NSFW.MatchesBadWord(tweet.Text);
                     if (x != null)
                     {
-                        PluginLog.LogDebug($"Skipping tweet {tweet.Id} because it matches the blacklist entry \"{x}\"");
+                        Plugin.Log.Debug($"Skipping tweet {tweet.Id} because it matches the blacklist entry \"{x}\"");
                         continue;
                     }
 
@@ -487,7 +487,7 @@ public abstract class Twitter : ImageSource
             {
                 if (userIDTask == null)
                 {
-                    PluginLog.Log("Getting user ID");
+                    Plugin.Log.Debug("Getting user ID");
                     try { userIDTask = GetUserID(ct); }
                     catch (Exception e) { return ("ERROR", e.Message); }
                 }
@@ -603,7 +603,7 @@ public abstract class Twitter : ImageSource
                     // Only show sensitive tweets if NSFW mode
                     if (tweet.PossiblySensitive && !NSFW.AllowNSFW)
                     {
-                        PluginLog.LogDebug($"Skipping tweet {tweet.Id} because it is marked as sensitive");
+                        Plugin.Log.Debug($"Skipping tweet {tweet.Id} because it is marked as sensitive");
                         continue;
                     }
 
@@ -765,7 +765,7 @@ public abstract class Twitter : ImageSource
         {
             next_token = result.NextToken();
             if (next_token == null)
-                PluginLog.LogDebug("No next_token found. There are no more tweets to load. Starting over from the beginning.");
+                Plugin.Log.Debug("No next_token found. There are no more tweets to load. Starting over from the beginning.");
             base.OnTaskSuccessfull(result);
         }
 

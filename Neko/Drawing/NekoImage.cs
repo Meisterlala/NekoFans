@@ -295,6 +295,6 @@ public class NekoImage
     {
         CurrentState = State.Error;
         ImageSource.FaultedIncrement();
-        PluginLog.LogWarning(ex, "Error while loading image");
+        Plugin.Log.Warning(ex, "Error while loading image");
     }
 }

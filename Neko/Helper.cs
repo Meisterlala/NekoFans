@@ -84,7 +84,7 @@ public static class Helper
         catch (Exception ex)
         {
             Gui.Common.Notification("Unable to open in a Browser, Invalid URL", Dalamud.Interface.Internal.Notifications.NotificationType.Error);
-            PluginLog.Error(ex, "URL unsafe");
+            Plugin.Log.Error(ex, "URL unsafe");
             return;
         }
 

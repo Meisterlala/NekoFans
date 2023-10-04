@@ -65,9 +65,9 @@ public static class NSFW
         if (mode == NSFW_MODE.Unknown)
             return;
         if (mode == NSFW_MODE.Enabled)
-            PluginLog.Log("Detected NSFW Plugin. NSFW Images are now avalible.");
+            Plugin.Log.Info("Detected NSFW Plugin. NSFW Images are now avalible.");
         else
-            PluginLog.Log("NSFW Plugin was disabled. NSFW Images are unavalible");
+            Plugin.Log.Info("NSFW Plugin was disabled. NSFW Images are unavalible");
 
         // Reload Config
         Plugin.UpdateImageSource();

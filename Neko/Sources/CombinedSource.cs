@@ -216,7 +216,7 @@ public class CombinedSource : ImageSource
         {
             if (e.GetType() != typeof(CombinedSource) && !other.Contains(e))
             {
-                Dalamud.Logging.PluginLog.LogDebug($"Removing {e.Name} from ImageSource");
+                Plugin.Log.Debug($"Removing {e.Name} from ImageSource");
                 return true;
             }
             return false;
@@ -227,7 +227,7 @@ public class CombinedSource : ImageSource
         {
             if (!Contains(source))
             {
-                Dalamud.Logging.PluginLog.LogDebug($"Added {source.Name} as ImageSource");
+                Plugin.Log.Debug($"Added {source.Name} as ImageSource");
                 if (wrapInCS)
                     AddSource(new CombinedSource(source));
                 else

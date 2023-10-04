@@ -569,10 +569,10 @@ public class ImageSourcesWindow
                         continue;
 
                     if (entry.Query.searchText != entry.QueryDirty.searchText)
-                        PluginLog.LogVerbose("Changing Twitter Search text from: \"" + entry.Query.searchText + "\" to: \"" + entry.QueryDirty.searchText + "\"");
+                        Plugin.Log.Verbose("Changing Twitter Search text from: \"" + entry.Query.searchText + "\" to: \"" + entry.QueryDirty.searchText + "\"");
 
                     if (entry.Query.enabled != entry.QueryDirty.enabled)
-                        PluginLog.LogVerbose((entry.QueryDirty.enabled ? "Enabling" : "Disabling") + " Twitter Search text: \"" + entry.QueryDirty.searchText + "\"");
+                        Plugin.Log.Verbose((entry.QueryDirty.enabled ? "Enabling" : "Disabling") + " Twitter Search text: \"" + entry.QueryDirty.searchText + "\"");
 
                     // Remove the old source
                     if (entry.ImageSource != null)
@@ -629,7 +629,7 @@ public class ImageSourcesWindow
             {
                 if (!Plugin.Config.Sources.Twitter.queries.Remove(TwitterTableEntries[selectedTwitterEntry].Query))
                 {
-                    PluginLog.LogError("Failed to remove Twitter query: " + TwitterTableEntries[selectedTwitterEntry].Query.searchText);
+                    Plugin.Log.Error("Failed to remove Twitter query: " + TwitterTableEntries[selectedTwitterEntry].Query.searchText);
                 }
                 TwitterTableEntries.RemoveAt(selectedTwitterEntry);
                 if (TwitterTableEntries.Count == 0)

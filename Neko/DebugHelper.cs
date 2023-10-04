@@ -19,7 +19,7 @@ public static class DebugHelper
     public static void LogNetwork(Func<string> message)
     {
 #if NETWORK
-        Dalamud.Logging.PluginLog.LogVerbose(message());
+        Plugin.Log.Verbose(message());
 #endif
     }
 

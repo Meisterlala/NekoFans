@@ -99,12 +99,12 @@ public class Mock : ImageSource
             if (Data != null) return;
             try
             {
-                PluginLog.LogWarning("Loading mock image (this should only happen while debugging): {0}", Path);
+                Plugin.Log.Warning("Loading mock image (this should only happen while debugging): {0}", Path);
                 Data = File.ReadAllBytes(System.IO.Path.GetFullPath(Path));
             }
             catch (Exception ex)
             {
-                PluginLog.LogError(ex, "Could not find image at path {0}", Path);
+                Plugin.Log.Error(ex, "Could not find image at path {0}", Path);
             }
         }
 

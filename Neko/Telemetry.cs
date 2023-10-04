@@ -50,7 +50,7 @@ public static class Telemetry
         {
             lastSaved = Plugin.Config.LocalDownloadCount;
             lastSave = DateTime.Now;
-            PluginLog.LogVerbose("Saving updated image download count");
+            Plugin.Log.Verbose("Saving updated image download count");
             Plugin.Config.Save();
             Interlocked.Exchange(ref saving, 0);
         }
@@ -96,11 +96,11 @@ public static class Telemetry
         {
             if (!apiNames.ContainsKey(API))
             {
-                PluginLog.LogWarning($"Could not find API name for {API}");
+                Plugin.Log.Warning($"Could not find API name for {API}");
                 return;
             }
 
-            PluginLog.LogVerbose($"Sending {count} {API} downloads to telemetry");
+            Plugin.Log.Verbose($"Sending {count} {API} downloads to telemetry");
 
             var url = $"{Plugin.ControlServer}/add/{apiNames[API]}/{count}";
             var request = new HttpRequestMessage(HttpMethod.Post, url);
@@ -113,19 +113,19 @@ public static class Telemetry
             }
             catch (HttpRequestException ex)
             {
-                PluginLog.LogDebug(ex, $"Failed to send telemetry: {ex.StatusCode}");
+                Plugin.Log.Debug(ex, $"Failed to send telemetry: {ex.StatusCode}");
                 if (Interlocked.Increment(ref errorCount) >= 10)
                 {
-                    PluginLog.LogWarning("Too many errors, disabling telemetry");
+                    Plugin.Log.Warning("Too many errors, disabling telemetry");
                     tmpDisabled = true;
                 }
             }
             catch (Exception ex)
             {
-                PluginLog.LogDebug(ex, "Failed to send telemetry");
+                Plugin.Log.Debug(ex, "Failed to send telemetry");
                 if (Interlocked.Increment(ref errorCount) >= 10)
                 {
-                    PluginLog.LogWarning("Too many errors, disabling telemetry");
+                    Plugin.Log.Warning("Too many errors, disabling telemetry");
                     tmpDisabled = true;
                 }
             }

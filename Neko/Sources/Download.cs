@@ -40,7 +40,7 @@ public static class Download
 
         // Log Download if its not the Telemetry API
         if (!request.RequestUri?.ToString().StartsWith(Plugin.ControlServer) ?? false)
-            PluginLog.Log($"Downloaded {Helper.SizeSuffix(bytes.LongLength, 1)} from {request.RequestUri}");
+            Plugin.Log.Info($"Downloaded {Helper.SizeSuffix(bytes.LongLength, 1)} from {request.RequestUri}");
 
         if (called != null)
             Telemetry.RegisterDownload(called);
@@ -118,7 +118,7 @@ public static class Download
                     throw new Exception("Twitter API limit reached. Wait a few days until the limit gets reset", ex);
                 }
 
-                PluginLog.LogInformation($"API retuned 429 (Too Many Requests). Waiting {retryAfter / 1000.0} seconds before trying again.");
+                Plugin.Log.Information($"API retuned 429 (Too Many Requests). Waiting {retryAfter / 1000.0} seconds before trying again.");
                 // Wait 2 seconds and retry
                 await Task.Delay(retryAfter, ct).ConfigureAwait(false);
                 ct.ThrowIfCancellationRequested();
@@ -150,7 +150,7 @@ public static class Download
         catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
-            PluginLog.LogDebug(await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false));
+            Plugin.Log.Debug(await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false));
             throw new Exception("Could not Parse .json File from: " + request.RequestUri, ex);
         }
 

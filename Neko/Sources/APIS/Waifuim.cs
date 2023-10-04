@@ -28,7 +28,7 @@ public class Waifuim : ImageSource
                 }
                 else
                 {
-                    Dalamud.Logging.PluginLog.LogError($"Waifuim: Unknown category {f}");
+                    Plugin.Log.Error($"Waifuim: Unknown category {f}");
                 }
             }
             return com.Count() > 0 ? com : null;

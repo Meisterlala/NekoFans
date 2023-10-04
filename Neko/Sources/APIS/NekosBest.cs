@@ -24,7 +24,7 @@ public class NekosBest : ImageSource
                 if (CategoryInfo.TryGetValue(f, out var info))
                     com.AddSource(new NekosBest(info.APIName));
                 else
-                    Dalamud.Logging.PluginLog.LogError($"NekosBest: Unknown category {f}");
+                    Plugin.Log.Error($"NekosBest: Unknown category {f}");
             }
 
             return com.Count() > 0 ? com : null;
