@@ -3,11 +3,9 @@
     "Author": "Meisterlala",
     "Name": "Neko Fans",
     "Punchline": "Frustrated in a dungeon? Look at a cute cat girl!",
-    "Description": "Shows you an image of a random neko character. Click on the image to view the next one.\nYou can choose different image sources, allowing you to look at Catboys, Waifus, Cats, Dogs and more.\n\nSupported APIs:\nnekos.best, Nekos.life, Catboys, Dog CEO, The Cat API, Pic.re, Waifu.im, Waifu.pics and shibe.online\n\nWarning: You might see naughty images",
+    "Description": "Shows you an image of a random neko character. Click on the image to view the next one.\nYou can choose different image sources, allowing you to look at Catboys, Waifus, Cats, Dogs and more.\n\nSupported APIs:\nnekos.best, Nekos.life, Dog CEO, The Cat API, Pic.re, Waifu.im, Waifu.pics and shibe.online\n\nWarning: You might see naughty images",
     "InternalName": "Neko",
-    "AssemblyVersion": "1.3.0",
     "RepoUrl": "https://github.com/Meisterlala/NekoFans",
-    "ApplicableVersion": "any",
     "Tags": [
       "anime",
       "neko",
@@ -18,19 +16,19 @@
     "CategoryTags": [
       "UI"
     ],
-    "DalamudApiLevel": 8,
     "IconUrl": "https://raw.githubusercontent.com/Meisterlala/NekoFans/master/icon.png",
     "ImageUrls": [
       "https://raw.githubusercontent.com/Meisterlala/NekoFans/master/images/image1.png",
       "https://raw.githubusercontent.com/Meisterlala/NekoFans/master/images/image2.png"
     ],
+    "CanUnloadAsync": true,
     "IsHide": "False",
     "IsTestingExclusive": "False",
-    "LastUpdated": 1687955390,
-    "DownloadCount": 12,
-    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.3.0/NekoFans.zip",
-    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.3.0/NekoFans.zip",
-    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.3.0/NekoFans.zip"
+    "LastUpdated": 1696423133,
+    "DownloadCount": 0,
+    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.4-NSFW/NekoFans.zip",
+    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.4-NSFW/NekoFans.zip",
+    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.4-NSFW/NekoFans.zip"
   },
   {
     "Author": "Meisterlala",
@@ -38,9 +36,7 @@
     "Punchline": "Frustrated in a dungeon? Look at a cute cat girl! Or look at sexy anime tiddies!",
     "Description": "This Plugin does nothing on its own. Neko Fans needs to be installed.\nYou now have access to NSFW images in Neko Fans.",
     "InternalName": "NekoLewd",
-    "AssemblyVersion": "1.0.3",
     "RepoUrl": "https://github.com/Meisterlala/NekoFans",
-    "ApplicableVersion": "any",
     "Tags": [
       "anime",
       "neko",
@@ -52,12 +48,11 @@
     "CategoryTags": [
       "UI"
     ],
-    "DalamudApiLevel": 8,
     "IconUrl": "https://raw.githubusercontent.com/Meisterlala/NekoFans/master/icon18.png",
     "IsHide": "False",
     "IsTestingExclusive": "False",
     "LastUpdated": 1673721064,
-    "DownloadCount": 2153,
+    "DownloadCount": 2165,
     "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.3-NSFW/NekoFansLewd.zip",
     "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.3-NSFW/NekoFansLewd.zip",
     "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.3-NSFW/NekoFansLewd.zip"
