@@ -364,11 +364,12 @@ public class ImageSourcesWindow
                     Plugin.Config.Save();
                     Plugin.UpdateImageSource();
                 }
+
                 if (ImGui.IsItemHovered()
                     && breeds[i] != DogCEO.Breed.all
-                    && DogCEO.BreedDictionary.ContainsKey(breeds[i]))
+                    && DogCEO.BreedDictionary.TryGetValue(breeds[i], out var info))
                 {
-                    Common.ToolTip(DogCEO.BreedDictionary[breeds[i]].Description);
+                    Common.ToolTip(info.Description);
                 }
             }
 
@@ -406,9 +407,9 @@ public class ImageSourcesWindow
                 }
                 if (ImGui.IsItemHovered()
                     && breeds[i] != TheCatAPI.Breed.All
-                    && TheCatAPI.BreedDictionary.ContainsKey(breeds[i]))
+                    && TheCatAPI.BreedDictionary.TryGetValue(breeds[i], out var info))
                 {
-                    Common.ToolTip(TheCatAPI.BreedDictionary[breeds[i]].Description);
+                    Common.ToolTip(info.Description);
                 }
             }
             ImGui.EndCombo();
