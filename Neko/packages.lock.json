@@ -5,8 +5,8 @@
       "DalamudPackager": {
         "type": "Direct",
         "requested": "[2.*, )",
-        "resolved": "2.1.10",
-        "contentHash": "S6NrvvOnLgT4GDdgwuKVJjbFo+8ZEj+JsEYk9ojjOR/MMfv1dIFpT8aRJQfI24rtDcw1uF+GnSSMN4WW1yt7fw=="
+        "resolved": "2.1.12",
+        "contentHash": "Sc0PVxvgg4NQjcI8n10/VfUQBAS4O+Fw2pZrAqBdRMbthYGeogzu5+xmIGCGmsEZ/ukMOBuAqiNiB5qA3MRalg=="
       },
       "Meziantou.Analyzer": {
         "type": "Direct",
@@ -17,8 +17,8 @@
       "SixLabors.ImageSharp": {
         "type": "Direct",
         "requested": "[2.1.*, )",
-        "resolved": "2.1.3",
-        "contentHash": "8yonNRWX3vUE9k29ta0Hbfa0AEc0hbDjSH/nZ3vOTJEXmY6hLnGsjDKoz96Z+AgOsrdkAu6PdL/Ebaf70aitzw==",
+        "resolved": "2.1.6",
+        "contentHash": "zgCyj3F3U19A/YpmhZAplH5dyh7BTCjLutzbVbHGd7zzPfSMA0Tm+DFqQEb/V52Y8EW1FH5wZ91PaEDSrUaNOw==",
         "dependencies": {
           "System.Runtime.CompilerServices.Unsafe": "5.0.0",
           "System.Text.Encoding.CodePages": "5.0.0"

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dalamud.Logging;
 
 namespace Neko;
@@ -42,7 +43,7 @@ public static class NSFW
 
     private static bool CheckIPC()
     {
-        if (!Plugin.PluginInterface.PluginInternalNames.Contains("NekoLewd"))
+        if (!Plugin.PluginInterface.InstalledPlugins.Any(p => "NekoLewd" == p.InternalName && p.IsLoaded))
             return false;
 
         bool ipcCheck;

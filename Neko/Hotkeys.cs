@@ -37,6 +37,7 @@ public class Hotkey
     private bool isDragging;
     private bool pressedLastCall;
 
+
     public static readonly Dictionary<Key, string> KeyNames = new() {
         {Key.LBUTTON, "Left Mouse Button"}, {Key.RBUTTON, "Right Mouse Button"}, {Key.MBUTTON, "Middle Mouse Button"},
 

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
     <TargetFramework>net7.0-windows</TargetFramework>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -16,7 +16,7 @@
 
   <ProjectExtensions>
     <DalamudPlugin>
-      <ApiLevel>7</ApiLevel>
+      <ApiLevel>9</ApiLevel>
       <Author>Meisterlala</Author>
       <Name>Neko Fans NSFW 18+ Patch</Name>
       <Punchline>Frustrated in a dungeon? Look at a cute cat girl! Or look at sexy anime tiddies!</Punchline>
@@ -47,12 +47,6 @@
       <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
       <Private>False</Private>
     </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="NekoLewd.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
   <ItemGroup> 

@@ -3,6 +3,7 @@ using System.Reflection;
 using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using Neko.Drawing;
 using Neko.Gui;
 
@@ -13,9 +14,9 @@ namespace Neko;
 
 public class Plugin : IDalamudPlugin
 {
-    [PluginService] public static CommandManager CommandManager { get; private set; } = null!;
+    [PluginService] public static ICommandManager CommandManager { get; private set; } = null!;
     [PluginService] public static DalamudPluginInterface PluginInterface { get; private set; } = null!;
-    [PluginService] public static Dalamud.Game.ClientState.Keys.KeyState KeyState { get; private set; } = null!;
+    [PluginService] public static IKeyState KeyState { get; private set; } = null!;
 
     public string Name => "Neko Fans";
 

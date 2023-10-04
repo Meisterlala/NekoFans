@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>1.3.0</Version>
+    <Version>1.3.1</Version>
     <TargetFramework>net7.0-windows</TargetFramework>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -16,34 +16,6 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <Configurations>Debug;Release;Network;Delays;Throw</Configurations>
   </PropertyGroup>
-
-  <!-- Info for the Dalamud Packer -->
-  <ProjectExtensions>
-    <DalamudPlugin>
-      <ApiLevel>7</ApiLevel>
-      <Author>Meisterlala</Author>
-      <Name>Neko Fans</Name>
-      <Punchline>Frustrated in a dungeon? Look at a cute cat girl!</Punchline>
-      <Description>Shows you an image of a random neko character. Click on the image to view the next one.\nYou can choose different image sources, allowing you to look at Catboys, Waifus, Cats, Dogs and more.\n\nSupported APIs:\nNekos.life, Catboys, Dog CEO, The Cat API, Pic.re, Waifu.im, Waifu.pics and shibe.online\n\nWarning: You might see naughty images</Description>
-      <IconUrl>https://raw.githubusercontent.com/Meisterlala/NekoFans/master/icon.png</IconUrl>
-      <Tags>
-        <Tag>anime</Tag>
-        <Tag>neko</Tag>
-        <Tag>waifu</Tag>
-        <Tag>miqote</Tag>
-        <Tag>image</Tag>
-      </Tags>
-      <CategoryTags>
-        <Tag>UI</Tag>
-      </CategoryTags>
-      <Images>
-        <Icon>../icon.png</Icon>
-        <Marketing>../images/image1.png</Marketing>
-        <Marketing>../images/image2.png</Marketing>
-      </Images>
-      <Hidden>False</Hidden>
-    </DalamudPlugin>
-  </ProjectExtensions>
 
   <!-- Set DalamudLibPath based on OS -->
   <PropertyGroup>
@@ -95,13 +67,6 @@
     <PackageReference Include="DalamudPackager" Version="2.*" /> 
   </ItemGroup>
  
-  <!-- Manifest -->
-  <ItemGroup>
-    <Content Include="Neko.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
   <!-- Embedded Resources -->
   <ItemGroup>
     <EmbeddedResource Include="resources/error.jpg" />
