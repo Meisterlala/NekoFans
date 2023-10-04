@@ -256,8 +256,7 @@ public class ConfigWindow
         if (ImGui.Checkbox("Contribute to public image count", ref Plugin.Config.EnableTelemetry))
             Plugin.Config.Save();
         ImGui.SameLine(); Common.HelpMarker("Contribute to the public image count by sending the amount of images you downloaded to the Neko Fans server.\n" +
-                                            "The Image Source name and the downloaded image count will be sent.\n" +
-                                            "The Twitter seach text will not be sent. And no personal information will be sent.");
+                                            "The Image Source name and the downloaded image count will be sent.");
 
         ImGui.Separator();
 
