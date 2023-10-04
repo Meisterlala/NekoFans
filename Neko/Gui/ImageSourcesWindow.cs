@@ -14,7 +14,7 @@ namespace Neko.Gui;
 /// </summary>
 public class ImageSourcesWindow
 {
-    private class ImageSourceConfig
+    sealed class ImageSourceConfig
     {
         public string Name;
         public string Description;
@@ -418,7 +418,7 @@ public class ImageSourcesWindow
 
     private static List<TwitterTableEntry>? TwitterTableEntries;
 
-    private class TwitterTableEntry
+    sealed class TwitterTableEntry
     {
         public Twitter.Config.Query Query;
         public Twitter.Config.Query QueryDirty;

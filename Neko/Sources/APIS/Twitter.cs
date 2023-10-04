@@ -12,7 +12,7 @@ using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
-public abstract class Twitter : ImageSource
+public abstract partial class Twitter : ImageSource
 {
 #pragma warning disable RCS1181
     // This is a bad idea, but there really isnt a easy way to avoid doing this.
@@ -74,6 +74,8 @@ public abstract class Twitter : ImageSource
         response.Headers.TryGetValues("x-rate-limit-limit", out var limit) &&
         limit != null;
 
+
+#pragma warning disable CA2211
     /// <summary>
     /// Checks if the API is rate limited
     /// </summary>
@@ -133,9 +135,9 @@ public abstract class Twitter : ImageSource
         }
     }
 
-    public struct ImageResponse
+    public partial struct ImageResponse
     {
-        private static readonly Regex removeTco = new(@"(\W*https:\/\/t.co\/\w+)+\W*$", RegexOptions.Compiled, TimeSpan.FromSeconds(5));
+        private static readonly Regex removeTco = RemoveTco();
 
         public string Text;
         public string TweetID;
@@ -192,9 +194,12 @@ public abstract class Twitter : ImageSource
 
         public readonly string URLTweetID(string authorUsername)
             => $"https://twitter.com/{authorUsername}/status/{TweetID}";
+
+        [GeneratedRegex(@"(\W*https:\/\/t.co\/\w+)+\W*$", RegexOptions.Compiled, matchTimeoutMilliseconds: 5000)]
+        private static partial Regex RemoveTco();
     }
 
-    public class Search : Twitter
+    public partial class Search : Twitter
     {
         private const string URLSearch = "https://api.twitter.com/2/tweets/search/recent";
         private static readonly string[] URLSearchParams = {
@@ -261,7 +266,7 @@ public abstract class Twitter : ImageSource
                                 var result = JsonSerializer.Deserialize(content, context)!;
 
                                 // Adjust position messages to account for hidden search text
-                                Regex adjustPosition = new(@"\(at position (\d+)\)", RegexOptions.Compiled, TimeSpan.FromSeconds(5));
+                                Regex adjustPosition = AdjustPosition();
                                 var error = adjustPosition.Replace(result.Errors![0].Message, (m) => $"(at position {int.Parse(m.Groups[1].Value) - URLQueryBegin.Length + 6})");
 
                                 return ("ERROR", $"{result.Title}\n({result.Detail})\n\n{error}");
@@ -423,14 +428,19 @@ public abstract class Twitter : ImageSource
             }
         }
 
+        [GeneratedRegex(@"\(at position (\d+)\)", RegexOptions.Compiled, matchTimeoutMilliseconds: 5000)]
+        private static partial Regex AdjustPosition();
+
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
         #endregion
     }
 
-    public class UserTimeline : Twitter
+    public partial class UserTimeline : Twitter
     {
-        private static readonly Regex extractUsername = new(@"^\s*@(\w+)\s*$", RegexOptions.Compiled, TimeSpan.FromSeconds(5));
         private static string TimelineURL(string ID) => $"https://api.twitter.com/2/users/{ID}/tweets?expansions=attachments.media_keys&tweet.fields=created_at,possibly_sensitive&user.fields=username&media.fields=url,media_key";
+
+        [GeneratedRegex(@"^\s*@(\w+)\s*$", RegexOptions.Compiled, matchTimeoutMilliseconds: 5000)]
+        private static partial Regex extractUsername();
 
         private string userID = "";
         private string? usernameReadable;
@@ -443,7 +453,7 @@ public abstract class Twitter : ImageSource
         {
             if (!ValidUsername(query.searchText))
                 throw new ArgumentException("Invalid username", nameof(query));
-            username = extractUsername.Match(query.searchText).Groups[1].Value;
+            username = extractUsername().Match(query.searchText).Groups[1].Value;
             URLs = new((string token) => $"&pagination_token={token}", () => AuthorizedRequest(TimelineURL(userID)), this, URLThreshold);
         }
 
@@ -519,7 +529,7 @@ public abstract class Twitter : ImageSource
                 : response.Data ?? throw new Exception("Could not find Username");
         }
 
-        public static bool ValidUsername(string username) => extractUsername.Match(username).Success;
+        public static bool ValidUsername(string username) => extractUsername().Match(username).Success;
 
         private async Task GetUserID(CancellationToken ct = default)
         {
@@ -671,6 +681,8 @@ public abstract class Twitter : ImageSource
             }
         }
 
+
+
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
         #endregion
     }
@@ -747,7 +759,7 @@ public abstract class Twitter : ImageSource
         public string? NextToken();
     }
 
-    internal class TwitterMultiURLs<TJson, TQueueElement> : MultiURLsGeneric<TJson, TQueueElement>
+    sealed class TwitterMultiURLs<TJson, TQueueElement> : MultiURLsGeneric<TJson, TQueueElement>
         where TJson : IJsonToList<TQueueElement>, INextToken
     {
         private string? next_token;

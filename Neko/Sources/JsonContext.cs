@@ -37,37 +37,37 @@ public static class JsonContext
 }
 
 [JsonSerializable(typeof(Catboys.CatboysJson))]
-internal partial class CatboysContext : JsonSerializerContext { }
+sealed partial class CatboysContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(DogCEO.DogCEOJson))]
-internal partial class DogCEOContext : JsonSerializerContext { }
+sealed partial class DogCEOContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(NekosBest.NekosBestJson))]
-internal partial class NekosBestContext : JsonSerializerContext { }
+sealed partial class NekosBestContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(NekosLife.NekosLifeJson))]
-internal partial class NekosLifeContext : JsonSerializerContext { }
+sealed partial class NekosLifeContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(ShibeOnline.ShibeOnlineJson))]
-internal partial class ShibeOnlineContext : JsonSerializerContext { }
+sealed partial class ShibeOnlineContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(Twitter.Search.SearchJson))]
-internal partial class TwitterSearchJsonContext : JsonSerializerContext { }
+sealed partial class TwitterSearchJsonContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(Twitter.CountJson))]
-internal partial class TwitterCountJsonContext : JsonSerializerContext { }
+sealed partial class TwitterCountJsonContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(Twitter.UserTimeline.TweetTimelineJson))]
-internal partial class TweetTimelineJsonContext : JsonSerializerContext { }
+sealed partial class TweetTimelineJsonContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(Twitter.UserTimeline.UserLookupJson))]
-internal partial class UserLookupJsonContext : JsonSerializerContext { }
+sealed partial class UserLookupJsonContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(TheCatAPI.TheCatAPIJson))]
-internal partial class TheCatAPIContext : JsonSerializerContext { }
+sealed partial class TheCatAPIContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(Waifuim.WaifuImJson))]
-internal partial class WaifuimContext : JsonSerializerContext { }
+sealed partial class WaifuimContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(WaifuPics.WaifuPicsJson))]
-internal partial class WaifuPicsContext : JsonSerializerContext { }
+sealed partial class WaifuPicsContext : JsonSerializerContext { }
