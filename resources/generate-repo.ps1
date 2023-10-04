@@ -51,7 +51,6 @@ $config | Add-Member -Name "DownloadCount" -MemberType NoteProperty -Value $coun
 $config | Add-Member -Name "DownloadLinkInstall" -MemberType NoteProperty -Value $download
 $config | Add-Member -Name "DownloadLinkTesting" -MemberType NoteProperty -Value $download
 $config | Add-Member -Name "DownloadLinkUpdate" -MemberType NoteProperty -Value $download
-$config | Add-Member -Name "IsThirdParty" -MemberType NoteProperty -Value "True" -Force
 
 
 # Add to the plugin array.
@@ -96,6 +95,8 @@ $configL | Add-Member -Name "DownloadCount" -MemberType NoteProperty -Value $cou
 $configL | Add-Member -Name "DownloadLinkInstall" -MemberType NoteProperty -Value $downloadL
 $configL | Add-Member -Name "DownloadLinkTesting" -MemberType NoteProperty -Value $downloadL
 $configL | Add-Member -Name "DownloadLinkUpdate" -MemberType NoteProperty -Value $downloadL
+$configL | Add-Member -Name "IsThirdParty" -MemberType NoteProperty -Value "True" -Force
+
 
 # Add to the plugin array.
 $pluginsOut += $configL
