@@ -67,6 +67,7 @@ public class Plugin : IDalamudPlugin
 
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigGui;
         PluginInterface.UiBuilder.Draw += DrawUI;
+        PluginInterface.UiBuilder.OpenMainUi += ToggleMainGui;
 
         // Open Main Window
         if (Config.GuiMainVisible)
@@ -119,6 +120,7 @@ public class Plugin : IDalamudPlugin
         GuiMain?.Draw();
         GuiConfig?.Draw();
     }
+
 
     public static void ToggleMainGui()
     {
