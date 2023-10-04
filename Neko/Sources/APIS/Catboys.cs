@@ -9,7 +9,7 @@ public class Catboys : ImageSource
     {
         public bool enabled;
 
-        public ImageSource? LoadConfig() => enabled ? new Catboys() : null;
+        public ImageSource? LoadConfig() => null;
     }
 
 #pragma warning disable

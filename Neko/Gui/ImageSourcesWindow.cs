@@ -86,7 +86,7 @@ public class ImageSourcesWindow
         //  ------------ shibe.online --------------
         SourceCheckbox(SourceList[2], ref Plugin.Config.Sources.ShibeOnline.enabled);
         //  ------------ Catboys --------------
-        SourceCheckbox(SourceList[3], ref Plugin.Config.Sources.Catboys.enabled);
+        // SourceCheckbox(SourceList[3], ref Plugin.Config.Sources.Catboys.enabled);
         //  ------------ waifu.im --------------
         SourceCheckbox(SourceList[4], ref Plugin.Config.Sources.Waifuim.enabled);
         if (Plugin.Config.Sources.Waifuim.enabled)

@@ -60,7 +60,7 @@ You can change to look and feel of the plugin in the Configutaion Menu, which ca
 
 ## Supported APIs
 
-- [Catboys](https://catboys.com/)
+- [Catboys](https://catboys.com/) (discontinued)
 - [Dog CEO](https://dog.ceo/dog-api/)
 - [nekos.best](https://nekos.best/)
 - [Nekos.life](https://nekos.life/)
