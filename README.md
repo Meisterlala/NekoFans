@@ -17,7 +17,7 @@ Some functions of the Plugin are provided by the [Neko Server](https://github.co
 
 <p align="center">
   <img src="https://cdn.discordapp.com/emojis/851544845322551347.webp?size=44&quality=lossless" align="left" alt="Total image count">
-    Give this project a star ⭐, so more people will find it. 
+    Give this project a star, so more people will find it. 
   <img src="https://cdn.discordapp.com/emojis/851511871625756694.webp?size=44&quality=lossless" align="right" alt="Total image count">
   <br>
 </p>
