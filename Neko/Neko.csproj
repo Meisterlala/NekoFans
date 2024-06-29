@@ -71,6 +71,7 @@
   <ItemGroup>
     <EmbeddedResource Include="resources/error.jpg" />
     <EmbeddedResource Include="resources/loading.jpg" />
+    <EmbeddedResource Include="resources/icon.png" />
   </ItemGroup>
 
   <!-- Used to manipulate Clipboard -->

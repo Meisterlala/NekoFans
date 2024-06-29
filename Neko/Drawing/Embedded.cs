@@ -4,7 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Logging;
+using Dalamud.Interface.Textures.TextureWraps;
 using Neko.Sources;
 
 namespace Neko.Drawing;
@@ -13,6 +13,8 @@ public class Embedded : ImageSource
 {
     public static readonly Embedded ImageError = new("error.jpg");
     public static readonly Embedded ImageLoading = new("loading.jpg");
+    public static readonly Embedded ImageIcon = new("icon.png");
+
 
     public override string Name => "Embedded";
     public override string ToString() => $"Embedded Image: {Filename}";
@@ -22,6 +24,7 @@ public class Embedded : ImageSource
     private readonly string Filename;
     private Download.Response? LoadedBytes;
     private readonly object LoadingLock = new();
+
 
     public Embedded(string filename) => Filename = filename;
 
@@ -99,6 +102,21 @@ public class Embedded : ImageSource
                 } while (emb.Image.CurrentState == NekoImage.State.Error);
             }
         });
+    }
+
+    /// <summary>
+    /// Gets a DalamudTextureWrap from the embedded icon.
+    /// </summary>
+    public async Task<IDalamudTextureWrap?> GetDalamudTextureWrap()
+    {
+        if (Image == null) throw new Exception("Embedded image was not loaded yet");
+
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = $"Neko.resources.{Filename}";
+        var shared = Plugin.TextureProvider.GetFromManifestResource(assembly, resourceName);
+
+
+        return await shared.RentAsync().ConfigureAwait(false);
     }
 
     public override bool SameAs(ImageSource other) => other is Embedded e && e.Filename == Filename;

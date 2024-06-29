@@ -2,6 +2,7 @@ using System;
 using System.Numerics;
 using Dalamud.Interface.Components;
 using ImGuiNET;
+using Neko.Drawing;
 
 namespace Neko.Gui;
 
@@ -86,18 +87,22 @@ public static class Common
         return ret;
     }
 
+
     /// <summary>
     /// Shows a Notification to the user
     /// </summary>
     /// <param name="text"></param>
     /// <param name="type"></param>
-    public static void Notification(string text, Dalamud.Interface.ImGuiNotification.NotificationType type = default)  {
-        // TODO: Add image to notification
+    public static void Notification(string text, Dalamud.Interface.ImGuiNotification.NotificationType type = default)
+    {
 
-        var notification = new Dalamud.Interface.ImGuiNotification.Notification(){
+        var notification = new Dalamud.Interface.ImGuiNotification.Notification()
+        {
             Content = text,
             Type = type,
+            IconTextureTask = Embedded.ImageIcon.GetDalamudTextureWrap(),
         };
+
         Plugin.NotificationManager.AddNotification(notification);
     }
 
