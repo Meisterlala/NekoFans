@@ -759,7 +759,7 @@ public abstract partial class Twitter : ImageSource
         public string? NextToken();
     }
 
-    sealed class TwitterMultiURLs<TJson, TQueueElement> : MultiURLsGeneric<TJson, TQueueElement>
+    private sealed class TwitterMultiURLs<TJson, TQueueElement> : MultiURLsGeneric<TJson, TQueueElement>
         where TJson : IJsonToList<TQueueElement>, INextToken
     {
         private string? next_token;

@@ -14,7 +14,7 @@ namespace Neko.Gui;
 /// </summary>
 public class ImageSourcesWindow
 {
-    sealed class ImageSourceConfig
+    private sealed class ImageSourceConfig
     {
         public string Name;
         public string Description;
@@ -66,7 +66,7 @@ public class ImageSourcesWindow
 
     private readonly HeaderImage.Individual Header = new();
 
-    private static DateTime TwitterTimeout = DateTime.MinValue;
+    private static readonly DateTime TwitterTimeout = DateTime.MinValue;
 
     public void Draw()
     {
@@ -419,7 +419,7 @@ public class ImageSourcesWindow
 
     private static List<TwitterTableEntry>? TwitterTableEntries;
 
-    sealed class TwitterTableEntry
+    private sealed class TwitterTableEntry
     {
         public Twitter.Config.Query Query;
         public Twitter.Config.Query QueryDirty;

@@ -53,7 +53,7 @@ public static class Helper
     {
         if (text.Length == 0)
         {
-            Gui.Common.Notification("Unable to copy to Clipboard", Dalamud.Interface.Internal.Notifications.NotificationType.Error);
+            Gui.Common.Notification("Unable to copy to Clipboard", Dalamud.Interface.ImGuiNotification.NotificationType.Error);
             return;
         }
 
@@ -62,14 +62,14 @@ public static class Helper
         // It is possible to add Windows.Forms back to a project, but using this is easier
         // and is cross platform
         ClipboardService.SetText(text);
-        Gui.Common.Notification($"Copied \"{text}\" to Clipboard", Dalamud.Interface.Internal.Notifications.NotificationType.Success);
+        Gui.Common.Notification($"Copied \"{text}\" to Clipboard", Dalamud.Interface.ImGuiNotification.NotificationType.Success);
     }
 
     public static void OpenInBrowser(string url)
     {
         if (url.Length == 0)
         {
-            Gui.Common.Notification("Unable to open in a Browser", Dalamud.Interface.Internal.Notifications.NotificationType.Error);
+            Gui.Common.Notification("Unable to open in a Browser", Dalamud.Interface.ImGuiNotification.NotificationType.Error);
             return;
         }
 
@@ -83,12 +83,12 @@ public static class Helper
         }
         catch (Exception ex)
         {
-            Gui.Common.Notification("Unable to open in a Browser, Invalid URL", Dalamud.Interface.Internal.Notifications.NotificationType.Error);
+            Gui.Common.Notification("Unable to open in a Browser, Invalid URL", Dalamud.Interface.ImGuiNotification.NotificationType.Error);
             Plugin.Log.Error(ex, "URL unsafe");
             return;
         }
 
-        var successNotification = () => Gui.Common.Notification($"Opening {url}", Dalamud.Interface.Internal.Notifications.NotificationType.Info);
+        var successNotification = () => Gui.Common.Notification($"Opening {url}", Dalamud.Interface.ImGuiNotification.NotificationType.Info);
 
         // Execute url as process
         try
@@ -117,7 +117,7 @@ public static class Helper
             }
             else
             {
-                Gui.Common.Notification("Unable to open in a Browser", Dalamud.Interface.Internal.Notifications.NotificationType.Error);
+                Gui.Common.Notification("Unable to open in a Browser", Dalamud.Interface.ImGuiNotification.NotificationType.Error);
             }
         }
     }

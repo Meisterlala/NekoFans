@@ -11,15 +11,13 @@ namespace Neko.Sources;
 /// </summary>
 public class CombinedSource : ImageSource
 {
+
     [Serializable]
     public class OutOfImagesException : Exception
     {
         public OutOfImagesException() { }
         public OutOfImagesException(string message) : base(message) { }
         public OutOfImagesException(string message, Exception inner) : base(message, inner) { }
-        protected OutOfImagesException(
-            System.Runtime.Serialization.SerializationInfo info,
-            System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
 
     public override string Name => "Combined Source";

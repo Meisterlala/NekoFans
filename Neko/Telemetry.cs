@@ -61,8 +61,7 @@ public static class Telemetry
         // Increment buffer counter to send to API
         lock (countBuffer)
         {
-            if (!countBuffer.ContainsKey(api))
-                countBuffer.Add(api, 0);
+            countBuffer.TryAdd(api, 0);
             countBuffer[api]++;
 
             if (countBuffer[api] >= MaxQueueSize)
@@ -94,7 +93,7 @@ public static class Telemetry
             ? Task.CompletedTask
             : Task.Run(async () =>
         {
-            if (!apiNames.ContainsKey(API))
+            if (!apiNames.TryGetValue(API, out var value))
             {
                 Plugin.Log.Warning($"Could not find API name for {API}");
                 return;
@@ -102,7 +101,7 @@ public static class Telemetry
 
             Plugin.Log.Verbose($"Sending {count} {API} downloads to telemetry");
 
-            var url = $"{Plugin.ControlServer}/add/{apiNames[API]}/{count}";
+            var url = $"{Plugin.ControlServer}/add/{value}/{count}";
             var request = new HttpRequestMessage(HttpMethod.Post, url);
 
             HttpResponseMessage response;

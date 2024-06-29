@@ -11,7 +11,7 @@ namespace Neko.Drawing;
 
 public static class ImageLoad
 {
-    private static unsafe TextureWrap LoadTexture(byte[] imagedata, int width, int height)
+    private static unsafe D3DTextureWrap LoadTexture(byte[] imagedata, int width, int height)
     {
         fixed (void* data_ptr = imagedata)
         {
@@ -19,7 +19,7 @@ public static class ImageLoad
         }
     }
 
-    private static unsafe TextureWrap LoadTexture(void* imagedata, int width, int height)
+    private static unsafe D3DTextureWrap LoadTexture(void* imagedata, int width, int height)
     {
         var device = Plugin.PluginInterface.UiBuilder.Device;
         ShaderResourceView resView;

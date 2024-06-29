@@ -91,8 +91,15 @@ public static class Common
     /// </summary>
     /// <param name="text"></param>
     /// <param name="type"></param>
-    public static void Notification(string text, Dalamud.Interface.Internal.Notifications.NotificationType type = default) =>
-            Plugin.PluginInterface.UiBuilder.AddNotification(text, "Neko Fans", type);
+    public static void Notification(string text, Dalamud.Interface.ImGuiNotification.NotificationType type = default)  {
+        // TODO: Add image to notification
+
+        var notification = new Dalamud.Interface.ImGuiNotification.Notification(){
+            Content = text,
+            Type = type,
+        };
+        Plugin.NotificationManager.AddNotification(notification);
+    }
 
     /// <summary>
     /// Only used for <see cref="TextWithColorsWrapped"/> to store the color and the text

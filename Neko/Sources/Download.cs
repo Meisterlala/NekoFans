@@ -16,6 +16,8 @@ public static class Download
         public string Url;
     }
 
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions() { WriteIndented = true };
+
     /// <summary>
     /// Downloads a file from the internet and returns the data in from of a <see cref="Response"/>.
     /// </summary>
@@ -127,7 +129,7 @@ public static class Download
                 return await ParseJson<T>(newRequest, ct).ConfigureAwait(false);
             }
 
-            DebugHelper.LogNetwork(() => $"Error Downloading Json from {request.RequestUri}:\n{JsonSerializer.Serialize(response.Content.ReadAsStringAsync(ct).Result, new JsonSerializerOptions() { WriteIndented = true })}");
+            DebugHelper.LogNetwork(() => $"Error Downloading Json from {request.RequestUri}:\n{JsonSerializer.Serialize(response.Content.ReadAsStringAsync(ct).Result, JsonSerializerOptions)}");
             var exception = new HttpRequestException($"Could not Download .json from: {request.RequestUri} ({response.StatusCode})", ex);
             exception.Data.Add("StatusCode", response.StatusCode);
             exception.Data.Add("Content", await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false));
@@ -154,7 +156,7 @@ public static class Download
             throw new Exception("Could not Parse .json File from: " + request.RequestUri, ex);
         }
 
-        DebugHelper.LogNetwork(() => $"Response from {request.RequestUri} trying to get a json:\n{JsonSerializer.Serialize(result, new JsonSerializerOptions() { WriteIndented = true })}");
+        DebugHelper.LogNetwork(() => $"Response from {request.RequestUri} trying to get a json:\n{JsonSerializer.Serialize(result, JsonSerializerOptions)}");
 
         return result;
     }
