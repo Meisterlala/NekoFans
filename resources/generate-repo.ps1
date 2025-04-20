@@ -6,7 +6,7 @@ $repo = "NekoFans"
 $nekoname = "NekoFans.zip"
 $nekolewdname = "NekoFansLewd.zip"
 
-$nekolewdtag = "1.0.7-NSFW"
+$nekolewdtag = "1.0.8-NSFW"
 
 # Authorization header for the Github API.
 $header = @{
