@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Dalamud.Interface.Textures;
 using Dalamud.Interface.Textures.TextureWraps;
 using Neko.Sources;
 
@@ -107,16 +108,13 @@ public class Embedded : ImageSource
     /// <summary>
     /// Gets a DalamudTextureWrap from the embedded icon.
     /// </summary>
-    public async Task<IDalamudTextureWrap?> GetDalamudTextureWrap()
+    public ISharedImmediateTexture GetShared()
     {
         if (Image == null) throw new Exception("Embedded image was not loaded yet");
 
         var assembly = Assembly.GetExecutingAssembly();
         var resourceName = $"Neko.resources.{Filename}";
-        var shared = Plugin.TextureProvider.GetFromManifestResource(assembly, resourceName);
-
-
-        return await shared.RentAsync().ConfigureAwait(false);
+        return Plugin.TextureProvider.GetFromManifestResource(assembly, resourceName);
     }
 
     public override bool SameAs(ImageSource other) => other is Embedded e && e.Filename == Filename;

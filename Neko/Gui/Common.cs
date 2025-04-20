@@ -100,7 +100,7 @@ public static class Common
         {
             Content = text,
             Type = type,
-            IconTextureTask = Embedded.ImageIcon.GetDalamudTextureWrap(),
+            IconTexture = Embedded.ImageIcon.GetShared()
         };
 
         Plugin.NotificationManager.AddNotification(notification);
