@@ -49,7 +49,7 @@ public class DogCEO : ImageSource
     public static string BreedName(Breed b)
     {
         var textInfo = new CultureInfo("en-US", useUserOverride: false).TextInfo;
-        var name = Enum.GetName(typeof(Breed), b)?.Trim() ?? "Unknown";
+        var name = Enum.GetName(b)?.Trim() ?? "Unknown";
         name = name.Replace("_", " (");
         if (name.Contains('('))
             name += ")";
@@ -58,7 +58,7 @@ public class DogCEO : ImageSource
 
     public static string BreedPath(Breed b)
     {
-        var name = Enum.GetName(typeof(Breed), b)?.Trim() ?? "Unknown";
+        var name = Enum.GetName(b)?.Trim() ?? "Unknown";
         return name.Replace("_", "/");
     }
 

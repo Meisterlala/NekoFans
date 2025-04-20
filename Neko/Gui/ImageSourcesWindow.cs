@@ -184,7 +184,7 @@ public class ImageSourcesWindow
         preview = preview.Length > 3 ? preview[..^2] : "No categories selected";
 
         var dic = NekosLife.CategoryInfo;
-        var enums = (NekosLife.Category[])Enum.GetValues(typeof(NekosLife.Category));
+        var enums = Enum.GetValues<NekosLife.Category>();
 
         if (ImGui.BeginCombo("Categories##NekosLife", preview, ImGuiComboFlags.HeightLarge))
         {
@@ -217,13 +217,13 @@ public class ImageSourcesWindow
         var preview = "";
         foreach (var f in Helper.GetFlags(wp.sfwCategories))
         {
-            preview += (Enum.GetName(typeof(WaifuPics.CategoriesSFW), f) ?? "unknown") + ", ";
+            preview += (Enum.GetName(f) ?? "unknown") + ", ";
         }
         if (NSFW.AllowNSFW) // NSFW Check
         {
             foreach (var f in Helper.GetFlags(wp.nsfwCategories))
             {
-                preview += "NSFW " + (Enum.GetName(typeof(WaifuPics.CategoriesNSFW), f) ?? "unknown") + ", ";
+                preview += "NSFW " + (Enum.GetName(f) ?? "unknown") + ", ";
             }
         }
 
@@ -269,7 +269,7 @@ public class ImageSourcesWindow
         }
         preview = preview.Length > 3 ? preview[..^2] : "No categories selected";
 
-        var enums = (NekosBest.Category[])Enum.GetValues(typeof(NekosBest.Category));
+        var enums = Enum.GetValues<NekosBest.Category>();
 
         if (ImGui.BeginCombo("Categories##NekosBest", preview, ImGuiComboFlags.HeightLarge))
         {
@@ -310,7 +310,7 @@ public class ImageSourcesWindow
         }
         preview = preview.Length > 3 ? preview[..^2] : "No categories selected";
 
-        var enums = (Waifuim.Category[])Enum.GetValues(typeof(Waifuim.Category));
+        var enums = Enum.GetValues<Waifuim.Category>();
 
         if (ImGui.BeginCombo("Content##Waifuim", preview, ImGuiComboFlags.HeightLarge))
         {
@@ -341,7 +341,7 @@ public class ImageSourcesWindow
     {
         if (DogCEOBreedNames == null) // Load names only once, then use cached
         {
-            var b = (DogCEO.Breed[])Enum.GetValues(typeof(DogCEO.Breed));
+            var b = Enum.GetValues<DogCEO.Breed>();
             var n = new string[b.Length];
             for (var i = 0; i < b.Length; i++)
             {
@@ -382,7 +382,7 @@ public class ImageSourcesWindow
     {
         if (TheCatAPIBreedNames == null) // Load names only once, then use cached
         {
-            var b = (TheCatAPI.Breed[])Enum.GetValues(typeof(TheCatAPI.Breed));
+            var b = Enum.GetValues<TheCatAPI.Breed>();
             var n = new string[b.Length];
             for (var i = 0; i < b.Length; i++)
             {

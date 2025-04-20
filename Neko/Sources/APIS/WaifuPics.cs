@@ -32,14 +32,14 @@ public class WaifuPics : ImageSource
             var comSFW = new CombinedSource();
             foreach (var f in Helper.GetFlags(sfwCategories))
             {
-                var category = Enum.GetName(typeof(CategoriesSFW), f)?.ToLower() ?? "unknown";
+                var category = Enum.GetName(f)?.ToLower() ?? "unknown";
                 comSFW.AddSource(new WaifuPics("sfw", category));
             }
 
             var comNSFW = new CombinedSource();
             foreach (var f in Helper.GetFlags(nsfwCategories))
             {
-                var category = Enum.GetName(typeof(CategoriesNSFW), f)?.ToLower() ?? "unknown";
+                var category = Enum.GetName(f)?.ToLower() ?? "unknown";
                 comNSFW.AddSource(new WaifuPics("nsfw", category));
             }
 

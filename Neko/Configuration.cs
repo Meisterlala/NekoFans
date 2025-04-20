@@ -107,5 +107,5 @@ public class Configuration : IPluginConfiguration
 
     private static readonly JsonSerializerOptions JsonSerializerOptions = new() { WriteIndented = true, IncludeFields = true };
     public override string ToString() =>
-        JsonSerializer.Serialize(this, typeof(Configuration), JsonSerializerOptions);
+        JsonSerializer.Serialize(this, JsonSerializerOptions);
 }
