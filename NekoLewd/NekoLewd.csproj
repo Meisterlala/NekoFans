@@ -14,27 +14,6 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
-  <ProjectExtensions>
-    <DalamudPlugin>
-      <ApiLevel>12</ApiLevel>
-      <Author>Meisterlala</Author>
-      <Name>Neko Fans NSFW 18+ Patch</Name>
-      <Punchline>Frustrated in a dungeon? Look at a cute cat girl! Or look at sexy anime tiddies!</Punchline>
-      <Description>Shows you an image of a random neko character. Click on the image to view the next one.\nMultiple Image APIs are supported, allowing you to look at Catboys, Waifus, Cats, Dogs and more.\nWarning: You might see naughty images</Description>
-      <IconUrl>https://raw.githubusercontent.com/Meisterlala/NekoFans/master/icon18.png</IconUrl>
-      <Tags>
-        <Tag>anime</Tag>
-        <Tag>neko</Tag>
-        <Tag>waifu</Tag>
-        <Tag>miqote</Tag>
-        <Tag>image</Tag>
-      </Tags>
-      <CategoryTags>
-        <Tag>UI</Tag>
-      </CategoryTags>
-      <Hidden>False</Hidden>
-    </DalamudPlugin>
-  </ProjectExtensions>
 
   <PropertyGroup>
     <DalamudLibPath Condition="'$(OS)' == 'Windows_NT'">$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
