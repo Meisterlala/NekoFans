@@ -3,7 +3,7 @@
     "Author": "Meisterlala",
     "Name": "Neko Fans",
     "InternalName": "Neko",
-    "AssemblyVersion": "1.3.4",
+    "AssemblyVersion": "1.3.5",
     "Description": "Shows you an image of a random neko character. Click on the image to view the next one.\nYou can choose different image sources, allowing you to look at Catboys, Waifus, Cats, Dogs and more.\n\nSupported APIs:\nnekos.best, Nekos.life, Dog CEO, The Cat API, Pic.re, Waifu.im, Waifu.pics and shibe.online\n\nWarning: You might see naughty images",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/Meisterlala/NekoFans",
@@ -17,7 +17,7 @@
     "CategoryTags": [
       "UI"
     ],
-    "DalamudApiLevel": 11,
+    "DalamudApiLevel": 12,
     "LoadRequiredState": 0,
     "LoadSync": false,
     "CanUnloadAsync": true,
@@ -31,11 +31,11 @@
     "AcceptsFeedback": true,
     "IsHide": "False",
     "IsTestingExclusive": "False",
-    "LastUpdated": 1731858782,
-    "DownloadCount": 50,
-    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.3.4/NekoFans.zip",
-    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.3.4/NekoFans.zip",
-    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.3.4/NekoFans.zip"
+    "LastUpdated": 1745164956,
+    "DownloadCount": 0,
+    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.8-NSFW/NekoFans.zip",
+    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.8-NSFW/NekoFans.zip",
+    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.8-NSFW/NekoFans.zip"
   },
   {
     "Author": "Meisterlala",
@@ -67,7 +67,7 @@
     "IsHide": "False",
     "IsTestingExclusive": "False",
     "LastUpdated": 1731858569,
-    "DownloadCount": 1458,
+    "DownloadCount": 1472,
     "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.7-NSFW/NekoFansLewd.zip",
     "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.7-NSFW/NekoFansLewd.zip",
     "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.7-NSFW/NekoFansLewd.zip",
