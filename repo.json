@@ -3,7 +3,7 @@
     "Author": "Meisterlala",
     "Name": "Neko Fans",
     "InternalName": "Neko",
-    "AssemblyVersion": "1.3.5",
+    "AssemblyVersion": "1.3.6",
     "Description": "Shows you an image of a random neko character. Click on the image to view the next one.\nYou can choose different image sources, allowing you to look at Catboys, Waifus, Cats, Dogs and more.\n\nSupported APIs:\nnekos.best, Nekos.life, Dog CEO, The Cat API, Pic.re, Waifu.im, Waifu.pics and shibe.online\n\nWarning: You might see naughty images",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/Meisterlala/NekoFans",
@@ -17,7 +17,7 @@
     "CategoryTags": [
       "UI"
     ],
-    "DalamudApiLevel": 12,
+    "DalamudApiLevel": 13,
     "LoadRequiredState": 0,
     "LoadSync": false,
     "CanUnloadAsync": true,
@@ -31,17 +31,17 @@
     "AcceptsFeedback": true,
     "IsHide": "False",
     "IsTestingExclusive": "False",
-    "LastUpdated": 1745164982,
-    "DownloadCount": 44,
-    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.3.5/NekoFans.zip",
-    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.3.5/NekoFans.zip",
-    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.3.5/NekoFans.zip"
+    "LastUpdated": 1754743050,
+    "DownloadCount": 0,
+    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.3.6/NekoFans.zip",
+    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.3.6/NekoFans.zip",
+    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.3.6/NekoFans.zip"
   },
   {
     "Author": "Meisterlala",
     "Name": "Neko Fans NSFW 18+ Patch",
     "InternalName": "NekoLewd",
-    "AssemblyVersion": "1.0.8",
+    "AssemblyVersion": "1.0.9",
     "Description": "This Plugin does nothing on its own. Neko Fans needs to be installed.\nYou now have access to NSFW images in Neko Fans.",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/Meisterlala/NekoFans",
@@ -56,7 +56,7 @@
     "CategoryTags": [
       "UI"
     ],
-    "DalamudApiLevel": 12,
+    "DalamudApiLevel": 13,
     "LoadRequiredState": 0,
     "LoadSync": false,
     "CanUnloadAsync": false,
@@ -66,11 +66,11 @@
     "AcceptsFeedback": true,
     "IsHide": "False",
     "IsTestingExclusive": "False",
-    "LastUpdated": 1745164956,
-    "DownloadCount": 934,
-    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.8-NSFW/NekoFansLewd.zip",
-    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.8-NSFW/NekoFansLewd.zip",
-    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.8-NSFW/NekoFansLewd.zip",
+    "LastUpdated": 1754743049,
+    "DownloadCount": 0,
+    "DownloadLinkInstall": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.9-NSFW/NekoFansLewd.zip",
+    "DownloadLinkTesting": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.9-NSFW/NekoFansLewd.zip",
+    "DownloadLinkUpdate": "https://github.com/Meisterlala/NekoFans/releases/download/1.0.9-NSFW/NekoFansLewd.zip",
     "IsThirdParty": "True"
   }
 ]
