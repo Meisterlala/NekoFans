@@ -2,8 +2,8 @@ using System;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Logging;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Logging;
 using Neko.Drawing;
 using Neko.Sources;
 

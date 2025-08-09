@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using ImGuiScene;
@@ -23,7 +22,9 @@ public static class ImageLoad
 
     private static unsafe D3DTextureWrap LoadTexture(void* imagedata, int width, int height)
     {
-        var device = Plugin.PluginInterface.UiBuilder.Device;
+        // Use DeviceHandle and wrap it with SharpDX.Device to avoid using the obsolete IUiBuilder.Device
+        var device = new SharpDX.Direct3D11.Device(Plugin.PluginInterface.UiBuilder.DeviceHandle);
+        
         ShaderResourceView resView;
 
         var texDesc = new Texture2DDescription

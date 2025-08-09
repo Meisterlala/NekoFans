@@ -17,7 +17,10 @@
     <Configurations>Debug;Release;Network;Delays;Throw</Configurations>
   </PropertyGroup>
 
-  <PropertyGroup>
+   <!-- Set DalamudLibPath based on OS -->
+  <PropertyGroup>  
+    <DalamudLibPath Condition="'$(OS)' == 'Windows_NT'">$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+    <DalamudLibPath Condition="'$(OS)' == 'Unix'">$(HOME)/.xlcore/dalamud/Hooks/dev/</DalamudLibPath>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 
@@ -62,7 +65,7 @@
   <!-- Used to manipulate Clipboard -->
   <ItemGroup>
     <PackageReference Include="TextCopy"> 
-        <Version>6.2.1</Version>
+        <Version>6.2.*</Version>
         <GeneratePathProperty>true</GeneratePathProperty>
     </PackageReference>
   </ItemGroup>
@@ -70,7 +73,7 @@
   <!-- Used to Decode Images -->
   <ItemGroup>
     <PackageReference Include="SixLabors.ImageSharp"> 
-        <Version>3.1.7</Version>
+        <Version>3.1.*</Version>
         <GeneratePathProperty>true</GeneratePathProperty>
     </PackageReference>
   </ItemGroup>
