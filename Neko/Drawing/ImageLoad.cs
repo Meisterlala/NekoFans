@@ -2,10 +2,12 @@
 using System;
 using System.Collections.Generic;
 using ImGuiScene;
+using Dalamud.Bindings.ImGui;
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
+
 
 namespace Neko.Drawing;
 

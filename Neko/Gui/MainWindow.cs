@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using System.Threading.Tasks;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Neko.Drawing;
 
 namespace Neko.Gui;

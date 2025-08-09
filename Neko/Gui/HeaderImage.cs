@@ -3,7 +3,7 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Logging;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Neko.Drawing;
 using Neko.Sources;
 
