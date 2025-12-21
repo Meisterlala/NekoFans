@@ -43,7 +43,7 @@ public abstract class HeaderImage : ImageSource
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, Vector4.Zero);
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Vector4.Zero);
 
-        ImGui.ImageButton(image!.GetTexture(0).ImGuiHandle,
+        ImGui.ImageButton(image!.GetTexture(0).Handle,
             size,
             Vector2.Zero,
             Vector2.One,

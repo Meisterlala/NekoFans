@@ -154,7 +154,7 @@ public class MainWindow
 
             // Draw Image
             ImGui.SetCursorPos(cursorPos);
-            ImGui.Image(displayedNeko.GetTexture(elapedTime).ImGuiHandle,
+            ImGui.Image(displayedNeko.GetTexture(elapedTime).Handle,
                 endPos - startPos,
                 Vector2.Zero,
                 Vector2.One,

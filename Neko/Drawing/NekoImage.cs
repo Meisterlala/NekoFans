@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Logging;
-using ImGuiScene;
+using Dalamud.Interface.Textures.TextureWraps;
 
 namespace Neko.Drawing;
 
@@ -13,7 +12,7 @@ public class NekoImage
     {
         public byte[]? Data { get; private set; }
         public int FrameDelay { get; }
-        public TextureWrap? Texture { get; set; }
+        public IDalamudTextureWrap? Texture { get; set; }
 
         public Frame(byte[] data, int frameDelay)
         {
@@ -270,7 +269,7 @@ public class NekoImage
         }
     }
 
-    public TextureWrap GetTexture(double time)
+    public IDalamudTextureWrap GetTexture(double time)
     {
         DebugHelper.Assert(CurrentState == State.LoadedGPU, "Image not loaded into GPU VRAM yet. Current state: " + CurrentState);
         DebugHelper.Assert(Width.HasValue && Height.HasValue, "Image has no width or height");

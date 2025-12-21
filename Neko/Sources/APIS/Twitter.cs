@@ -529,7 +529,7 @@ public abstract partial class Twitter : ImageSource
                 : response.Data ?? throw new Exception("Could not find Username");
         }
 
-        public static bool ValidUsername(string username) => extractUsername().Match(username).Success;
+        public static bool ValidUsername(string username) => extractUsername().IsMatch(username);
 
         private async Task GetUserID(CancellationToken ct = default)
         {
