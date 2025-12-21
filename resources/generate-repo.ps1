@@ -6,7 +6,7 @@ $repo = "NekoFans"
 $nekoname = "NekoFans.zip"
 $nekolewdname = "NekoFansLewd.zip"
 
-$nekolewdtag = "1.0.9-NSFW"
+$nekolewdtag = "1.0.10-NSFW"
 
 # Authorization header for the Github API.
 $header = @{
@@ -109,7 +109,8 @@ $pluginJson = ConvertTo-Json $pluginsOut
 Set-Content -Path "repo.json" -Value $pluginJson
 
 # Function to exit with a specific code.
-function ExitWithCode($code) {
+function ExitWithCode($code)
+{
   $host.SetShouldExit($code)
   exit $code
 }
