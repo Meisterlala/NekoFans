@@ -6,8 +6,6 @@ $repo = "NekoFans"
 $nekoname = "NekoFans.zip"
 $nekolewdname = "NekoFansLewd.zip"
 
-$nekolewdtag = "1.0.10-NSFW"
-
 # Authorization header for the Github API.
 $header = @{
   "Authorization" = "Bearer $env:GITHUB_TOKEN"
@@ -18,8 +16,9 @@ $header = @{
 ##############
 
 # Fetch the release data from the Gibhub API
-$data = Invoke-WebRequest -Uri "https://api.github.com/repos/$($username)/$($repo)/releases/latest" -Headers $header
-$json = ConvertFrom-Json $data.content
+$data = Invoke-WebRequest -Uri "https://api.github.com/repos/$($username)/$($repo)/releases" -Headers $header
+$releases = ConvertFrom-Json $data.content
+$json = $releases | Where-Object { $_.tag_name -notlike "*-NSFW" -and $_.assets.Name -contains $nekoname } | Select-Object -First 1
 
 # Select Neko Fans zip
 $asset = $json.assets | Where-Object { $_.Name -eq $nekoname } #Darts
@@ -62,8 +61,7 @@ $pluginsOut += $config
 ##############
 
 # Fetch the release data from the Gibhub API
-$dataL = Invoke-WebRequest -Uri "https://api.github.com/repos/$($username)/$($repo)/releases/tags/$($nekolewdtag)" -Headers $header
-$jsonL = ConvertFrom-Json $dataL.content
+$jsonL = $releases | Where-Object { $_.tag_name -like "*-NSFW" -and $_.assets.Name -contains $nekolewdname } | Select-Object -First 1
 
 # Select Neko Fans zip
 $assetL = $jsonL.assets | Where-Object { $_.Name -eq $nekolewdname }

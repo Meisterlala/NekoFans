@@ -71,15 +71,11 @@ jobs:
       - name: Display structure of downloaded artifacts
         run: ls -R
 
-      - name: Get tag name
-        id: tag
-        uses: WyriHaximus/github-action-get-previous-tag@v1
-
       - name: Create release
         uses: softprops/action-gh-release@v0.1.13
         with:
-          name: ${{ env.PROJECT_NAME }} ${{ steps.tag.outputs.tag }}
-          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ${{ env.PROJECT_NAME }} ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
           body: ${{ github.events.commits[0].message }}
           fail_on_unmatched_files: true
           files: |
