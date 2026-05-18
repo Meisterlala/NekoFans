@@ -10,6 +10,8 @@ namespace Neko.Sources;
 
 public static class Download
 {
+    private static readonly TimeSpan ImageRateLimitTimeout = TimeSpan.FromSeconds(90);
+
     public struct Response
     {
         public byte[] Data;
@@ -23,6 +25,9 @@ public static class Download
     /// Downloads a file from the internet and returns the data in from of a <see cref="Response"/>.
     /// </summary>
     public static async Task<Response> DownloadImage(HttpRequestMessage request, Type? called = default, CancellationToken ct = default)
+        => await DownloadImage(request, called, null, ct).ConfigureAwait(false);
+
+    private static async Task<Response> DownloadImage(HttpRequestMessage request, Type? called, DateTimeOffset? firstRateLimit, CancellationToken ct)
     {
         DebugHelper.RandomThrow(DebugHelper.ThrowChance.DownloadImage);
         await DebugHelper.RandomDelay(DebugHelper.Delay.DownloadImage, ct).ConfigureAwait(false);
@@ -39,11 +44,17 @@ public static class Download
             if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
             {
                 MarkRateLimited(response, called);
-                await WaitForSourceRateLimit(rateLimitKey, RetryAfterMilliseconds(response), ct).ConfigureAwait(false);
+                firstRateLimit ??= DateTimeOffset.UtcNow;
+                var elapsed = DateTimeOffset.UtcNow - firstRateLimit.Value;
+                if (elapsed >= ImageRateLimitTimeout)
+                    throw new HttpRequestException($"Could not download image from: {request.RequestUri} ({response.StatusCode})", null, response.StatusCode);
 
-                return await DownloadImage(Helper.RequestClone(request), called, ct).ConfigureAwait(false);
+                await WaitForSourceRateLimit(rateLimitKey, RetryAfterMilliseconds(response), request.RequestUri?.ToString() ?? "unknown", ImageRateLimitTimeout - elapsed, ct).ConfigureAwait(false);
+
+                return await DownloadImage(Helper.RequestClone(request), called, firstRateLimit, ct).ConfigureAwait(false);
             }
             response.EnsureSuccessStatusCode();
+            MarkRateLimitSucceeded(rateLimitKey, response, called);
             bytes = await response.Content.ReadAsByteArrayAsync(ct).ConfigureAwait(false);
         }
         catch (Exception ex)
@@ -113,7 +124,7 @@ public static class Download
         try
         {
             response.EnsureSuccessStatusCode();
-            MarkRateLimitSucceeded(response, called);
+            MarkRateLimitSucceeded(rateLimitKey, response, called);
         }
         catch (HttpRequestException ex)
         {
@@ -130,7 +141,7 @@ public static class Download
                 }
 
                 MarkRateLimited(response, called);
-                await WaitForSourceRateLimit(rateLimitKey, RetryAfterMilliseconds(response), ct).ConfigureAwait(false);
+                await WaitForSourceRateLimit(rateLimitKey, RetryAfterMilliseconds(response), request.RequestUri?.ToString() ?? "unknown", null, ct).ConfigureAwait(false);
 
                 // Clone request, because you cant send the same one twice
                 var newRequest = Helper.RequestClone(request);
@@ -193,12 +204,25 @@ public static class Download
     }
 
     private static async Task WaitForSourceRateLimit(string key, int retryAfterMilliseconds, CancellationToken ct)
+        => await WaitForSourceRateLimit(key, retryAfterMilliseconds, null, null, ct).ConfigureAwait(false);
+
+    private static async Task WaitForSourceRateLimit(string key, int retryAfterMilliseconds, string? url, TimeSpan? maxWait, CancellationToken ct)
     {
         var rateLimit = SourceRateLimits.GetOrAdd(key, _ => new SourceRateLimit(key));
-        await rateLimit.Wait(retryAfterMilliseconds, ct).ConfigureAwait(false);
+        await rateLimit.Wait(retryAfterMilliseconds, url, maxWait, ct).ConfigureAwait(false);
     }
 
-    private static string RateLimitKey(HttpRequestMessage request, Type? called = default) => called == null ? request.RequestUri?.Host ?? "unknown" : called.FullName ?? called.Name;
+    private static void MarkSourceRateLimitSucceeded(string key)
+    {
+        if (SourceRateLimits.TryGetValue(key, out var rateLimit))
+            rateLimit.Succeeded();
+    }
+
+    private static string RateLimitKey(HttpRequestMessage request, Type? called = default)
+    {
+        var host = request.RequestUri?.Host ?? "unknown";
+        return called == null ? host : $"{called.FullName ?? called.Name} {host}";
+    }
 
     private static void MarkRateLimited(HttpResponseMessage response, Type? called = default)
     {
@@ -206,9 +230,11 @@ public static class Download
             APIS.Nekosia.IsRateLimited = true;
     }
 
-    private static void MarkRateLimitSucceeded(HttpResponseMessage response, Type? called = default)
+    private static void MarkRateLimitSucceeded(string key, HttpResponseMessage response, Type? called = default)
     {
-        if (called == typeof(APIS.Nekosia) && APIS.Nekosia.IsApiResponse(response))
+        MarkSourceRateLimitSucceeded(key);
+
+        if (called == typeof(APIS.Nekosia) || APIS.Nekosia.IsApiResponse(response))
             APIS.Nekosia.IsRateLimited = false;
     }
 
@@ -216,6 +242,7 @@ public static class Download
     {
         private readonly SemaphoreSlim semaphore = new(1, 1);
         private readonly string key = key;
+        private int consecutiveFailures;
         private DateTimeOffset waitUntil = DateTimeOffset.MinValue;
 
         public async Task Wait(CancellationToken ct)
@@ -225,17 +252,18 @@ public static class Download
                 await Task.Delay(delay, ct).ConfigureAwait(false);
         }
 
-        public async Task Wait(int retryAfterMilliseconds, CancellationToken ct)
+        public async Task Wait(int retryAfterMilliseconds, string? url, TimeSpan? maxWait, CancellationToken ct)
         {
             await semaphore.WaitAsync(ct).ConfigureAwait(false);
             try
             {
                 var now = DateTimeOffset.UtcNow;
+                var retryDelay = BackoffMilliseconds(retryAfterMilliseconds, maxWait);
                 var existingDelay = waitUntil - now;
-                if (existingDelay.TotalMilliseconds < retryAfterMilliseconds - 250)
+                if (existingDelay.TotalMilliseconds < retryDelay - 250)
                 {
-                    waitUntil = now.AddMilliseconds(retryAfterMilliseconds);
-                    Plugin.Log.Information($"{key} returned 429 (Too Many Requests). Waiting {retryAfterMilliseconds / 1000.0} seconds before trying again.");
+                    waitUntil = now.AddMilliseconds(retryDelay);
+                    Plugin.Log.Information($"{key} returned 429 (Too Many Requests) for {url ?? "unknown URL"}. Waiting {retryDelay / 1000.0} seconds before trying again.");
                 }
             }
             finally
@@ -244,6 +272,22 @@ public static class Download
             }
 
             await Wait(ct).ConfigureAwait(false);
+        }
+
+        public void Succeeded()
+        {
+            consecutiveFailures = 0;
+        }
+
+        private int BackoffMilliseconds(int retryAfterMilliseconds, TimeSpan? maxWait)
+        {
+            var backoffSeconds = Math.Min(60, 1 << Math.Min(consecutiveFailures, 5));
+            consecutiveFailures++;
+            var delay = Math.Clamp(Math.Max(retryAfterMilliseconds, backoffSeconds * 1000), 1000, 60000);
+            if (maxWait == null)
+                return delay;
+
+            return Math.Clamp(Math.Min(delay, (int)maxWait.Value.TotalMilliseconds), 1000, 60000);
         }
     }
 
