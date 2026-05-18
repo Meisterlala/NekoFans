@@ -10,7 +10,25 @@
         "${workspaceFolder}/Neko/Neko.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary",
-        "/p:DefineConstants=\"DEBUG\"",
+        "-c",
+        "Debug"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "build"
+      }
+    },
+    {
+      "label": "Neko: Build Debug All",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/Neko/Neko.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary",
+        "-c",
+        "DebugAll"
       ],
       "problemMatcher": "$msCompile",
       "group": {
@@ -43,7 +61,8 @@
         "${workspaceFolder}/Neko/Neko.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary",
-        "/p:DefineConstants=\"NETWORK;DEBUG\"",
+        "-c",
+        "Network"
       ],
       "problemMatcher": "$msCompile",
       "group": {
@@ -59,7 +78,8 @@
         "${workspaceFolder}/Neko/Neko.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary",
-        "/p:DefineConstants=\"THROW;DEBUG\"",
+        "-c",
+        "Throw"
       ],
       "problemMatcher": "$msCompile",
       "group": {
@@ -75,7 +95,8 @@
         "${workspaceFolder}/Neko/Neko.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary",
-        "/p:DefineConstants=\"DELAY;DEBUG\"",
+        "-c",
+        "Delays"
       ],
       "problemMatcher": "$msCompile",
       "group": {

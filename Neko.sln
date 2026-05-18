@@ -10,6 +10,7 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
+		DebugAll|x64 = DebugAll|x64
 		Delays|x64 = Delays|x64
 		Network|x64 = Network|x64
 		Release|x64 = Release|x64
@@ -18,6 +19,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Debug|x64.ActiveCfg = Debug|x64
 		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Debug|x64.Build.0 = Debug|x64
+		{13C812E9-0D42-4B95-8646-40EEBF30636F}.DebugAll|x64.ActiveCfg = DebugAll|x64
+		{13C812E9-0D42-4B95-8646-40EEBF30636F}.DebugAll|x64.Build.0 = DebugAll|x64
 		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Delays|x64.ActiveCfg = Delays|x64
 		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Delays|x64.Build.0 = Delays|x64
 		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Network|x64.ActiveCfg = Network|x64
@@ -28,6 +31,8 @@ Global
 		{13C812E9-0D42-4B95-8646-40EEBF30636F}.Throw|x64.Build.0 = Throw|x64
 		{5D22A1BA-E504-4CE8-9D44-07CF4236BDDE}.Debug|x64.ActiveCfg = Debug|x64
 		{5D22A1BA-E504-4CE8-9D44-07CF4236BDDE}.Debug|x64.Build.0 = Debug|x64
+		{5D22A1BA-E504-4CE8-9D44-07CF4236BDDE}.DebugAll|x64.ActiveCfg = Debug|x64
+		{5D22A1BA-E504-4CE8-9D44-07CF4236BDDE}.DebugAll|x64.Build.0 = Debug|x64
 		{5D22A1BA-E504-4CE8-9D44-07CF4236BDDE}.Delays|x64.ActiveCfg = Debug|x64
 		{5D22A1BA-E504-4CE8-9D44-07CF4236BDDE}.Delays|x64.Build.0 = Debug|x64
 		{5D22A1BA-E504-4CE8-9D44-07CF4236BDDE}.Network|x64.ActiveCfg = Release|x64

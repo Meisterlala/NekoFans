@@ -14,7 +14,7 @@
     <PreserveCompilationContext>false</PreserveCompilationContext>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <Configurations>Debug;Release;Network;Delays;Throw</Configurations>
+    <Configurations>Debug;DebugAll;Release;Network;Delays;Throw</Configurations>
   </PropertyGroup>
 
    <!-- Set DalamudLibPath based on OS -->
@@ -25,13 +25,23 @@
   </PropertyGroup>
 
   <!-- Define Constants based on the Configuration -->
-  <!-- Everything is defined in the Debug Configuration, so roslyn is happy.
-       use dotnet build /p:DefineConstants="DEBUG" if you want a normal Debug build  -->
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
-    <DefineConstants>TRACE;NETWORK;THROW;DELAY</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <DefineConstants></DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='DebugAll'">
+    <DefineConstants>TRACE;DEBUG;NETWORK;THROW;DELAY</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Network'">
+    <DefineConstants>TRACE;DEBUG;NETWORK</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Delays'">
+    <DefineConstants>TRACE;DEBUG;DELAY</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Throw'">
+    <DefineConstants>TRACE;DEBUG;THROW</DefineConstants>
   </PropertyGroup>
 
   <!-- Load DLLs included with Dalamud -->
