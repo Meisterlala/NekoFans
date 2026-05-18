@@ -67,17 +67,19 @@ public class Waifuim : ImageSource
     private readonly MultiURLs<WaifuImJson> URLs;
     private readonly Info CurrentInfo;
 
-    private const string ApiVersion = "v5";
+    private const string ApiVersion = "v7";
+
+    private const int PageSize = 30;
 
     public Waifuim(Info i)
     {
         CurrentInfo = i;
-        var nsfw = CurrentInfo.NSFW && NSFW.AllowNSFW ? "true" : "false";
-        var gif = CurrentInfo.GIF ? "true" : "false";
+        var isNsfw = CurrentInfo.NSFW && NSFW.AllowNSFW ? "true" : "false";
+        var isAnimated = CurrentInfo.GIF ? "true" : "false";
 
         HttpRequestMessage requestWithVersion()
         {
-            HttpRequestMessage request = new(HttpMethod.Get, $"https://api.waifu.im/search/?is_nsfw={nsfw}&gif={gif}&many=true");
+            HttpRequestMessage request = new(HttpMethod.Get, $"https://api.waifu.im/images?IsNsfw={isNsfw}&IsAnimated={isAnimated}&PageSize={PageSize}");
             request.Headers.Add("Accept-Version", ApiVersion);
             return request;
         }
@@ -100,36 +102,65 @@ public class Waifuim : ImageSource
 #pragma warning disable
     public class WaifuImJson : IJsonToList<string>
     {
+        public class Artist
+        {
+            public int id { get; set; }
+            public string name { get; set; }
+            public string? patreon { get; set; }
+            public string? pixiv { get; set; }
+            public string? twitter { get; set; }
+            public string? deviantArt { get; set; }
+            public string reviewStatus { get; set; }
+            public int? creatorId { get; set; }
+            public int imageCount { get; set; }
+        }
+
+        public class Tag
+        {
+            public int id { get; set; }
+            public string name { get; set; }
+            public string slug { get; set; }
+            public string description { get; set; }
+            public string reviewStatus { get; set; }
+            public int? creatorId { get; set; }
+            public int imageCount { get; set; }
+        }
+
         public class Image
         {
-            public class Tag
-            {
-                public int tag_id { get; set; }
-                public string name { get; set; }
-                public string description { get; set; }
-                public bool is_nsfw { get; set; }
-            }
-
-            public string file { get; set; }
+            public int id { get; set; }
+            public string perceptualHash { get; set; }
             public string extension { get; set; }
-            public int image_id { get; set; }
-            public int favorites { get; set; }
-            public string dominant_color { get; set; }
-            public string source { get; set; }
-            public DateTime uploaded_at { get; set; }
-            public bool is_nsfw { get; set; }
+            public string dominantColor { get; set; }
+            public string? source { get; set; }
+            public List<Artist> artists { get; set; }
+            public int? uploaderId { get; set; }
+            public DateTime uploadedAt { get; set; }
+            public bool isNsfw { get; set; }
+            public bool isAnimated { get; set; }
             public int width { get; set; }
             public int height { get; set; }
+            public long byteSize { get; set; }
             public string url { get; set; }
-            public string preview_url { get; set; }
+            public string reviewStatus { get; set; }
+            public int favorites { get; set; }
+            public DateTime? likedAt { get; set; }
+            public DateTime? addedToAlbumAt { get; set; }
             public List<Tag> tags { get; set; }
         }
-        public List<Image> images { get; set; }
+
+        public List<Image> items { get; set; }
+
+        public int pageNumber { get; set; }
+        public int totalPages { get; set; }
+        public int totalCount { get; set; }
+        public bool hasPreviousPage { get; set; }
+        public bool hasNextPage { get; set; }
 
         public List<string> ToList()
         {
             List<string> res = new();
-            foreach (var img in images)
+            foreach (var img in items)
             {
                 res.Add(img.url);
             }
@@ -138,3 +169,4 @@ public class Waifuim : ImageSource
     }
 #pragma warning restore
 }
+
