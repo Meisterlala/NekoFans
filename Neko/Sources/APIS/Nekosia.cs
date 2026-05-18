@@ -11,7 +11,7 @@ namespace Neko.Sources.APIS;
 public class Nekosia : ImageSource
 {
     private const string BaseUrl = "https://api.nekosia.cat/api/v1/images";
-    private const int PageSize = 20;
+    private const int PageSize = 10;
     private static readonly string SessionId = Guid.NewGuid().ToString("N");
 
     internal static bool IsRateLimited;
@@ -22,7 +22,7 @@ public class Nekosia : ImageSource
         Suggestive,
     }
 
-    public static bool Is429Response(HttpResponseMessage response) =>
+    public static bool IsApiResponse(HttpResponseMessage response) =>
         response.RequestMessage?.RequestUri?.Host == "api.nekosia.cat";
 
     public class Config : IImageConfig, IJsonOnDeserialized
@@ -206,7 +206,7 @@ public class Nekosia : ImageSource
         this.includeTags = NormalizeTags(includeTags);
         this.excludeTags = NormalizeTags(excludeTags);
         this.rating = rating;
-        sourceKey = SourceKey(this.includeTags, this.excludeTags, rating);
+        sourceKey = SourceKey(this.includeTags, this.excludeTags, EffectiveRating(rating));
         urls = new(() => new HttpRequestMessage(HttpMethod.Get, RequestUrl()), this, 5);
     }
 

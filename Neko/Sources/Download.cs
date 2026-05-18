@@ -113,6 +113,7 @@ public static class Download
         try
         {
             response.EnsureSuccessStatusCode();
+            MarkRateLimitSucceeded(response, called);
         }
         catch (HttpRequestException ex)
         {
@@ -201,8 +202,14 @@ public static class Download
 
     private static void MarkRateLimited(HttpResponseMessage response, Type? called = default)
     {
-        if (called == typeof(APIS.Nekosia) || APIS.Nekosia.Is429Response(response))
+        if (called == typeof(APIS.Nekosia) || APIS.Nekosia.IsApiResponse(response))
             APIS.Nekosia.IsRateLimited = true;
+    }
+
+    private static void MarkRateLimitSucceeded(HttpResponseMessage response, Type? called = default)
+    {
+        if (called == typeof(APIS.Nekosia) && APIS.Nekosia.IsApiResponse(response))
+            APIS.Nekosia.IsRateLimited = false;
     }
 
     private sealed class SourceRateLimit(string key)
