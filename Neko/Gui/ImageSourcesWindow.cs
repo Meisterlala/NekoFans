@@ -84,7 +84,7 @@ public class ImageSourcesWindow
         if (Plugin.Config.Sources.NekosBest.enabled)
             DrawNekosBest(SourceList[1]);
         //  ------------ shibe.online --------------
-        SourceCheckbox(SourceList[2], ref Plugin.Config.Sources.ShibeOnline.enabled);
+        // SourceCheckbox(SourceList[2], ref Plugin.Config.Sources.ShibeOnline.enabled);
         //  ------------ Catboys --------------
         // SourceCheckbox(SourceList[3], ref Plugin.Config.Sources.Catboys.enabled);
         //  ------------ waifu.im --------------

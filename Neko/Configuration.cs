@@ -81,7 +81,7 @@ public class Configuration : IPluginConfiguration
         combined.AddSource(Sources.NekosBest.LoadConfig());
         combined.AddSource(Sources.NekosLife.LoadConfig());
         combined.AddSource(Sources.PicRe.LoadConfig());
-        combined.AddSource(Sources.ShibeOnline.LoadConfig());
+        // combined.AddSource(Sources.ShibeOnline.LoadConfig());
         combined.AddSource(Sources.TheCatAPI.LoadConfig());
         // combined.AddSource(Sources.Twitter.LoadConfig());
         combined.AddSource(Sources.Waifuim.LoadConfig());
