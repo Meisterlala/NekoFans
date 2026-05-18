@@ -19,14 +19,19 @@ public class ConfigWindow
     private readonly ImageSourcesWindow imageSourcesGUI = new();
     private readonly HeaderImage.Total headerImage = new();
 
+    private const int MaxQueueDownloadCount = 50;
+    private const int MaxQueuePreloadCount = 25;
+
     private int QueueDonwloadCount;
     private int QueuePreloadCount;
+    private bool wasDev;
     private readonly string Title;
 
     public ConfigWindow()
     {
         QueueDonwloadCount = Plugin.Config.QueueDownloadCount;
         QueuePreloadCount = Plugin.Config.QueuePreloadCount;
+        wasDev = Plugin.PluginInterface.IsDev;
         Title = "Neko Fans Configuration";
 
         // Add debug info to the title
@@ -48,6 +53,8 @@ public class ConfigWindow
 
     public void Draw()
     {
+        UpdateDevQueueLimits();
+
         if (!Visible) return;
         try
         {
@@ -202,6 +209,26 @@ public class ConfigWindow
         ImGui.PopItemWidth();
     }
 
+    private void UpdateDevQueueLimits()
+    {
+        var isDev = Plugin.PluginInterface.IsDev;
+        if (!wasDev || isDev)
+        {
+            wasDev = isDev;
+            return;
+        }
+
+        QueueDonwloadCount = Math.Clamp(QueueDonwloadCount, 1, MaxQueueDownloadCount);
+        QueuePreloadCount = Math.Clamp(QueuePreloadCount, 1, Math.Min(MaxQueuePreloadCount, QueueDonwloadCount));
+
+        Plugin.Config.QueueDownloadCount = QueueDonwloadCount;
+        Plugin.Config.QueuePreloadCount = QueuePreloadCount;
+        Plugin.Config.Save();
+        Plugin.GuiMain?.Queue.UpdateQueueLength();
+
+        wasDev = false;
+    }
+
     private void DrawAdvanced()
     {
         ImGui.PushItemWidth(-200);
@@ -214,7 +241,9 @@ public class ConfigWindow
         // Int Downloaded
         if (ImGui.InputInt("Downloaded##Advanced", ref QueueDonwloadCount, 1))
         {
-            if (QueueDonwloadCount < 1 || QueueDonwloadCount > 50 || QueuePreloadCount > QueueDonwloadCount)
+            if (QueueDonwloadCount < 1
+             || (!Plugin.PluginInterface.IsDev && QueueDonwloadCount > MaxQueueDownloadCount)
+             || QueuePreloadCount > QueueDonwloadCount)
                 QueueDonwloadCount = Plugin.Config.QueueDownloadCount;
             Plugin.Config.QueueDownloadCount = QueueDonwloadCount;
             Plugin.Config.Save();
@@ -233,7 +262,9 @@ public class ConfigWindow
         // Int in VRAM
         if (ImGui.InputInt("in VRAM##Advanced", ref QueuePreloadCount, 1))
         {
-            if (QueuePreloadCount < 1 || QueuePreloadCount > 25 || QueuePreloadCount > QueueDonwloadCount)
+            if (QueuePreloadCount < 1
+             || (!Plugin.PluginInterface.IsDev && QueuePreloadCount > MaxQueuePreloadCount)
+             || QueuePreloadCount > QueueDonwloadCount)
                 QueuePreloadCount = Plugin.Config.QueuePreloadCount;
             Plugin.Config.QueuePreloadCount = QueuePreloadCount;
             Plugin.Config.Save();
@@ -284,6 +315,14 @@ public class ConfigWindow
             if (ImGui.Button("Force Garbage collection##Advanced"))
                 GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
             ImGui.SameLine(); Common.HelpMarker("This will lag the game. Only press this when you know what you are doing!");
+        }
+
+        if (Plugin.PluginInterface.IsDev)
+        {
+            ImGui.Button("Advance images as fast as possible##Advanced");
+            if (ImGui.IsItemActive())
+                Plugin.GuiMain?.NextNeko();
+            ImGui.SameLine(); Common.HelpMarker("Hold this button to advance images once per rendered frame, using the same path as clicking the main image.");
         }
 
         ImGui.PopItemWidth();

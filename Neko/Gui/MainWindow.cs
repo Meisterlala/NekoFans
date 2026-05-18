@@ -207,7 +207,7 @@ public class MainWindow
     /// <summary>
     /// Advance to the next image
     /// </summary>
-    private void NextNeko()
+    internal void NextNeko()
     {
         // Restart the timer for the slideshow
         Slideshow.Restart();
