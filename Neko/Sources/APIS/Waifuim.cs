@@ -10,7 +10,7 @@ public class Waifuim : ImageSource
 {
     public class Config : IImageConfig
     {
-        public bool enabled;
+        public bool enabled = true;
         public Category categories = Category.SFW | Category.SFWGIF;
 
         public ImageSource? LoadConfig()
@@ -169,4 +169,3 @@ public class Waifuim : ImageSource
     }
 #pragma warning restore
 }
-

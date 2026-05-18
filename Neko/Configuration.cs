@@ -78,7 +78,7 @@ public class Configuration : IPluginConfiguration
     public CombinedSource LoadSources()
     {
         CombinedSource combined = new();
-        combined.AddSource(Sources.Catboys.LoadConfig());
+        // combined.AddSource(Sources.Catboys.LoadConfig());
         combined.AddSource(Sources.DogCEO.LoadConfig());
         combined.AddSource(Sources.NekosBest.LoadConfig());
         combined.AddSource(Sources.NekosLife.LoadConfig());
