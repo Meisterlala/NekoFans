@@ -115,7 +115,7 @@ public class ImageSourcesWindow
             Common.HelpMarker("Nekosia is currently rate limiting API or image requests. Wait a bit and it should work again.");
         }
         if (Plugin.Config.Sources.Nekosia.enabled)
-            DrawNekosia(SourceList[8]);
+            DrawNekosia();
         //  ------------ Dog CEO --------------
         SourceCheckbox(SourceList[9], ref Plugin.Config.Sources.DogCEO.enabled);
         if (Plugin.Config.Sources.DogCEO.enabled)
@@ -352,38 +352,113 @@ public class ImageSourcesWindow
         ImGui.Unindent(INDENT);
     }
 
-    private static void DrawNekosia(ImageSourceConfig source)
+    private static void DrawNekosia()
     {
         ImGui.Indent(INDENT);
         var nekosia = Plugin.Config.Sources.Nekosia;
-        var preview = "";
-        foreach (var f in Helper.GetFlags(nekosia.categories))
-        {
-            if (Nekosia.CategoryInfo.TryGetValue(f, out var info))
-                preview += $"{info.DisplayName}, ";
-        }
-        preview = preview.Length > 3 ? preview[..^2] : "No categories selected";
+        nekosia.includeTags = Nekosia.NormalizeTags(nekosia.includeTags);
+        nekosia.excludeTags = Nekosia.NormalizeTags(nekosia.excludeTags);
 
-        var enums = Enum.GetValues<Nekosia.Category>();
+        ImGui.TextWrapped("Images matching any of the selected categories are shown. Images matching blacklisted categories are excluded.");
 
-        if (ImGui.BeginCombo("Categories##Nekosia", preview, ImGuiComboFlags.HeightLarge))
+        if (NSFW.AllowNSFW && ImGui.BeginCombo("Rating##Nekosia", Nekosia.RatingDisplayName(nekosia.rating)))
         {
-            foreach (var e in enums)
-            {
-                if (Nekosia.CategoryInfo.TryGetValue(e, out var info))
-                    EnumSelectable(source, info.DisplayName, e, ref nekosia.categories);
-            }
+            NekosiaRatingSelectable(nekosia, Nekosia.Rating.Safe);
+            NekosiaRatingSelectable(nekosia, Nekosia.Rating.Suggestive);
             ImGui.EndCombo();
         }
-        if (preview.Length > 35)
-            Common.ToolTip(preview);
 
-        if (nekosia.categories == Nekosia.Category.None)
+        DrawNekosiaCategoryDropdown("Included categories##NekosiaInclude", nekosia, true);
+        DrawNekosiaCategoryDropdown("Excluded categories##NekosiaExclude", nekosia, false);
+
+        var duplicateCategories = nekosia.includeTags.Intersect(nekosia.excludeTags, StringComparer.OrdinalIgnoreCase).Select(Nekosia.CategoryDisplayName).ToList();
+        if (duplicateCategories.Count > 0)
         {
             ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), "WARNING:"); ImGui.SameLine();
-            ImGui.TextWrapped("No categories selected. Please select at least one image category.");
+            if (ImGui.Button("Fix##NekosiaDuplicateCategories"))
+                FixNekosiaDuplicateCategories(nekosia);
+            ImGui.SameLine();
+            ImGui.TextWrapped($"The same category is selected and blacklisted: {string.Join(", ", duplicateCategories)}. Selected categories win, so these categories are not blacklisted.");
         }
+
+        if (nekosia.includeTags.Count == 0)
+        {
+            ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), "WARNING:"); ImGui.SameLine();
+            ImGui.TextWrapped("No categories selected. Nekosia will not load until at least one category is selected.");
+        }
+
         ImGui.Unindent(INDENT);
+    }
+
+    private static void NekosiaRatingSelectable(Nekosia.Config config, Nekosia.Rating rating)
+    {
+        if (ImGui.Selectable(Nekosia.RatingDisplayName(rating), config.rating == rating))
+        {
+            config.rating = rating;
+            Plugin.Config.Save();
+            Plugin.UpdateImageSource();
+        }
+    }
+
+    private static void DrawNekosiaCategoryDropdown(string label, Nekosia.Config config, bool includeCategories)
+    {
+        var selectedCategories = includeCategories ? config.includeTags : config.excludeTags;
+        var preview = NekosiaCategoryPreview(selectedCategories);
+
+        if (ImGui.BeginCombo(label, preview, ImGuiComboFlags.HeightLarge))
+        {
+            foreach (var category in Nekosia.CategorySlugs().OrderBy(Nekosia.CategoryDisplayName, StringComparer.OrdinalIgnoreCase))
+            {
+                var selected = selectedCategories.Contains(category, StringComparer.OrdinalIgnoreCase);
+                if (ImGui.Selectable($"{Nekosia.CategoryDisplayName(category)}##{label}{category}", selected, ImGuiSelectableFlags.DontClosePopups))
+                {
+                    ToggleNekosiaCategory(config, includeCategories, category);
+                    selectedCategories = includeCategories ? config.includeTags : config.excludeTags;
+                }
+            }
+
+            ImGui.EndCombo();
+        }
+
+        if (preview.Length > 35)
+            Common.ToolTip(preview);
+    }
+
+    private static string NekosiaCategoryPreview(IEnumerable<string> categories)
+    {
+        var preview = string.Join(", ", categories.Select(Nekosia.CategoryDisplayName));
+        return preview.Length > 0 ? preview : "No categories selected";
+    }
+
+    private static void ToggleNekosiaCategory(Nekosia.Config config, bool includeCategories, string category)
+    {
+        config.includeTags = Nekosia.NormalizeTags(config.includeTags);
+        config.excludeTags = Nekosia.NormalizeTags(config.excludeTags);
+
+        var categories = includeCategories ? config.includeTags : config.excludeTags;
+        if (categories.Contains(category, StringComparer.OrdinalIgnoreCase))
+            categories.RemoveAll(saved => saved.Equals(category, StringComparison.OrdinalIgnoreCase));
+        else
+            categories.Add(category);
+
+        config.includeTags = Nekosia.NormalizeTags(config.includeTags);
+        config.excludeTags = Nekosia.NormalizeTags(config.excludeTags);
+        Plugin.Config.Save();
+        Plugin.UpdateImageSource();
+    }
+
+    private static void FixNekosiaDuplicateCategories(Nekosia.Config config)
+    {
+        config.includeTags = Nekosia.NormalizeTags(config.includeTags);
+        config.excludeTags = Nekosia.NormalizeTags(config.excludeTags);
+
+        var includedCategories = new HashSet<string>(config.includeTags, StringComparer.OrdinalIgnoreCase);
+        config.excludeTags.RemoveAll(includedCategories.Contains);
+
+        config.includeTags = Nekosia.NormalizeTags(config.includeTags);
+        config.excludeTags = Nekosia.NormalizeTags(config.excludeTags);
+        Plugin.Config.Save();
+        Plugin.UpdateImageSource();
     }
 
     private static void DrawWaifuim(ImageSourceConfig source)

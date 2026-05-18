@@ -205,8 +205,6 @@ public class ConfigWindow
 
             DrawKeybinds(keybinds);
         }
-
-        ImGui.PopItemWidth();
     }
 
     private void UpdateDevQueueLimits()
@@ -325,7 +323,6 @@ public class ConfigWindow
             ImGui.SameLine(); Common.HelpMarker("Hold this button to advance images once per rendered frame, using the same path as clicking the main image.");
         }
 
-        ImGui.PopItemWidth();
     }
 
     private static void DrawAlign()

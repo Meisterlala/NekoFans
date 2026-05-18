@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -13,35 +14,137 @@ public class Nekosia : ImageSource
     private const int PageSize = 20;
     private static readonly string SessionId = Guid.NewGuid().ToString("N");
 
-    public static bool IsRateLimited;
+    internal static bool IsRateLimited;
+
+    public enum Rating
+    {
+        Safe,
+        Suggestive,
+    }
 
     public static bool Is429Response(HttpResponseMessage response) =>
         response.RequestMessage?.RequestUri?.Host == "api.nekosia.cat";
 
-    public class Config : IImageConfig
+    public class Config : IImageConfig, IJsonOnDeserialized
     {
         public bool enabled = true;
-        public Category categories = Category.All;
+        public List<string> includeTags = DefaultIncludeTags();
+        public List<string> excludeTags = DefaultExcludeTags();
+        public Rating rating = Rating.Safe;
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public Category categories = Category.None;
+
+        public void OnDeserialized()
+        {
+            if (categories == Category.None)
+                return;
+
+            includeTags = TagsFromCategories(categories);
+            categories = Category.None;
+        }
 
         public ImageSource? LoadConfig()
         {
             if (!enabled)
                 return null;
 
-            var com = new CombinedSource();
-            foreach (var f in Helper.GetFlags(categories))
-            {
-                if (f == Category.All)
-                    continue;
+            includeTags = NormalizeTags(includeTags);
+            excludeTags = NormalizeTags(excludeTags);
 
-                if (CategoryInfo.TryGetValue(f, out var info))
-                    com.AddSource(new Nekosia(info.APIName));
-                else
-                    Plugin.Log.Error($"Nekosia: Unknown category {f}");
-            }
-
-            return com.Count() > 0 ? com : null;
+            return includeTags.Count > 0 ? new Nekosia(includeTags, excludeTags, rating) : null;
         }
+    }
+
+    public static string RatingDisplayName(Rating rating) => rating switch
+    {
+        Rating.Suggestive => "Prefer Suggestive",
+        _ => "SFW",
+    };
+
+    private static string RatingApiName(Rating rating) => rating switch
+    {
+        Rating.Suggestive => "suggestive",
+        _ => "safe",
+    };
+
+    private static Rating EffectiveRating(Rating rating) => NSFW.AllowNSFW ? rating : Rating.Safe;
+
+    public static List<string> NormalizeTags(IEnumerable<string>? tags)
+        => tags?
+            .Where(tag => !string.IsNullOrWhiteSpace(tag))
+            .Select(CanonicalCategorySlug)
+            .Where(tag => tag != null)
+            .Select(tag => tag!)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToList()
+        ?? new List<string>();
+
+    public static List<string> DefaultIncludeTags()
+        => NormalizeTags([
+            "animal-ears",
+            "catgirl",
+            "cute",
+            "foxgirl",
+            "maid",
+            "tail",
+            "wolfgirl",
+        ]);
+
+    public static List<string> DefaultExcludeTags()
+        => NormalizeTags(["blue-archive"]);
+
+    public static List<string> CategorySlugs()
+        => Helper.GetFlags(Category.All)
+            .Where(category => category != Category.All)
+            .Select(CategorySlug)
+            .Order(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+    public static string CategoryDisplayName(string slug)
+    {
+        return string.Join(" ", slug.Split('-', StringSplitOptions.RemoveEmptyEntries).Select(HumanizeCategoryWord));
+    }
+
+    private static string? CanonicalCategorySlug(string tag)
+    {
+        var trimmed = tag.Trim();
+        foreach (var slug in CategorySlugs())
+            if (slug.Equals(trimmed, StringComparison.OrdinalIgnoreCase))
+                return slug;
+
+        return null;
+    }
+
+    private static string CategorySlug(Category category)
+    {
+        var name = Enum.GetName(category);
+        if (string.IsNullOrEmpty(name))
+            return "";
+
+        return string.Concat(name.Select((character, index) => index > 0 && char.IsUpper(character) ? $"-{char.ToLowerInvariant(character)}" : char.ToLowerInvariant(character).ToString()));
+    }
+
+    private static string HumanizeCategoryWord(string word) => word switch
+    {
+        "vtuber" => "VTuber",
+        "w" => "W",
+        _ => char.ToUpperInvariant(word[0]) + word[1..],
+    };
+
+    private static List<string> TagsFromCategories(Category categories)
+    {
+        var tags = new List<string>();
+        foreach (var flag in Helper.GetFlags(categories))
+        {
+            if (flag == Category.All)
+                continue;
+
+            tags.Add(CategorySlug(flag));
+        }
+
+        return NormalizeTags(tags);
     }
 
     [Flags]
@@ -92,60 +195,42 @@ public class Nekosia : ImageSource
               BlueHair | LongHair | Blonde | BlueEyes | PurpleEyes,
     }
 
-    public struct Info
-    {
-        public string DisplayName;
-        public string APIName;
-    }
-
-    public static readonly Dictionary<Category, Info> CategoryInfo = new()
-    {
-        { Category.Random, new Info { DisplayName = "Random", APIName = "random" } },
-        { Category.Catgirl, new Info { DisplayName = "Catgirl", APIName = "catgirl" } },
-        { Category.Foxgirl, new Info { DisplayName = "Foxgirl", APIName = "foxgirl" } },
-        { Category.Wolfgirl, new Info { DisplayName = "Wolfgirl", APIName = "wolfgirl" } },
-        { Category.AnimalEars, new Info { DisplayName = "Animal Ears", APIName = "animal-ears" } },
-        { Category.Tail, new Info { DisplayName = "Tail", APIName = "tail" } },
-        { Category.TailWithRibbon, new Info { DisplayName = "Tail With Ribbon", APIName = "tail-with-ribbon" } },
-        { Category.TailFromUnderSkirt, new Info { DisplayName = "Tail From Under Skirt", APIName = "tail-from-under-skirt" } },
-        { Category.Cute, new Info { DisplayName = "Cute", APIName = "cute" } },
-        { Category.CutenessIsJustice, new Info { DisplayName = "Cuteness Is Justice", APIName = "cuteness-is-justice" } },
-        { Category.BlueArchive, new Info { DisplayName = "Blue Archive", APIName = "blue-archive" } },
-        { Category.Girl, new Info { DisplayName = "Girl", APIName = "girl" } },
-        { Category.YoungGirl, new Info { DisplayName = "Young Girl", APIName = "young-girl" } },
-        { Category.Maid, new Info { DisplayName = "Maid", APIName = "maid" } },
-        { Category.MaidUniform, new Info { DisplayName = "Maid Uniform", APIName = "maid-uniform" } },
-        { Category.Vtuber, new Info { DisplayName = "VTuber", APIName = "vtuber" } },
-        { Category.WSitting, new Info { DisplayName = "W Sitting", APIName = "w-sitting" } },
-        { Category.LyingDown, new Info { DisplayName = "Lying Down", APIName = "lying-down" } },
-        { Category.HandsFormingAHeart, new Info { DisplayName = "Hands Forming A Heart", APIName = "hands-forming-a-heart" } },
-        { Category.Wink, new Info { DisplayName = "Wink", APIName = "wink" } },
-        { Category.Valentine, new Info { DisplayName = "Valentine", APIName = "valentine" } },
-        { Category.Headphones, new Info { DisplayName = "Headphones", APIName = "headphones" } },
-        { Category.ThighHighSocks, new Info { DisplayName = "Thigh High Socks", APIName = "thigh-high-socks" } },
-        { Category.KneeHighSocks, new Info { DisplayName = "Knee High Socks", APIName = "knee-high-socks" } },
-        { Category.WhiteTights, new Info { DisplayName = "White Tights", APIName = "white-tights" } },
-        { Category.BlackTights, new Info { DisplayName = "Black Tights", APIName = "black-tights" } },
-        { Category.Heterochromia, new Info { DisplayName = "Heterochromia", APIName = "heterochromia" } },
-        { Category.Uniform, new Info { DisplayName = "Uniform", APIName = "uniform" } },
-        { Category.SailorUniform, new Info { DisplayName = "Sailor Uniform", APIName = "sailor-uniform" } },
-        { Category.Hoodie, new Info { DisplayName = "Hoodie", APIName = "hoodie" } },
-        { Category.Ribbon, new Info { DisplayName = "Ribbon", APIName = "ribbon" } },
-        { Category.WhiteHair, new Info { DisplayName = "White Hair", APIName = "white-hair" } },
-        { Category.BlueHair, new Info { DisplayName = "Blue Hair", APIName = "blue-hair" } },
-        { Category.LongHair, new Info { DisplayName = "Long Hair", APIName = "long-hair" } },
-        { Category.Blonde, new Info { DisplayName = "Blonde", APIName = "blonde" } },
-        { Category.BlueEyes, new Info { DisplayName = "Blue Eyes", APIName = "blue-eyes" } },
-        { Category.PurpleEyes, new Info { DisplayName = "Purple Eyes", APIName = "purple-eyes" } },
-    };
-
-    private readonly string category;
+    private readonly List<string> includeTags;
+    private readonly List<string> excludeTags;
+    private readonly Rating rating;
+    private readonly string sourceKey;
     private readonly MultiURLsGeneric<NekosiaJson, NekosiaJson.Result> urls;
 
-    public Nekosia(string category)
+    public Nekosia(List<string> includeTags, List<string> excludeTags, Rating rating)
     {
-        this.category = category;
-        urls = new(() => new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/{category}?count={PageSize}&session=id&id={SessionId}"), this, 5);
+        this.includeTags = NormalizeTags(includeTags);
+        this.excludeTags = NormalizeTags(excludeTags);
+        this.rating = rating;
+        sourceKey = SourceKey(this.includeTags, this.excludeTags, rating);
+        urls = new(() => new HttpRequestMessage(HttpMethod.Get, RequestUrl()), this, 5);
+    }
+
+    private string RequestUrl()
+    {
+        var included = NormalizeTags(includeTags);
+        var includedSet = new HashSet<string>(included, StringComparer.OrdinalIgnoreCase);
+        var excluded = NormalizeTags(excludeTags).Where(tag => !includedSet.Contains(tag)).ToList();
+
+        var parameters = new List<string>
+        {
+            $"count={PageSize}",
+            $"rating={Uri.EscapeDataString(RatingApiName(EffectiveRating(rating)))}",
+            $"session=id",
+            $"id={Uri.EscapeDataString(SessionId)}",
+        };
+
+        if (included.Count > 0)
+            parameters.Add($"additionalTags={Uri.EscapeDataString(string.Join(",", included))}");
+
+        if (excluded.Count > 0)
+            parameters.Add($"blacklistedTags={Uri.EscapeDataString(string.Join(",", excluded))}");
+
+        return $"{BaseUrl}/nothing?{string.Join("&", parameters)}";
     }
 
     public override NekoImage Next(CancellationToken ct = default)
@@ -161,9 +246,21 @@ public class Nekosia : ImageSource
         }, this);
     }
 
-    public override string ToString() => $"Nekosia {category} {urls}";
+    public override string ToString() => $"Nekosia {string.Join(", ", includeTags)} {urls}";
     public override string Name => "Nekosia";
-    public override bool SameAs(ImageSource other) => other is Nekosia n && n.category == category;
+    public override bool SameAs(ImageSource other) => other is Nekosia n && n.sourceKey == sourceKey;
+
+    private static string SourceKey(List<string> includeTags, List<string> excludeTags, Rating rating)
+    {
+        var included = NormalizeTags(includeTags);
+        var includedSet = new HashSet<string>(included, StringComparer.OrdinalIgnoreCase);
+        var excluded = NormalizeTags(excludeTags).Where(tag => !includedSet.Contains(tag)).ToList();
+
+        return string.Join("\n", included)
+           + "\n--\n"
+           + string.Join("\n", excluded)
+           + $"\n--\n{rating}";
+    }
 
 #pragma warning disable
     public class NekosiaJson : IJsonToList<NekosiaJson.Result>
@@ -220,12 +317,12 @@ public class Nekosia : ImageSource
             public string Tooltip()
             {
                 List<string> lines = new();
-                var artist = SafeTooltipValue(Attribution.Artist.Username ?? Attribution.Artist.Profile);
+                var artist = SafeTooltipValue(Attribution?.Artist?.Username ?? Attribution?.Artist?.Profile);
                 if (!string.IsNullOrWhiteSpace(artist))
                     lines.Add($"Artist: {artist}");
 
-                var source = SafeTooltipValue(Source.Url ?? Source.Direct) ?? "Unknown";
-                var tags = Tags.Count > 0 ? string.Join(", ", Tags.ConvertAll(SafeTooltipValue)) : "None";
+                var source = SafeTooltipValue(Source?.Url ?? Source?.Direct) ?? "Unknown";
+                var tags = Tags is { Count: > 0 } ? string.Join(", ", Tags.Select(tag => SafeTooltipValue(CategoryDisplayName(tag)))) : "None";
                 lines.Add($"Source: {source}");
                 lines.Add($"Tags: {tags}");
                 return string.Join("\n", lines);
