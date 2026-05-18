@@ -30,6 +30,7 @@ public static class Telemetry
         {typeof(NekosBest), "nekos.best"},
         {typeof(NekosLife), "nekos.life"},
         {typeof(PicRe), "nekos.life"},
+        {typeof(Purrbot), "purrbot"},
         {typeof(ShibeOnline), "nekos.life"},
         {typeof(TheCatAPI), "the_cat_api"},
         {typeof(Twitter.UserTimeline), "twitter_user_timeline"},

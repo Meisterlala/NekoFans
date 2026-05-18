@@ -47,6 +47,8 @@ public class ImageSourcesWindow
                 typeof(WaifuPics), Plugin.Config.Sources.WaifuPics),
             new ImageSourceConfig("Pic.re", "High resolution Anime Images","https://pic.re/",
                 typeof(PicRe), Plugin.Config.Sources.PicRe),
+            new ImageSourceConfig("Purrbot", "Anime Catgirls","https://purrbot.site/",
+                typeof(Purrbot), Plugin.Config.Sources.Purrbot),
             new ImageSourceConfig("Dog CEO", "Dogs","https://dog.ceo/",
                 typeof(DogCEO), Plugin.Config.Sources.DogCEO),
             new ImageSourceConfig("The Cat API", "Cats","https://thecatapi.com/",
@@ -97,17 +99,21 @@ public class ImageSourcesWindow
         //     DrawWaifuPics(SourceList[5]);
         //  ------------ Pic.re --------------
         SourceCheckbox(SourceList[6], ref Plugin.Config.Sources.PicRe.enabled);
+        //  ------------ Purrbot --------------
+        SourceCheckbox(SourceList[7], ref Plugin.Config.Sources.Purrbot.enabled);
+        if (Plugin.Config.Sources.Purrbot.enabled)
+            DrawPurrbot(SourceList[7]);
         //  ------------ Dog CEO --------------
-        SourceCheckbox(SourceList[7], ref Plugin.Config.Sources.DogCEO.enabled);
+        SourceCheckbox(SourceList[8], ref Plugin.Config.Sources.DogCEO.enabled);
         if (Plugin.Config.Sources.DogCEO.enabled)
             DrawDogCEO();
         //  ------------ TheCatAPI --------------
-        SourceCheckbox(SourceList[8], ref Plugin.Config.Sources.TheCatAPI.enabled);
+        SourceCheckbox(SourceList[9], ref Plugin.Config.Sources.TheCatAPI.enabled);
         if (Plugin.Config.Sources.TheCatAPI.enabled)
             DrawTheCatAPI();
         //  ------------ Twitter --------------
         /*
-        SourceCheckbox(SourceList[9], ref Plugin.Config.Sources.Twitter.enabled);
+        SourceCheckbox(SourceList[10], ref Plugin.Config.Sources.Twitter.enabled);
         if (Twitter.IsRateLimited)
         {
             ImGui.SameLine();
@@ -286,6 +292,46 @@ public class ImageSourcesWindow
             Common.ToolTip(preview);
 
         if (nb.categories == NekosBest.Category.None)
+        {
+            ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), "WARNING:"); ImGui.SameLine();
+            ImGui.TextWrapped("No categories selected. Please select at least one image category.");
+        }
+        ImGui.Unindent(INDENT);
+    }
+
+    private static void DrawPurrbot(ImageSourceConfig source)
+    {
+        ImGui.Indent(INDENT);
+        var purrbot = Plugin.Config.Sources.Purrbot;
+        var preview = "";
+        foreach (var f in Helper.GetFlags(purrbot.categories))
+        {
+            if (Purrbot.CategoryInfo.TryGetValue(f, out var info))
+            {
+                if (!info.NSFW || NSFW.AllowNSFW)
+                    preview += $"{info.DisplayName}, ";
+            }
+        }
+        preview = preview.Length > 3 ? preview[..^2] : "No categories selected";
+
+        var enums = Enum.GetValues<Purrbot.Category>();
+
+        if (ImGui.BeginCombo("Categories##Purrbot", preview, ImGuiComboFlags.HeightLarge))
+        {
+            foreach (var e in enums)
+            {
+                if (Purrbot.CategoryInfo.TryGetValue(e, out var info))
+                {
+                    if (!info.NSFW || NSFW.AllowNSFW)
+                        EnumSelectable(source, info.DisplayName, e, ref purrbot.categories);
+                }
+            }
+            ImGui.EndCombo();
+        }
+        if (preview.Length > 35)
+            Common.ToolTip(preview);
+
+        if (purrbot.categories == Purrbot.Category.None)
         {
             ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), "WARNING:"); ImGui.SameLine();
             ImGui.TextWrapped("No categories selected. Please select at least one image category.");

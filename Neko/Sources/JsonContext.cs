@@ -14,6 +14,7 @@ public static class JsonContext
         { typeof(DogCEO.DogCEOJson), DogCEOContext.Default },
         { typeof(NekosBest.NekosBestJson), NekosBestContext.Default },
         { typeof(NekosLife.NekosLifeJson), NekosLifeContext.Default },
+        { typeof(Purrbot.PurrbotJson), PurrbotContext.Default },
         { typeof(ShibeOnline.ShibeOnlineJson), ShibeOnlineContext.Default },
         { typeof(TheCatAPI.TheCatAPIJson), TheCatAPIContext.Default },
         { typeof(Twitter.Search.SearchJson), TwitterSearchJsonContext.Default },
@@ -47,6 +48,9 @@ internal sealed partial class NekosBestContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(NekosLife.NekosLifeJson))]
 internal sealed partial class NekosLifeContext : JsonSerializerContext { }
+
+[JsonSerializable(typeof(Purrbot.PurrbotJson))]
+internal sealed partial class PurrbotContext : JsonSerializerContext { }
 
 [JsonSerializable(typeof(ShibeOnline.ShibeOnlineJson))]
 internal sealed partial class ShibeOnlineContext : JsonSerializerContext { }

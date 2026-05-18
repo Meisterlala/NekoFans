@@ -65,6 +65,7 @@ You can change to look and feel of the plugin in the Configutaion Menu, which ca
 - [nekos.best](https://nekos.best/)
 - [Nekos.life](https://nekos.life/)
 - [Pic.re](https://pic.re/)
+- [Purrbot](https://purrbot.site/)
 - [shibe.online](https://shibe.online/) (domain expired)
 - [The Cat API](https://thecatapi.com/)
 - [WAIFU.IM](https://waifu.im/)
