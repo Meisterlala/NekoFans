@@ -49,6 +49,8 @@ public class ImageSourcesWindow
                 typeof(PicRe), Plugin.Config.Sources.PicRe),
             new ImageSourceConfig("Purrbot", "Anime Catgirls","https://purrbot.site/",
                 typeof(Purrbot), Plugin.Config.Sources.Purrbot),
+            new ImageSourceConfig("Nekosia", "Anime and Nekos","https://nekosia.cat/",
+                typeof(Nekosia), Plugin.Config.Sources.Nekosia),
             new ImageSourceConfig("Dog CEO", "Dogs","https://dog.ceo/",
                 typeof(DogCEO), Plugin.Config.Sources.DogCEO),
             new ImageSourceConfig("The Cat API", "Cats","https://thecatapi.com/",
@@ -103,17 +105,28 @@ public class ImageSourcesWindow
         SourceCheckbox(SourceList[7], ref Plugin.Config.Sources.Purrbot.enabled);
         if (Plugin.Config.Sources.Purrbot.enabled)
             DrawPurrbot(SourceList[7]);
+        //  ------------ Nekosia --------------
+        SourceCheckbox(SourceList[8], ref Plugin.Config.Sources.Nekosia.enabled);
+        if (Nekosia.IsRateLimited)
+        {
+            ImGui.SameLine();
+            ImGui.TextColored(new Vector4(1f, 0, 0f, 1f), "API rate limit reached");
+            ImGui.SameLine();
+            Common.HelpMarker("Nekosia is currently rate limiting API or image requests. Wait a bit and it should work again.");
+        }
+        if (Plugin.Config.Sources.Nekosia.enabled)
+            DrawNekosia(SourceList[8]);
         //  ------------ Dog CEO --------------
-        SourceCheckbox(SourceList[8], ref Plugin.Config.Sources.DogCEO.enabled);
+        SourceCheckbox(SourceList[9], ref Plugin.Config.Sources.DogCEO.enabled);
         if (Plugin.Config.Sources.DogCEO.enabled)
             DrawDogCEO();
         //  ------------ TheCatAPI --------------
-        SourceCheckbox(SourceList[9], ref Plugin.Config.Sources.TheCatAPI.enabled);
+        SourceCheckbox(SourceList[10], ref Plugin.Config.Sources.TheCatAPI.enabled);
         if (Plugin.Config.Sources.TheCatAPI.enabled)
             DrawTheCatAPI();
         //  ------------ Twitter --------------
         /*
-        SourceCheckbox(SourceList[10], ref Plugin.Config.Sources.Twitter.enabled);
+        SourceCheckbox(SourceList[11], ref Plugin.Config.Sources.Twitter.enabled);
         if (Twitter.IsRateLimited)
         {
             ImGui.SameLine();
@@ -332,6 +345,40 @@ public class ImageSourcesWindow
             Common.ToolTip(preview);
 
         if (purrbot.categories == Purrbot.Category.None)
+        {
+            ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), "WARNING:"); ImGui.SameLine();
+            ImGui.TextWrapped("No categories selected. Please select at least one image category.");
+        }
+        ImGui.Unindent(INDENT);
+    }
+
+    private static void DrawNekosia(ImageSourceConfig source)
+    {
+        ImGui.Indent(INDENT);
+        var nekosia = Plugin.Config.Sources.Nekosia;
+        var preview = "";
+        foreach (var f in Helper.GetFlags(nekosia.categories))
+        {
+            if (Nekosia.CategoryInfo.TryGetValue(f, out var info))
+                preview += $"{info.DisplayName}, ";
+        }
+        preview = preview.Length > 3 ? preview[..^2] : "No categories selected";
+
+        var enums = Enum.GetValues<Nekosia.Category>();
+
+        if (ImGui.BeginCombo("Categories##Nekosia", preview, ImGuiComboFlags.HeightLarge))
+        {
+            foreach (var e in enums)
+            {
+                if (Nekosia.CategoryInfo.TryGetValue(e, out var info))
+                    EnumSelectable(source, info.DisplayName, e, ref nekosia.categories);
+            }
+            ImGui.EndCombo();
+        }
+        if (preview.Length > 35)
+            Common.ToolTip(preview);
+
+        if (nekosia.categories == Nekosia.Category.None)
         {
             ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), "WARNING:"); ImGui.SameLine();
             ImGui.TextWrapped("No categories selected. Please select at least one image category.");

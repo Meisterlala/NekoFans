@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Text.Json;
 using System.Threading;
-using System.Threading.Tasks;
 using Dalamud.Logging;
 
 namespace Neko.Sources;
@@ -32,6 +32,14 @@ public static class Download
             var response = await Plugin.HttpClient.SendAsync(request, ct).ConfigureAwait(false);
             if (response.RequestMessage != null)
                 DebugHelper.LogNetwork(() => "Sent request to download image:\n" + response.RequestMessage?.ToString());
+            if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+            {
+                if (called == typeof(APIS.Nekosia))
+                    APIS.Nekosia.IsRateLimited = true;
+
+                await WaitForRateLimit(response, ct).ConfigureAwait(false);
+                return await DownloadImage(Helper.RequestClone(request), called, ct).ConfigureAwait(false);
+            }
             response.EnsureSuccessStatusCode();
             bytes = await response.Content.ReadAsByteArrayAsync(ct).ConfigureAwait(false);
         }
@@ -104,15 +112,6 @@ public static class Download
             {
                 DebugHelper.LogNetwork(() => "API retuned 429 (Too Many Requests)\n" + response.Headers.ToString());
 
-                var retryAfter = 2000; // in ms
-                // Respect timeout header for WAIFU.IM
-                if (response.Headers.TryGetValues("Retry-After", out var values) && values.Any())
-                {
-                    var val = values.First();
-                    if (double.TryParse(val, out var seconds))
-                        retryAfter = (int)(seconds * 1000);
-                }
-
                 // Twitter API limit reached
                 if (APIS.Twitter.Is429Response(response))
                 {
@@ -120,10 +119,10 @@ public static class Download
                     throw new Exception("Twitter API limit reached. Wait a few days until the limit gets reset", ex);
                 }
 
-                Plugin.Log.Information($"API retuned 429 (Too Many Requests). Waiting {retryAfter / 1000.0} seconds before trying again.");
-                // Wait 2 seconds and retry
-                await Task.Delay(retryAfter, ct).ConfigureAwait(false);
-                ct.ThrowIfCancellationRequested();
+                if (APIS.Nekosia.Is429Response(response))
+                    APIS.Nekosia.IsRateLimited = true;
+
+                await WaitForRateLimit(response, ct).ConfigureAwait(false);
                 // Clone request, because you cant send the same one twice
                 var newRequest = Helper.RequestClone(request);
                 return await ParseJson<T>(newRequest, ct).ConfigureAwait(false);
@@ -174,5 +173,25 @@ public static class Download
                 }
         };
         return await ParseJson<T>(request, ct).ConfigureAwait(false);
+    }
+
+    private static async Task WaitForRateLimit(HttpResponseMessage response, CancellationToken ct)
+    {
+        var retryAfter = RetryAfterMilliseconds(response);
+        Plugin.Log.Information($"API retuned 429 (Too Many Requests). Waiting {retryAfter / 1000.0} seconds before trying again.");
+        await Task.Delay(retryAfter, ct).ConfigureAwait(false);
+        ct.ThrowIfCancellationRequested();
+    }
+
+    private static int RetryAfterMilliseconds(HttpResponseMessage response)
+    {
+        if (response.Headers.TryGetValues("Retry-After", out var values) && values.Any())
+        {
+            var val = values.First();
+            if (double.TryParse(val, out var seconds))
+                return (int)(seconds * 1000);
+        }
+
+        return 2000;
     }
 }

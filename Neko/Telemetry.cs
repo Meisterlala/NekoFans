@@ -28,6 +28,7 @@ public static class Telemetry
         {typeof(Catboys), "catboys"},
         {typeof(DogCEO), "dog_ceo"},
         {typeof(NekosBest), "nekos.best"},
+        {typeof(Nekosia), "nekosia.cat"},
         {typeof(NekosLife), "nekos.life"},
         {typeof(PicRe), "nekos.life"},
         {typeof(Purrbot), "purrbot"},
