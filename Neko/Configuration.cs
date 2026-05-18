@@ -85,7 +85,7 @@ public class Configuration : IPluginConfiguration
         combined.AddSource(Sources.TheCatAPI.LoadConfig());
         // combined.AddSource(Sources.Twitter.LoadConfig());
         combined.AddSource(Sources.Waifuim.LoadConfig());
-        combined.AddSource(Sources.WaifuPics.LoadConfig());
+        // combined.AddSource(Sources.WaifuPics.LoadConfig());
 #if DEBUG // Load the test source in debug mode
         combined.AddSource(Mock.LoadSources());
 #endif

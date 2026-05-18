@@ -68,5 +68,5 @@ You can change to look and feel of the plugin in the Configutaion Menu, which ca
 - [shibe.online](https://shibe.online/) (domain expired)
 - [The Cat API](https://thecatapi.com/)
 - [WAIFU.IM](https://waifu.im/)
-- [Waifu.pics](https://waifu.im/)
+- [Waifu.pics](https://waifu.pics/) (domain expired)
 - [Twitter](https://twitter.com/) (no longer supported after API price increase)

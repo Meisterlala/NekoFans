@@ -92,9 +92,9 @@ public class ImageSourcesWindow
         if (Plugin.Config.Sources.Waifuim.enabled)
             DrawWaifuim(SourceList[4]);
         //  ------------ Waifu.pics --------------
-        SourceCheckbox(SourceList[5], ref Plugin.Config.Sources.WaifuPics.enabled);
-        if (Plugin.Config.Sources.WaifuPics.enabled)
-            DrawWaifuPics(SourceList[5]);
+        // SourceCheckbox(SourceList[5], ref Plugin.Config.Sources.WaifuPics.enabled);
+        // if (Plugin.Config.Sources.WaifuPics.enabled)
+        //     DrawWaifuPics(SourceList[5]);
         //  ------------ Pic.re --------------
         SourceCheckbox(SourceList[6], ref Plugin.Config.Sources.PicRe.enabled);
         //  ------------ Dog CEO --------------
