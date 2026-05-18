@@ -20,7 +20,7 @@ public class NekoQueue
     public NekoQueue()
     {
         tokenSource = new();
-        queue = new();
+        queue = [];
 
         FillQueue();
         LoadImages();

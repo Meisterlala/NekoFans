@@ -59,13 +59,15 @@ public class Nekosia : ImageSource
     public static string RatingDisplayName(Rating rating) => rating switch
     {
         Rating.Suggestive => "Prefer Suggestive",
-        _ => "SFW",
+        Rating.Safe => "SFW",
+        _ => throw new NotImplementedException(),
     };
 
     private static string RatingApiName(Rating rating) => rating switch
     {
         Rating.Suggestive => "suggestive",
-        _ => "safe",
+        Rating.Safe => "safe",
+        _ => throw new NotImplementedException(),
     };
 
     private static Rating EffectiveRating(Rating rating) => NSFW.AllowNSFW ? rating : Rating.Safe;
@@ -79,7 +81,7 @@ public class Nekosia : ImageSource
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Order(StringComparer.OrdinalIgnoreCase)
             .ToList()
-        ?? new List<string>();
+        ?? [];
 
     public static List<string> DefaultIncludeTags()
         => NormalizeTags([
@@ -96,23 +98,21 @@ public class Nekosia : ImageSource
         => NormalizeTags(["blue-archive"]);
 
     public static List<string> CategorySlugs()
-        => Helper.GetFlags(Category.All)
+        => [.. Helper.GetFlags(Category.All)
             .Where(category => category != Category.All)
             .Select(CategorySlug)
-            .Order(StringComparer.OrdinalIgnoreCase)
-            .ToList();
+            .Order(StringComparer.OrdinalIgnoreCase)];
 
-    public static string CategoryDisplayName(string slug)
-    {
-        return string.Join(" ", slug.Split('-', StringSplitOptions.RemoveEmptyEntries).Select(HumanizeCategoryWord));
-    }
+    public static string CategoryDisplayName(string slug) => string.Join(" ", slug.Split('-', StringSplitOptions.RemoveEmptyEntries).Select(HumanizeCategoryWord));
 
     private static string? CanonicalCategorySlug(string tag)
     {
         var trimmed = tag.Trim();
         foreach (var slug in CategorySlugs())
+        {
             if (slug.Equals(trimmed, StringComparison.OrdinalIgnoreCase))
                 return slug;
+        }
 
         return null;
     }
@@ -120,10 +120,9 @@ public class Nekosia : ImageSource
     private static string CategorySlug(Category category)
     {
         var name = Enum.GetName(category);
-        if (string.IsNullOrEmpty(name))
-            return "";
-
-        return string.Concat(name.Select((character, index) => index > 0 && char.IsUpper(character) ? $"-{char.ToLowerInvariant(character)}" : char.ToLowerInvariant(character).ToString()));
+        return string.IsNullOrEmpty(name)
+            ? ""
+            : string.Concat(name.Select((character, index) => index > 0 && char.IsUpper(character) ? $"-{char.ToLowerInvariant(character)}" : char.ToLowerInvariant(character).ToString()));
     }
 
     private static string HumanizeCategoryWord(string word) => word switch

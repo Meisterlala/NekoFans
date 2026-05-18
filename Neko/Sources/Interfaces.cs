@@ -82,7 +82,7 @@ public abstract class ImageSource
 /// </summary>
 public interface IImageConfig
 {
-    public ImageSource? LoadConfig();
+    ImageSource? LoadConfig();
 }
 
 /// <summary>
@@ -90,5 +90,5 @@ public interface IImageConfig
 /// </summary>
 public interface IJsonToList<T>
 {
-    public List<T> ToList();
+    List<T> ToList();
 }

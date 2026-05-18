@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Dalamud.Interface;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
 
 namespace Neko.Gui;
 
@@ -242,7 +242,10 @@ public class ConfigWindow
             if (QueueDonwloadCount < 1
              || (!Plugin.PluginInterface.IsDev && QueueDonwloadCount > MaxQueueDownloadCount)
              || QueuePreloadCount > QueueDonwloadCount)
+            {
                 QueueDonwloadCount = Plugin.Config.QueueDownloadCount;
+            }
+
             Plugin.Config.QueueDownloadCount = QueueDonwloadCount;
             Plugin.Config.Save();
             Plugin.GuiMain?.Queue.UpdateQueueLength();
@@ -263,7 +266,10 @@ public class ConfigWindow
             if (QueuePreloadCount < 1
              || (!Plugin.PluginInterface.IsDev && QueuePreloadCount > MaxQueuePreloadCount)
              || QueuePreloadCount > QueueDonwloadCount)
+            {
                 QueuePreloadCount = Plugin.Config.QueuePreloadCount;
+            }
+
             Plugin.Config.QueuePreloadCount = QueuePreloadCount;
             Plugin.Config.Save();
             Plugin.GuiMain?.Queue.UpdateQueueLength();
@@ -337,7 +343,7 @@ public class ConfigWindow
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, 0);
 
         var buttonSize = new Vector2(50, 50);
-        string[] names = {
+        string[] names = [
                 "Top\nLeft",
                 "Top",
                 "Top\nRight",
@@ -346,8 +352,8 @@ public class ConfigWindow
                 "Right",
                 "Bottom\nLeft",
                 "Bottom",
-                "Bottom\nRight" };
-        Configuration.ImageAlignment[] alignmentents = {
+                "Bottom\nRight" ];
+        Configuration.ImageAlignment[] alignmentents = [
                 Configuration.ImageAlignment.TopLeft,
                 Configuration.ImageAlignment.Top,
                 Configuration.ImageAlignment.TopRight,
@@ -356,7 +362,7 @@ public class ConfigWindow
                 Configuration.ImageAlignment.Right,
                 Configuration.ImageAlignment.BottomLeft,
                 Configuration.ImageAlignment.Bottom,
-                Configuration.ImageAlignment.BottomRight };
+                Configuration.ImageAlignment.BottomRight ];
 
         for (var y = 0; y < 3; y++)
         {
@@ -415,11 +421,11 @@ public class ConfigWindow
     private static void DrawKeybinds(List<(Hotkey, string)> keybinds)
     {
         // Set static fields
-        Keys ??= Hotkey.KeyNames.Keys.ToArray();
-        KeyNames ??= Keys.Select(Hotkey.GetKeyName).ToArray();
+        Keys ??= [.. Hotkey.KeyNames.Keys];
+        KeyNames ??= [.. Keys.Select(Hotkey.GetKeyName)];
         KeyLongestName ??= KeyNames.Max(x => ImGui.CalcTextSize(x).X);
-        Conditions ??= Hotkey.ConditionNames.Keys.ToArray();
-        ConditionNames ??= Conditions.Select(x => Hotkey.ConditionNames[x]).ToArray();
+        Conditions ??= [.. Hotkey.ConditionNames.Keys];
+        ConditionNames ??= [.. Conditions.Select(x => Hotkey.ConditionNames[x])];
         ConditionLongestName ??= ConditionNames.Max(x => ImGui.CalcTextSize(x).X);
 
         ImGui.BeginTable("Keybinds##ConfigWindow", 4, ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingFixedFit);

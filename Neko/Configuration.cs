@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Dalamud.Configuration;
-using Dalamud.Logging;
 using Neko.Sources;
 using Neko.Sources.APIS;
 

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using TerraFX.Interop.DirectX;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Textures.TextureWraps;
+using TerraFX.Interop.DirectX;
 
 
 namespace Neko.Drawing;

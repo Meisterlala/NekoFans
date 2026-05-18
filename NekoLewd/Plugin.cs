@@ -16,7 +16,7 @@ namespace NekoLewd;
 /// </summary>
 public class Plugin : IDalamudPlugin
 {
-    public string Name => "Neko Fans NSFW 18+ Patch";
+    public static string Name => "Neko Fans NSFW 18+ Patch";
 
     [PluginService] public static IDalamudPluginInterface PluginInterface { get; set; } = null!;
 

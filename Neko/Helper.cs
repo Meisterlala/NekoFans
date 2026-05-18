@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
-using Dalamud.Logging;
 using TextCopy;
 
 namespace Neko;
@@ -12,10 +11,10 @@ namespace Neko;
 public static class Helper
 {
     private static readonly string[] SizeSuffixes =
-                   { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+                   ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
     public static string SizeSuffix(long value, int decimalPlaces = 1)
     {
-        if (decimalPlaces < 0) { throw new ArgumentOutOfRangeException(nameof(decimalPlaces)); }
+        ArgumentOutOfRangeException.ThrowIfNegative(decimalPlaces);
         if (value < 0) { return "-" + SizeSuffix(-value, decimalPlaces); }
         if (value == 0) { return string.Format("{0:n" + decimalPlaces + "} bytes", 0); }
 
@@ -88,7 +87,7 @@ public static class Helper
             return;
         }
 
-        var successNotification = () => Gui.Common.Notification($"Opening {url}", Dalamud.Interface.ImGuiNotification.NotificationType.Info);
+        void successNotification() => Gui.Common.Notification($"Opening {url}", Dalamud.Interface.ImGuiNotification.NotificationType.Info);
 
         // Execute url as process
         try

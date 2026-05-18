@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using Dalamud.Logging;
 using Dalamud.Bindings.ImGui;
 using Neko.Sources;
 using Neko.Sources.APIS;
@@ -32,32 +31,32 @@ public class ImageSourcesWindow
         }
     }
 
-    private readonly ImageSourceConfig[] SourceList = {
-            new ImageSourceConfig("Nekos.life", "Anime Catgirls", "https://nekos.life/",
+    private readonly ImageSourceConfig[] SourceList = [
+            new("Nekos.life", "Anime Catgirls", "https://nekos.life/",
                 typeof(NekosLife), Plugin.Config.Sources.NekosLife),
-            new ImageSourceConfig("nekos.best", "Anime Catgirls", "https://nekos.best/",
+            new("nekos.best", "Anime Catgirls", "https://nekos.best/",
                 typeof(NekosBest), Plugin.Config.Sources.NekosBest),
-            new ImageSourceConfig("shibe.online", "Shiba Inu Dogs", "https://shibe.online/",
+            new("shibe.online", "Shiba Inu Dogs", "https://shibe.online/",
                 typeof(ShibeOnline), Plugin.Config.Sources.ShibeOnline),
-            new ImageSourceConfig("Catboys", "Anime Catboys","https://catboys.com/",
+            new("Catboys", "Anime Catboys","https://catboys.com/",
                 typeof(Catboys), Plugin.Config.Sources.Catboys),
-            new ImageSourceConfig("WAIFU.IM", "Anime Waifus","https://waifu.im/",
+            new("WAIFU.IM", "Anime Waifus","https://waifu.im/",
                 typeof(Waifuim), Plugin.Config.Sources.Waifuim),
-            new ImageSourceConfig("Waifu.pics", "Anime Waifus","https://waifu.pics/",
+            new("Waifu.pics", "Anime Waifus","https://waifu.pics/",
                 typeof(WaifuPics), Plugin.Config.Sources.WaifuPics),
-            new ImageSourceConfig("Pic.re", "High resolution Anime Images","https://pic.re/",
+            new("Pic.re", "High resolution Anime Images","https://pic.re/",
                 typeof(PicRe), Plugin.Config.Sources.PicRe),
-            new ImageSourceConfig("Purrbot", "Anime Catgirls","https://purrbot.site/",
+            new("Purrbot", "Anime Catgirls","https://purrbot.site/",
                 typeof(Purrbot), Plugin.Config.Sources.Purrbot),
-            new ImageSourceConfig("Nekosia", "Anime and Nekos","https://nekosia.cat/",
+            new("Nekosia", "Anime and Nekos","https://nekosia.cat/",
                 typeof(Nekosia), Plugin.Config.Sources.Nekosia),
-            new ImageSourceConfig("Dog CEO", "Dogs","https://dog.ceo/",
+            new("Dog CEO", "Dogs","https://dog.ceo/",
                 typeof(DogCEO), Plugin.Config.Sources.DogCEO),
-            new ImageSourceConfig("The Cat API", "Cats","https://thecatapi.com/",
+            new("The Cat API", "Cats","https://thecatapi.com/",
                 typeof(TheCatAPI), Plugin.Config.Sources.TheCatAPI),
-            new ImageSourceConfig("Twitter", "Twitter","https://twitter.com/",
+            new("Twitter", "Twitter","https://twitter.com/",
                 typeof(Twitter), Plugin.Config.Sources.Twitter),
-        };
+        ];
 
     private static readonly Vector4 TwitterDark = new(0.0549f, 0.29411f, 0.4431372f, 1f);
     private static readonly Vector4 TwitterLight = new(0.11372549f, 0.6313725f, 0.94901960f, 0.8f);
@@ -70,7 +69,9 @@ public class ImageSourcesWindow
 
     private readonly HeaderImage.Individual Header = new();
 
+#pragma warning disable IDE0052 // Keep disabled Twitter UI state for future re-enable.
     private static readonly DateTime TwitterTimeout = DateTime.MinValue;
+#pragma warning restore IDE0052
 
     public void Draw()
     {
@@ -229,6 +230,7 @@ public class ImageSourcesWindow
         ImGui.Unindent(INDENT);
     }
 
+#pragma warning disable IDE0051 // Keep disabled Waifu.pics UI for future re-enable.
     private static void DrawWaifuPics(ImageSourceConfig source)
     {
         ImGui.Indent(INDENT);
@@ -273,6 +275,7 @@ public class ImageSourcesWindow
         }
         ImGui.Unindent(INDENT);
     }
+#pragma warning restore IDE0051
 
     private static void DrawNekosBest(ImageSourceConfig source)
     {
@@ -585,6 +588,7 @@ public class ImageSourcesWindow
         ImGui.Unindent(INDENT);
     }
 
+#pragma warning disable IDE0051, IDE0052 // Keep disabled Twitter UI for future re-enable.
     private static List<TwitterTableEntry>? TwitterTableEntries;
 
     private sealed class TwitterTableEntry
@@ -612,11 +616,11 @@ public class ImageSourcesWindow
         // Create Table if there is none
         if (TwitterTableEntries == null)
         {
-            TwitterTableEntries = new();
+            TwitterTableEntries = [];
             var imageSources = Plugin.ImageSource.GetAll<Twitter>();
             foreach (var query in Plugin.Config.Sources.Twitter.queries)
             {
-                var source = imageSources.Find((s) => s.ConfigQuery == query);
+                var source = imageSources.Find(s => s.ConfigQuery == query);
                 TwitterTableEntries.Add(new(query, source, false));
             }
         }
@@ -640,7 +644,7 @@ public class ImageSourcesWindow
 
         // Find max width needed of TweetCount Column or use default
         var tweetStatusColumWidth = TwitterTableEntries.Count > 0
-            ? TwitterTableEntries.Max((e) => ImGui.CalcTextSize(TweetStatus(e).Item1).X + 5)
+            ? TwitterTableEntries.Max(e => ImGui.CalcTextSize(TweetStatus(e).Item1).X + 5)
             : ImGui.CalcTextSize(TweetStatus(null).Item1).X;
 
         // It should be bigger than the header
@@ -724,7 +728,7 @@ public class ImageSourcesWindow
         static string GetHelpText() => ImGui.IsPopupOpen("Twitter Help##Twitter") ? "Hide Help" : "Show Help";
 
         // Save button only when there are changes to save
-        if (TwitterTableEntries.Find((e) => e.IsDirty) != null)
+        if (TwitterTableEntries.Find(e => e.IsDirty) != null)
         {
             var lengthSave = ImGui.CalcTextSize("Save Changes").X + (ImGui.GetStyle().FramePadding.X * 2);
             var lengthHelp = ImGui.CalcTextSize(GetHelpText()).X + (ImGui.GetStyle().FramePadding.X * 2);
@@ -750,7 +754,7 @@ public class ImageSourcesWindow
 
                     // Remove the old query and add the new one
                     var query = entry.QueryDirty.Clone();
-                    var oldIndex = Plugin.Config.Sources.Twitter.queries.FindIndex((q) => q == entry.Query);
+                    var oldIndex = Plugin.Config.Sources.Twitter.queries.FindIndex(q => q == entry.Query);
                     if (oldIndex != -1)
                         Plugin.Config.Sources.Twitter.queries.RemoveAt(oldIndex);
                     Plugin.Config.Sources.Twitter.queries.Insert(oldIndex, query);
@@ -765,7 +769,7 @@ public class ImageSourcesWindow
                 {
                     if (entry.IsDirty || entry.ImageSource == null)
                     {
-                        entry.ImageSource = Plugin.ImageSource.GetAll<Twitter>().Find((s) => s.ConfigQuery.Equals(entry.Query));
+                        entry.ImageSource = Plugin.ImageSource.GetAll<Twitter>().Find(s => s.ConfigQuery.Equals(entry.Query));
                         entry.IsDirty = false;
                     }
                 }
@@ -777,7 +781,7 @@ public class ImageSourcesWindow
             var lengthSave = ImGui.CalcTextSize("Save Changes").X + (ImGui.GetStyle().FramePadding.X * 2);
             var lengthHelp = ImGui.CalcTextSize(GetHelpText()).X + (ImGui.GetStyle().FramePadding.X * 2);
             // If there is a Save button, align it to the right
-            if (TwitterTableEntries.Find((e) => e.IsDirty) != null)
+            if (TwitterTableEntries.Find(e => e.IsDirty) != null)
                 ImGui.SameLine(((ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X - INDENT) / 2) - ((lengthSave + lengthHelp + ImGui.GetStyle().ItemSpacing.X) / 2) + INDENT + (lengthSave + ImGui.GetStyle().ItemSpacing.X));
             else
                 ImGui.SameLine(((ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X - INDENT) / 2) - (lengthHelp / 2) + INDENT);
@@ -810,14 +814,14 @@ public class ImageSourcesWindow
                 Plugin.Config.Save();
                 Plugin.UpdateImageSource();
                 selectedTwitterEntry = selectedTwitterEntry < 0
-                ? -1
-                : selectedTwitterEntry > TwitterTableEntries.Count - 1
-                ? TwitterTableEntries.Count - 1
-                : selectedTwitterEntry;
+                    ? -1
+                    : selectedTwitterEntry > TwitterTableEntries.Count - 1
+                        ? TwitterTableEntries.Count - 1
+                        : selectedTwitterEntry;
                 // Update ImageSource references
                 foreach (var entry in TwitterTableEntries)
                 {
-                    entry.ImageSource ??= Plugin.ImageSource.GetAll<Twitter>().Find((s) => s.ConfigQuery.Equals(entry.Query));
+                    entry.ImageSource ??= Plugin.ImageSource.GetAll<Twitter>().Find(s => s.ConfigQuery.Equals(entry.Query));
                 }
             }
         }
@@ -864,28 +868,28 @@ public class ImageSourcesWindow
 
         ImGui.TextWrapped("There are 2 modes. You can either view Tweets from a specific user or all Tweets that match a query. The status column will show \"OK\" if you are viewing tweets from a specific user or the amount of tweets mathcing a query.");
 
-        // By User  
+        // By User
         ImGui.Spacing();
         ImGui.TextColored(TwitterLight, "Search by Username:");
-        Common.TextWithColorsWrapped(new Common.Segment[]{
+        Common.TextWithColorsWrapped([
             new("The last 600 Tweets from a specific user can be viewed by entering a Twitter username. If the user exists, then the status column will show the text \"OK\""),
-        });
+        ]);
         ImGui.Spacing();
-        Common.TextWithColorsWrapped(new Common.Segment[]{
+        Common.TextWithColorsWrapped([
             new("@username",  Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
             new(" (e.g. "),
             new("@nasa",      Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
             new(") will show you the last 600 Tweets from Nasa."),
-        });
+        ]);
 
-        // By Query  
+        // By Query
         ImGui.Spacing();
         ImGui.TextColored(TwitterLight, "Search by Query:");
-        Common.TextWithColorsWrapped(new Common.Segment[]{
+        Common.TextWithColorsWrapped([
             new("You can combine multiple search terms. Only Tweets that were posted in the last 7 days will be shown. The status column will show the amount of matching Tweets."),
-        });
+        ]);
         ImGui.Spacing();
-        Common.TextWithColorsWrapped(new Common.Segment[]{
+        Common.TextWithColorsWrapped([
             new("#hashtag",         Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
             new(" (e.g. "),
             new("#gposers",         Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
@@ -910,17 +914,17 @@ public class ImageSourcesWindow
             new(" (e.g. "),
             new("-Lalafell",        Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
             new(") Matches any Tweet which doesn't contain the word \"Lalafell\""),
-        });
+        ]);
         ImGui.Spacing();
         ImGui.Spacing();
-        Common.TextWithColorsWrapped(new Common.Segment[]{
+        Common.TextWithColorsWrapped([
             new("Here is an example of what a query could look like:\n"),
             new("lang:en #ffxiv #gposers -#miqote -#aura -#lala -#lalafell -(#meme OR funny)", Dalamud.Interface.Colors.ImGuiColors.DalamudGrey),
-        });
+        ]);
         ImGui.Spacing();
-        Common.TextWithColorsWrapped(new Common.Segment[]{
+        Common.TextWithColorsWrapped([
             new("There are many more options. For more information, please visit the "),
-        }); ImGui.SameLine();
+        ]); ImGui.SameLine();
         // Clickable Link
         Common.ClickLinkWrapped("Twitter API Documentation.", () => Helper.OpenInBrowser("https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query"));
 
@@ -930,6 +934,7 @@ public class ImageSourcesWindow
         ImGui.End();
         ImGui.Unindent(INDENT);
     }
+#pragma warning restore IDE0051, IDE0052
 
     private static void CheckIfNoSource()
     {
@@ -938,14 +943,12 @@ public class ImageSourcesWindow
         // If any are enabled, enable the queue again
         if (hasSome && hasNoneFaulted)
         {
-            if (Plugin.GuiMain != null)
-                Plugin.GuiMain.Queue.StopQueue = false;
+            Plugin.GuiMain?.Queue.StopQueue = false;
             return;
         }
 
         // Stop queue new images if there are no image sources
-        if (Plugin.GuiMain != null)
-            Plugin.GuiMain.Queue.StopQueue = true;
+        Plugin.GuiMain?.Queue.StopQueue = true;
 
         ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), "WARNING:");
         ImGui.SameLine();

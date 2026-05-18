@@ -22,7 +22,7 @@ public class CombinedSource : ImageSource
 
     public override string Name => "Combined Source";
 
-    private readonly List<ImageSource> sources = new();
+    private readonly List<ImageSource> sources = [];
     private readonly Random random = new();
 
     public CombinedSource(params ImageSource[] source)

@@ -191,7 +191,7 @@ public class NekoImage
         }
 
         // Clear downloaded data
-        EncodedData = Array.Empty<byte>();
+        EncodedData = [];
 
         CurrentState = State.Decoded;
     }

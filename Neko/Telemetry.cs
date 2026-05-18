@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Logging;
 using Neko.Sources.APIS;
 
 namespace Neko;
@@ -22,7 +21,7 @@ public static class Telemetry
     private static DateTime lastUploaded = DateTime.Now;
     private static readonly TimeSpan uploadInterval = TimeSpan.FromMinutes(5);
 
-    private static readonly Dictionary<Type, int> countBuffer = new();
+    private static readonly Dictionary<Type, int> countBuffer = [];
     private static readonly Dictionary<Type, string> apiNames = new()
     {
         {typeof(Catboys), "catboys"},

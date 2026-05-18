@@ -7,7 +7,6 @@ using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Logging;
 using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
@@ -84,7 +83,7 @@ public abstract partial class Twitter : ImageSource
     public class Config : IImageConfig
     {
         public bool enabled;
-        public List<Query> queries = new();
+        public List<Query> queries = [];
 
         public class Query
         {
@@ -177,7 +176,7 @@ public abstract partial class Twitter : ImageSource
                 ? $"{(int)span.TotalHours} hours ago"
                 : span.TotalDays < 7
                 ? $"{(int)span.TotalDays} days ago"
-                : $"{localTime.ToLongDateString()}";
+                : $"{localTime:D}";
 
             return $"{AuthorName} (@{AuthorUsername}) tweeted {time}:\n{filterdText}";
         }
@@ -202,25 +201,25 @@ public abstract partial class Twitter : ImageSource
     public partial class Search : Twitter
     {
         private const string URLSearch = "https://api.twitter.com/2/tweets/search/recent";
-        private static readonly string[] URLSearchParams = {
+        private static readonly string[] URLSearchParams = [
             "tweet.fields=id,text,attachments,created_at,possibly_sensitive",
             "media.fields=url,type",
             "user.fields=username",
             "expansions=attachments.media_keys,author_id",
             "max_results=10",
-        };
+        ];
         private const string URLQueryBegin = "query=has:media -is:retweet ";
 
         private readonly TwitterMultiURLs<SearchJson, ImageResponse> URLs;
         private readonly string searchQuery;
         private Task<(string, string?)>? TweetCount;
-        private readonly object TweetCountLock = new();
+        private readonly Lock TweetCountLock = new();
 
         public Search(Config.Query query) : base(query)
         {
             searchQuery = URLQueryBegin + Uri.EscapeDataString(search);
             var URL = $"{URLSearch}?{string.Join('&', URLSearchParams)}&{searchQuery}";
-            URLs = new((string token) => $"&next_token={token}", () => AuthorizedRequest(URL), this, URLThreshold);
+            URLs = new(token => $"&next_token={token}", () => AuthorizedRequest(URL), this, URLThreshold);
         }
 
         public override string ToString() => $"Twitter Search: \"{search}\"\t{URLs}";
@@ -266,7 +265,7 @@ public abstract partial class Twitter : ImageSource
                                 var result = JsonSerializer.Deserialize(content, context)!;
 
                                 // Adjust position messages to account for hidden search text
-                                Regex adjustPosition = AdjustPosition();
+                                var adjustPosition = AdjustPosition();
                                 var error = adjustPosition.Replace(result.Errors![0].Message, (m) => $"(at position {int.Parse(m.Groups[1].Value) - URLQueryBegin.Length + 6})");
 
                                 return ("ERROR", $"{result.Title}\n({result.Detail})\n\n{error}");
@@ -302,9 +301,9 @@ public abstract partial class Twitter : ImageSource
             public List<ImageResponse> ToList()
             {
                 if (Includes == null || Includes.Media == null || Data == null)
-                    return new List<ImageResponse>();
+                    return [];
 
-                List<ImageResponse> results = new();
+                List<ImageResponse> results = [];
 
                 // Check for metadata
                 if (Includes.Users == null)
@@ -338,7 +337,7 @@ public abstract partial class Twitter : ImageSource
                         continue;
 
                     // Search all attatched media_keys
-                    foreach (var media_key in tweet.Attachments.MediaKeys ?? new())
+                    foreach (var media_key in tweet.Attachments.MediaKeys ?? [])
                     {
                         // Find the media with the matching media_key
                         var media = Includes.Media.Find((m) => m.MediaKey == media_key);
@@ -445,7 +444,7 @@ public abstract partial class Twitter : ImageSource
         private string userID = "";
         private string? usernameReadable;
         private readonly string username;
-        private readonly object userIDTaskLock = new();
+        private readonly Lock userIDTaskLock = new();
         private Task? userIDTask;
         private readonly TwitterMultiURLs<TweetTimelineJson, ImageResponse> URLs;
 
@@ -454,7 +453,7 @@ public abstract partial class Twitter : ImageSource
             if (!ValidUsername(query.searchText))
                 throw new ArgumentException("Invalid username", nameof(query));
             username = extractUsername().Match(query.searchText).Groups[1].Value;
-            URLs = new((string token) => $"&pagination_token={token}", () => AuthorizedRequest(TimelineURL(userID)), this, URLThreshold);
+            URLs = new(token => $"&pagination_token={token}", () => AuthorizedRequest(TimelineURL(userID)), this, URLThreshold);
         }
 
         ~UserTimeline()
@@ -599,9 +598,9 @@ public abstract partial class Twitter : ImageSource
             public List<ImageResponse> ToList()
             {
                 if (Includes == null || Includes.Media == null || Data == null)
-                    return new List<ImageResponse>();
+                    return [];
 
-                List<ImageResponse> results = new();
+                List<ImageResponse> results = [];
 
                 // For each tweet
                 foreach (var tweet in Data)
@@ -618,7 +617,7 @@ public abstract partial class Twitter : ImageSource
                     }
 
                     // Search all attatched media_keys
-                    foreach (var media_key in tweet.Attachments.MediaKeys ?? new())
+                    foreach (var media_key in tweet.Attachments.MediaKeys ?? [])
                     {
                         // Find the media with the matching media_key
                         var media = Includes.Media.Find((m) => m.MediaKey == media_key);
@@ -756,7 +755,7 @@ public abstract partial class Twitter : ImageSource
 
     internal interface INextToken
     {
-        public string? NextToken();
+        string? NextToken();
     }
 
     private sealed class TwitterMultiURLs<TJson, TQueueElement> : MultiURLsGeneric<TJson, TQueueElement>

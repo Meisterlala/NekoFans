@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Interface.Textures;
-using Dalamud.Interface.Textures.TextureWraps;
 using Neko.Sources;
 
 namespace Neko.Drawing;
@@ -24,7 +23,7 @@ public class Embedded : ImageSource
 
     private readonly string Filename;
     private Download.Response? LoadedBytes;
-    private readonly object LoadingLock = new();
+    private readonly Lock LoadingLock = new();
 
 
     public Embedded(string filename) => Filename = filename;
@@ -74,7 +73,7 @@ public class Embedded : ImageSource
         Task.Run(async () =>
         {
             // Find all embedded images
-            List<Embedded> embedded = new();
+            List<Embedded> embedded = [];
             foreach (var field in typeof(Embedded).GetFields())
             {
                 if (field.FieldType != typeof(Embedded) || !field.IsStatic) continue;

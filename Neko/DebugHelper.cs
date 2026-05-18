@@ -10,7 +10,7 @@ namespace Neko;
 
 public static class DebugHelper
 {
-    public static void Assert(bool condition, string message, [CallerArgumentExpression("condition")] string? conditionString = null)
+    public static void Assert(bool condition, string message, [CallerArgumentExpression(nameof(condition))] string? conditionString = null)
     {
         if (condition) return;
         throw new Exception($"Assert Failed\n{conditionString}\n" + message);
@@ -35,7 +35,7 @@ public static class DebugHelper
         public const double Mock = 0;
     }
 
-    public static void RandomThrow(double chance = 0.3, [CallerArgumentExpression("chance")] string? chanceString = null)
+    public static void RandomThrow(double chance = 0.3, [CallerArgumentExpression(nameof(chance))] string? chanceString = null)
     {
 #if THROW
         if (ThrowRandom.NextDouble() <= chance)

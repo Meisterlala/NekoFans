@@ -2,15 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using Dalamud.Logging;
 using Neko.Drawing;
 
 namespace Neko.Sources.APIS;
 
 public class Mock : ImageSource
 {
-    public static readonly List<MockImage> MockImages = new()
-    {
+    public static readonly List<MockImage> MockImages =
+    [
    //     new("X:\\1.jpg"),
   //      new("X:\\2.png"),
  //       new("X:\\3.gif"),
@@ -19,7 +18,7 @@ public class Mock : ImageSource
         new("X:\\slap_012.gif"),
         new("X:\\really_big.gif"),
         new("X:\\transparent.gif"),
-    };
+    ];
 
 #pragma warning disable CA2211 // Non-constant fields should not be visible
 #if DEBUG
@@ -35,7 +34,7 @@ public class Mock : ImageSource
     private readonly string FileName;
 
     private static volatile int Index;
-    private static readonly object IndexLock = new();
+    private static readonly Lock IndexLock = new();
 
     private static bool SourcesUpdated;
     private static List<(byte[], string)> MockSources = MockImage.LoadList(MockImages);
