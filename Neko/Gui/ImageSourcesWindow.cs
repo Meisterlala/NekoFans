@@ -56,6 +56,8 @@ public class ImageSourcesWindow
                 typeof(TheCatAPI), Plugin.Config.Sources.TheCatAPI),
             new("Twitter", "Twitter","https://twitter.com/",
                 typeof(Twitter), Plugin.Config.Sources.Twitter),
+            new("NekosAPI", "Anime Images","https://nekosapi.com/",
+                typeof(NekosAPI), Plugin.Config.Sources.NekosAPI),
         ];
 
     private static readonly Vector4 TwitterDark = new(0.0549f, 0.29411f, 0.4431372f, 1f);
@@ -106,6 +108,10 @@ public class ImageSourcesWindow
         SourceCheckbox(SourceList[7], ref Plugin.Config.Sources.Purrbot.enabled);
         if (Plugin.Config.Sources.Purrbot.enabled)
             DrawPurrbot(SourceList[7]);
+        //  ------------ NekosAPI --------------
+        SourceCheckbox(SourceList[12], ref Plugin.Config.Sources.NekosAPI.enabled);
+        if (Plugin.Config.Sources.NekosAPI.enabled)
+            DrawNekosAPI();
         //  ------------ Nekosia --------------
         SourceCheckbox(SourceList[8], ref Plugin.Config.Sources.Nekosia.enabled);
         if (Nekosia.IsRateLimited)
@@ -362,8 +368,6 @@ public class ImageSourcesWindow
         nekosia.includeTags = Nekosia.NormalizeTags(nekosia.includeTags);
         nekosia.excludeTags = Nekosia.NormalizeTags(nekosia.excludeTags);
 
-        ImGui.TextWrapped("Images matching any of the selected categories are shown. Images matching blacklisted categories are excluded.");
-
         if (NSFW.AllowNSFW && ImGui.BeginCombo("Rating##Nekosia", Nekosia.RatingDisplayName(nekosia.rating)))
         {
             NekosiaRatingSelectable(nekosia, Nekosia.Rating.Safe);
@@ -391,6 +395,43 @@ public class ImageSourcesWindow
         }
 
         ImGui.Unindent(INDENT);
+    }
+
+    private static void DrawNekosAPI()
+    {
+        if (!NSFW.AllowNSFW)
+            return;
+
+        ImGui.Indent(INDENT);
+        var nekosApi = Plugin.Config.Sources.NekosAPI;
+
+        if (ImGui.BeginCombo("Rating##NekosAPI", NekosAPI.RatingPreview(nekosApi.ratings), ImGuiComboFlags.HeightLarge))
+        {
+            NekosAPIRatingSelectable(nekosApi, NekosAPI.Rating.Safe);
+            NekosAPIRatingSelectable(nekosApi, NekosAPI.Rating.Suggestive);
+            NekosAPIRatingSelectable(nekosApi, NekosAPI.Rating.Borderline);
+            NekosAPIRatingSelectable(nekosApi, NekosAPI.Rating.Explicit);
+            ImGui.EndCombo();
+        }
+
+        ImGui.Unindent(INDENT);
+    }
+
+    private static void NekosAPIRatingSelectable(NekosAPI.Config config, NekosAPI.Rating rating)
+    {
+        if (ImGui.Selectable(NekosAPI.RatingDisplayName(rating), config.ratings.HasFlag(rating), ImGuiSelectableFlags.DontClosePopups))
+        {
+            config.ratings = config.ratings.HasFlag(rating)
+                ? config.ratings & ~rating
+                : config.ratings | rating;
+
+            if (config.ratings == NekosAPI.Rating.None)
+                config.ratings = NekosAPI.Rating.Safe;
+
+            config.offset = 0;
+            Plugin.Config.Save();
+            Plugin.UpdateImageSource();
+        }
     }
 
     private static void NekosiaRatingSelectable(Nekosia.Config config, Nekosia.Rating rating)

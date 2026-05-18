@@ -64,6 +64,7 @@ You can change to look and feel of the plugin in the Configutaion Menu, which ca
 - [Dog CEO](https://dog.ceo/dog-api/)
 - [nekos.best](https://nekos.best/)
 - [Nekosia](https://nekosia.cat/)
+- [NekosAPI](https://nekosapi.com/)
 - [Nekos.life](https://nekos.life/)
 - [Pic.re](https://pic.re/)
 - [Purrbot](https://purrbot.site/)

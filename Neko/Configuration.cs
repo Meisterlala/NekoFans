@@ -15,6 +15,7 @@ public class Configuration : IPluginConfiguration
         public NekosLife.Config NekosLife = new();
         public PicRe.Config PicRe = new();
         public Purrbot.Config Purrbot = new();
+        public NekosAPI.Config NekosAPI = new();
         public Nekosia.Config Nekosia = new();
         public ShibeOnline.Config ShibeOnline = new();
         public TheCatAPI.Config TheCatAPI = new();
@@ -83,6 +84,7 @@ public class Configuration : IPluginConfiguration
         combined.AddSource(Sources.NekosLife.LoadConfig());
         combined.AddSource(Sources.PicRe.LoadConfig());
         combined.AddSource(Sources.Purrbot.LoadConfig());
+        combined.AddSource(Sources.NekosAPI.LoadConfig());
         combined.AddSource(Sources.Nekosia.LoadConfig());
         // combined.AddSource(Sources.ShibeOnline.LoadConfig());
         combined.AddSource(Sources.TheCatAPI.LoadConfig());
