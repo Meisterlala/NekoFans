@@ -31,7 +31,7 @@ public class ConfigWindow
     {
         QueueDonwloadCount = Plugin.Config.QueueDownloadCount;
         QueuePreloadCount = Plugin.Config.QueuePreloadCount;
-        wasDev = Plugin.PluginInterface.IsDev;
+        wasDev = Plugin.PluginInterface.IsDevMenuOpen;
         Title = "Neko Fans Configuration";
 
         // Add debug info to the title
@@ -209,7 +209,7 @@ public class ConfigWindow
 
     private void UpdateDevQueueLimits()
     {
-        var isDev = Plugin.PluginInterface.IsDev;
+        var isDev = Plugin.PluginInterface.IsDevMenuOpen;
         if (!wasDev || isDev)
         {
             wasDev = isDev;
@@ -240,7 +240,7 @@ public class ConfigWindow
         if (ImGui.InputInt("Downloaded##Advanced", ref QueueDonwloadCount, 1))
         {
             if (QueueDonwloadCount < 1
-             || (!Plugin.PluginInterface.IsDev && QueueDonwloadCount > MaxQueueDownloadCount)
+             || (!Plugin.PluginInterface.IsDevMenuOpen && QueueDonwloadCount > MaxQueueDownloadCount)
              || QueuePreloadCount > QueueDonwloadCount)
             {
                 QueueDonwloadCount = Plugin.Config.QueueDownloadCount;
@@ -264,7 +264,7 @@ public class ConfigWindow
         if (ImGui.InputInt("in VRAM##Advanced", ref QueuePreloadCount, 1))
         {
             if (QueuePreloadCount < 1
-             || (!Plugin.PluginInterface.IsDev && QueuePreloadCount > MaxQueuePreloadCount)
+             || (!Plugin.PluginInterface.IsDevMenuOpen && QueuePreloadCount > MaxQueuePreloadCount)
              || QueuePreloadCount > QueueDonwloadCount)
             {
                 QueuePreloadCount = Plugin.Config.QueuePreloadCount;
@@ -321,7 +321,7 @@ public class ConfigWindow
             ImGui.SameLine(); Common.HelpMarker("This will lag the game. Only press this when you know what you are doing!");
         }
 
-        if (Plugin.PluginInterface.IsDev)
+        if (Plugin.PluginInterface.IsDevMenuOpen)
         {
             ImGui.Button("Advance images as fast as possible##Advanced");
             if (ImGui.IsItemActive())
