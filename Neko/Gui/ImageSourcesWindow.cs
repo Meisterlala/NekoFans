@@ -117,9 +117,9 @@ public class ImageSourcesWindow
         if (Nekosia.IsRateLimited)
         {
             ImGui.SameLine();
-            ImGui.TextColored(new Vector4(1f, 0, 0f, 1f), "API rate limit reached");
+            ImGui.TextColored(new Vector4(1f, 0, 0f, 1f), "Rate limit cooldown active");
             ImGui.SameLine();
-            Common.HelpMarker("Nekosia is currently rate limiting API or image requests. Wait a bit and it should work again.");
+            Common.HelpMarker("Nekosia recently returned a rate-limit response. Requests are being slowed down until the retry window passes.");
         }
         if (Plugin.Config.Sources.Nekosia.enabled)
             DrawNekosia();

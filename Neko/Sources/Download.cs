@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
@@ -11,6 +12,8 @@ namespace Neko.Sources;
 public static class Download
 {
     private static readonly TimeSpan ImageRateLimitTimeout = TimeSpan.FromSeconds(90);
+
+    public sealed class SkippedImageException(string message) : Exception(message) { }
 
     public struct Response
     {
@@ -43,7 +46,12 @@ public static class Download
                 DebugHelper.LogNetwork(() => "Sent request to download image:\n" + response.RequestMessage?.ToString());
             if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
             {
-                MarkRateLimited(response, called);
+                if (!HasRetryAfter(response))
+                {
+                    RegisterSourceRateLimit(rateLimitKey, RetryAfterMilliseconds(response), request.RequestUri?.ToString() ?? "unknown", RateLimitAction.CoolDownAndSkip);
+                    throw new SkippedImageException($"Skipped rate-limited image without Retry-After: {request.RequestUri}");
+                }
+
                 firstRateLimit ??= DateTimeOffset.UtcNow;
                 var elapsed = DateTimeOffset.UtcNow - firstRateLimit.Value;
                 if (elapsed >= ImageRateLimitTimeout)
@@ -53,10 +61,16 @@ public static class Download
 
                 return await DownloadImage(Helper.RequestClone(request), called, firstRateLimit, ct).ConfigureAwait(false);
             }
+            if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            {
+                LogForbidden(response, called);
+                throw new HttpRequestException($"Could not download image from: {request.RequestUri} ({response.StatusCode})", null, response.StatusCode);
+            }
             response.EnsureSuccessStatusCode();
-            MarkRateLimitSucceeded(rateLimitKey, response, called);
+            MarkRateLimitSucceeded(rateLimitKey);
             bytes = await response.Content.ReadAsByteArrayAsync(ct).ConfigureAwait(false);
         }
+        catch (SkippedImageException) { throw; }
         catch (Exception ex)
         {
             throw new Exception("Could not download image from: " + request.RequestUri, ex);
@@ -124,10 +138,19 @@ public static class Download
         try
         {
             response.EnsureSuccessStatusCode();
-            MarkRateLimitSucceeded(rateLimitKey, response, called);
+            MarkRateLimitSucceeded(rateLimitKey);
         }
         catch (HttpRequestException ex)
         {
+            if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            {
+                LogForbidden(response, called);
+                var forbiddenException = new HttpRequestException($"Could not Download .json from: {request.RequestUri} ({response.StatusCode})", ex, response.StatusCode);
+                forbiddenException.Data.Add("StatusCode", response.StatusCode);
+                forbiddenException.Data.Add("Content", await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false));
+                throw forbiddenException;
+            }
+
             // Handle 429 (Too Many Requests) by waiting and retrying
             if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
             {
@@ -140,7 +163,6 @@ public static class Download
                     throw new Exception("Twitter API limit reached. Wait a few days until the limit gets reset", ex);
                 }
 
-                MarkRateLimited(response, called);
                 await WaitForSourceRateLimit(rateLimitKey, RetryAfterMilliseconds(response), request.RequestUri?.ToString() ?? "unknown", null, ct).ConfigureAwait(false);
 
                 // Clone request, because you cant send the same one twice
@@ -209,7 +231,20 @@ public static class Download
     private static async Task WaitForSourceRateLimit(string key, int retryAfterMilliseconds, string? url, TimeSpan? maxWait, CancellationToken ct)
     {
         var rateLimit = SourceRateLimits.GetOrAdd(key, _ => new SourceRateLimit(key));
-        await rateLimit.Wait(retryAfterMilliseconds, url, maxWait, ct).ConfigureAwait(false);
+        await rateLimit.Wait(retryAfterMilliseconds, url, maxWait, RateLimitAction.WaitAndRetry, ct).ConfigureAwait(false);
+    }
+
+    private static void RegisterSourceRateLimit(string key, int retryAfterMilliseconds, string? url, RateLimitAction action)
+    {
+        var rateLimit = SourceRateLimits.GetOrAdd(key, _ => new SourceRateLimit(key));
+        rateLimit.Register(retryAfterMilliseconds, url, null, action);
+    }
+
+    internal static bool IsRateLimited(Type source)
+    {
+        var keyPrefix = SourceRateLimitKeyPrefix(source) + " ";
+        return SourceRateLimits.Any(entry => entry.Key.StartsWith(keyPrefix, StringComparison.Ordinal)
+            && entry.Value.IsActive);
     }
 
     private static void MarkSourceRateLimitSucceeded(string key)
@@ -221,21 +256,26 @@ public static class Download
     private static string RateLimitKey(HttpRequestMessage request, Type? called = default)
     {
         var host = request.RequestUri?.Host ?? "unknown";
-        return called == null ? host : $"{called.FullName ?? called.Name} {host}";
+        return called == null ? host : $"{SourceRateLimitKeyPrefix(called)} {host}";
     }
 
-    private static void MarkRateLimited(HttpResponseMessage response, Type? called = default)
-    {
-        if (called == typeof(APIS.Nekosia) || APIS.Nekosia.IsApiResponse(response))
-            APIS.Nekosia.IsRateLimited = true;
-    }
+    private static string SourceRateLimitKeyPrefix(Type source) => source.FullName ?? source.Name;
 
-    private static void MarkRateLimitSucceeded(string key, HttpResponseMessage response, Type? called = default)
+    private static void MarkRateLimitSucceeded(string key)
     {
         MarkSourceRateLimitSucceeded(key);
+    }
 
-        if (called == typeof(APIS.Nekosia) || APIS.Nekosia.IsApiResponse(response))
-            APIS.Nekosia.IsRateLimited = false;
+    private static void LogForbidden(HttpResponseMessage response, Type? called = default)
+    {
+        var source = called?.FullName ?? called?.Name ?? response.RequestMessage?.RequestUri?.Host ?? "unknown source";
+        Plugin.Log.Warning($"{source} returned 403 (Forbidden) for {response.RequestMessage?.RequestUri}. Marking request as failed.");
+    }
+
+    private enum RateLimitAction
+    {
+        WaitAndRetry,
+        CoolDownAndSkip,
     }
 
     private sealed class SourceRateLimit(string key)
@@ -245,6 +285,8 @@ public static class Download
         private int consecutiveFailures;
         private DateTimeOffset waitUntil = DateTimeOffset.MinValue;
 
+        public bool IsActive => DateTimeOffset.UtcNow < waitUntil;
+
         public async Task Wait(CancellationToken ct)
         {
             var delay = waitUntil - DateTimeOffset.UtcNow;
@@ -252,19 +294,12 @@ public static class Download
                 await Task.Delay(delay, ct).ConfigureAwait(false);
         }
 
-        public async Task Wait(int retryAfterMilliseconds, string? url, TimeSpan? maxWait, CancellationToken ct)
+        public async Task Wait(int retryAfterMilliseconds, string? url, TimeSpan? maxWait, RateLimitAction action, CancellationToken ct)
         {
             await semaphore.WaitAsync(ct).ConfigureAwait(false);
             try
             {
-                var now = DateTimeOffset.UtcNow;
-                var retryDelay = BackoffMilliseconds(retryAfterMilliseconds, maxWait);
-                var existingDelay = waitUntil - now;
-                if (existingDelay.TotalMilliseconds < retryDelay - 250)
-                {
-                    waitUntil = now.AddMilliseconds(retryDelay);
-                    Plugin.Log.Information($"{key} returned 429 (Too Many Requests) for {url ?? "unknown URL"}. Waiting {retryDelay / 1000.0} seconds before trying again.");
-                }
+                RegisterLocked(retryAfterMilliseconds, url, maxWait, action);
             }
             finally
             {
@@ -272,6 +307,19 @@ public static class Download
             }
 
             await Wait(ct).ConfigureAwait(false);
+        }
+
+        public void Register(int retryAfterMilliseconds, string? url, TimeSpan? maxWait, RateLimitAction action)
+        {
+            semaphore.Wait();
+            try
+            {
+                RegisterLocked(retryAfterMilliseconds, url, maxWait, action);
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
         public void Succeeded()
@@ -289,6 +337,21 @@ public static class Download
 
             return Math.Clamp(Math.Min(delay, (int)maxWait.Value.TotalMilliseconds), 1000, 60000);
         }
+
+        private void RegisterLocked(int retryAfterMilliseconds, string? url, TimeSpan? maxWait, RateLimitAction action)
+        {
+            var now = DateTimeOffset.UtcNow;
+            var retryDelay = BackoffMilliseconds(retryAfterMilliseconds, maxWait);
+            var existingDelay = waitUntil - now;
+            if (existingDelay.TotalMilliseconds < retryDelay - 250)
+            {
+                waitUntil = now.AddMilliseconds(retryDelay);
+                var actionText = action == RateLimitAction.CoolDownAndSkip
+                    ? $"Cooling down source for {retryDelay / 1000.0} seconds and skipping current image."
+                    : $"Waiting {retryDelay / 1000.0} seconds before trying again.";
+                Plugin.Log.Information($"{key} returned 429 (Too Many Requests) for {url ?? "unknown URL"}. {actionText}");
+            }
+        }
     }
 
     private static int RetryAfterMilliseconds(HttpResponseMessage response)
@@ -298,8 +361,18 @@ public static class Download
             var val = values.First();
             if (double.TryParse(val, out var seconds))
                 return Math.Clamp((int)(seconds * 1000), 1000, 60000);
+
+            if (DateTimeOffset.TryParse(val, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var retryAt))
+            {
+                var milliseconds = (retryAt - DateTimeOffset.UtcNow).TotalMilliseconds;
+                if (milliseconds > 0)
+                    return (int)Math.Clamp(milliseconds, 1000, 60000);
+            }
         }
 
         return 2000;
     }
+
+    private static bool HasRetryAfter(HttpResponseMessage response) =>
+        response.Headers.TryGetValues("Retry-After", out var values) && values.Any();
 }

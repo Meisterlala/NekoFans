@@ -14,16 +14,13 @@ public class Nekosia : ImageSource
     private const int PageSize = 10;
     private static readonly string SessionId = Guid.NewGuid().ToString("N");
 
-    internal static bool IsRateLimited;
+    internal static bool IsRateLimited => Download.IsRateLimited(typeof(Nekosia));
 
     public enum Rating
     {
         Safe,
         Suggestive,
     }
-
-    public static bool IsApiResponse(HttpResponseMessage response) =>
-        response.RequestMessage?.RequestUri?.Host == "api.nekosia.cat";
 
     public class Config : IImageConfig, IJsonOnDeserialized
     {

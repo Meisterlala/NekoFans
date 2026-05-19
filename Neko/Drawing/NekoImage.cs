@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Interface.Textures.TextureWraps;
+using Neko.Sources;
 
 namespace Neko.Drawing;
 
@@ -293,6 +294,12 @@ public class NekoImage
     private void OnError(Exception ex)
     {
         CurrentState = State.Error;
+        if (ex is Download.SkippedImageException)
+        {
+            Plugin.Log.Information(ex.Message);
+            return;
+        }
+
         ImageSource.FaultedIncrement();
         Plugin.Log.Warning(ex, "Error while loading image");
     }
